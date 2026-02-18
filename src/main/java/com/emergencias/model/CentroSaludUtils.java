@@ -8,23 +8,19 @@ import java.util.List;
 public class CentroSaludUtils {
     
     /**
-     * Carga la lista de centros de salud desde un archivo JSON en el classpath (resources).
-     * 
-     * @param nombreArchivo El nombre del archivo (ej: "CentrosdeSaludMurcia.json")
-     * @return Lista de objetos CentroSalud o null si hay error
+     * Carga la lista de centros de salud desde un archivo JSON en el classpath.
      */
-    public static List<CentroSalud> cargarCentros(String nombreArchivo) {
+    public static List<CentroSalud> cargarCentros(String rutaArchivo) {
         try {
-            // 1. Obtener el archivo como un flujo de datos (InputStream) desde los recursos
-            // Esto funciona tanto en el IDE como dentro de un JAR
-            InputStream inputStream = CentroSaludUtils.class.getClassLoader().getResourceAsStream(nombreArchivo);
+            // CAMBIO: Usar Class.getResourceAsStream en lugar de ClassLoader.getResourceAsStream.
+            // Este método es a veces más fiable para encontrar recursos.
+            InputStream inputStream = CentroSaludUtils.class.getResourceAsStream(rutaArchivo);
 
             if (inputStream == null) {
-                System.err.println("❌ Error: No se encontró el archivo '" + nombreArchivo + "' en los recursos.");
+                System.err.println("❌ Error: No se encontró el archivo '" + rutaArchivo + "' en los recursos.");
                 return null;
             }
 
-            // 2. Usar Jackson para leer directamente del InputStream
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<List<CentroSalud>>(){});
             

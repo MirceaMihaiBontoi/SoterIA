@@ -23,12 +23,6 @@ public class EmergencyManager {
 
     /**
      * Constructor que recibe sus dependencias (Inyección de Dependencias).
-     *
-     * @param userData      Datos del usuario.
-     * @param scanner       Scanner compartido.
-     * @param detector      El detector de emergencias a utilizar.
-     * @param alertSender   El sistema de envío de alertas a utilizar.
-     * @param logger        El sistema de logging a utilizar.
      */
     public EmergencyManager(UserData userData, Scanner scanner, EmergencyDetector detector, IAlert alertSender, EmergencyLogger logger) {
         this.userData = userData;
@@ -67,7 +61,8 @@ public class EmergencyManager {
                                     System.out.print("\n¿Quieres ver todos los centros de salud de Murcia? (S/N): ");
                                     String verCentros = scanner.nextLine().trim();
                                     if (verCentros.equalsIgnoreCase("S")) {
-                                        List<CentroSalud> centros = CentroSaludUtils.cargarCentros("CentrosdeSaludMurcia.json");
+                                        // SOLUCIÓN: Usar una barra inclinada al principio para indicar la raíz del classpath.
+                                        List<CentroSalud> centros = CentroSaludUtils.cargarCentros("/CentrosdeSaludMurcia.json");
                                         if (centros != null) {
                                             System.out.println("\n=== TODOS LOS CENTROS DE SALUD DE LA REGIÓN DE MURCIA ===");
                                             for (CentroSalud centro : centros) {

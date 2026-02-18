@@ -8,54 +8,41 @@ import java.util.Scanner;
  * Clase encargada de detectar emergencias y recopilar información inicial.
  */
 public class EmergencyDetector {
-    // Constantes para validación de gravedad
-    private static final int MIN_SEVERITY = 1;  // Nivel mínimo de gravedad
-    private static final int MAX_SEVERITY = 10; // Nivel máximo de gravedad
+    private static final int MIN_SEVERITY = 1;
+    private static final int MAX_SEVERITY = 10;
     
-    // Componentes internos
-    private final Scanner scanner;  // Para leer la entrada del usuario
-    private final UserData userData; // Datos del usuario para la notificación
+    private final Scanner scanner;
+    private final UserData userData;
 
-    /**
-     * Constructor de la clase EmergencyDetector
-     */
     public EmergencyDetector(UserData userData, Scanner scanner) {
-        this.scanner = scanner;  // Usa el scanner compartido
-        this.userData = userData;  // Almacena los datos del usuario
+        this.scanner = scanner;
+        this.userData = userData;
     }
 
     /**
-     * Inicia el proceso de detección de emergencia
+     * Inicia el proceso de detección de emergencia.
      */
     public EmergencyEvent detectEmergency() {
-        // Mostrar encabezado de la sección
         System.out.println("\n=== DETECCIÓN DE EMERGENCIA ===");
-        
-        // Preguntar al usuario si está en una emergencia
         System.out.print("¿Estás en una situación de emergencia? (S/N): ");
         
-        // Verificar si el usuario confirma la emergencia
         if (scanner.nextLine().equalsIgnoreCase("S")) {
-            // Recopilar información detallada de la emergencia
-            String emergencyType = getEmergencyType();  // Obtener el tipo de emergencia
-            String location = getLocation();           // Obtener la ubicación
-            int severity = getSeverityLevel();         // Obtener nivel de gravedad
+            String emergencyType = getEmergencyType();
+            String location = getLocation(); // Ahora la ubicación es obligatoria
+            int severity = getSeverityLevel();
             
-            // Confirmar con el usuario antes de proceder
             if (confirmEmergency(emergencyType, location, severity)) {
-                // Crear y retornar un nuevo evento de emergencia con los datos recopilados
                 return new EmergencyEvent(
-                    emergencyType,     // Tipo de emergencia
-                    location,          // Ubicación de la emergencia
-                    severity,          // Nivel de gravedad
-                    userData.toString() // Datos del usuario
+                    emergencyType,
+                    location,
+                    severity,
+                    userData.toString()
                 );
             }
         }
         
-        // Si el usuario cancela o no confirma, mostrar mensaje y retornar null
         System.out.println("Emergencia cancelada o no confirmada.");
-        return null;  // Indicar que no se generó ningún evento de emergencia
+        return null;
     }
 
     private String getEmergencyType() {
@@ -70,37 +57,27 @@ public class EmergencyDetector {
             System.out.print("Seleccione el tipo de emergencia (1-5): ");
             String input = scanner.nextLine().trim();
             
-            // Validar que la entrada sea válida
-            if (input.isEmpty()) {
-                System.out.println("⚠️  Error: Debe seleccionar un tipo de emergencia. Intente nuevamente.");
-                continue;
-            }
-            
             switch (input) {
-                case "1":
-                    return "Accidente de tráfico";
-                case "2":
-                    return "Problema médico";
-                case "3":
-                    return "Incendio";
-                case "4":
-                    return "Agresión";
-                case "5":
-                    return "Otro";
+                case "1": return "Accidente de tráfico";
+                case "2": return "Problema médico";
+                case "3": return "Incendio";
+                case "4": return "Agresión";
+                case "5": return "Otro";
                 default:
-                    System.out.println("Opción no válida. Debe ingresar un número entre 1 y 5. Intente nuevamente.");
+                    System.out.println("⚠️  Opción no válida. Debe ingresar un número entre 1 y 5.");
             }
         }
     }
 
     private String getLocation() {
-        System.out.print("\nUbicación actual (o presione Enter para usar 'Murcia' por defecto): ");
-        String location = scanner.nextLine().trim();
-        if (location.isEmpty()) {
-            System.out.println("Ubicación por defecto: Murcia");
-            return "Murcia";
+        while (true) {
+            System.out.print("\nUbicación actual de la emergencia (obligatorio): ");
+            String location = scanner.nextLine().trim();
+            if (!location.isEmpty()) {
+                return location;
+            }
+            System.out.println("⚠️  Error: La ubicación no puede estar vacía. Intente nuevamente.");
         }
-        return location;
     }
 
     private int getSeverityLevel() {
@@ -113,11 +90,10 @@ public class EmergencyDetector {
                     return severity;
                 }
                 
-                System.out.printf("Por favor, ingrese un valor entre %d y %d.\n", 
-                    MIN_SEVERITY, MAX_SEVERITY);
+                System.out.printf("⚠️  Por favor, ingrese un valor entre %d y %d.\n", MIN_SEVERITY, MAX_SEVERITY);
                     
             } catch (NumberFormatException e) {
-                System.out.println("Por favor, ingrese un número válido.");
+                System.out.println("⚠️  Por favor, ingrese un número válido.");
             }
         }
     }
