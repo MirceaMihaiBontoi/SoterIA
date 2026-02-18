@@ -1,52 +1,58 @@
 package com.emergencias;
 
+import com.emergencias.alert.AlertSender;
+import com.emergencias.alert.EmergencyLogger;
 import com.emergencias.controller.EmergencyManager;
+import com.emergencias.detector.EmergencyDetector;
 import com.emergencias.model.UserData;
+import com.emergencias.services.IAlert;
 import java.util.Scanner;
 
 /**
- * Clase principal que inicia la aplicación del sistema de emergencias.
+ * Clase principal que inicia la aplicación y ensambla sus componentes (Inyección de Dependencias).
  */
 public class Main {
     /**
      * Punto de entrada principal de la aplicación.
      */
     public static void main(String[] args) {
-        // 0. Crear un único Scanner compartido para toda la aplicación
         Scanner scanner = new Scanner(System.in);
         
         try {
-            // 1. Crear datos de ejemplo del usuario con información relevante
+            // 1. Crear los datos del usuario
             UserData userData = new UserData(
-                "Juan Pérez",                      // Nombre completo del usuario
-                "+34 600 123 456",                // Teléfono de contacto
-                "Alergias: Ninguna\nTipo de sangre: A+",  // Información médica relevante
-                "María García (Madre): +34 600 654 321"  // Contacto de emergencia
+                "Juan Pérez",
+                "+34 600 123 456",
+                "Alergias: Ninguna\nTipo de sangre: A+",
+                "María García (Madre): +34 600 654 321"
             );
             
-            // 2. Inicializar el gestor de emergencias con los datos del usuario y el scanner compartido
-            //    El gestor se encargará de coordinar todas las operaciones del sistema
-            EmergencyManager emergencyManager = new EmergencyManager(userData, scanner);
+            // 2. Crear las dependencias (los "servicios" de la aplicación)
+            EmergencyDetector detector = new EmergencyDetector(userData, scanner);
+            IAlert alertSender = new AlertSender();
+            EmergencyLogger logger = new EmergencyLogger();
             
-            // 3. Iniciar el sistema de gestión de emergencias
-            //    Este método contiene el bucle principal de la aplicación
+            // 3. Inyectar las dependencias en el gestor principal
+            EmergencyManager emergencyManager = new EmergencyManager(
+                userData, 
+                scanner, 
+                detector, 
+                alertSender, 
+                logger
+            );
+            
+            // 4. Iniciar el sistema
             emergencyManager.startSystem();
             
         } catch (Exception e) {
-            // Captura global de excepciones inesperadas
             System.err.println("\n=== ERROR CRÍTICO ===");
-            System.err.println("Se ha producido un error inesperado en la aplicación: " + e.getMessage());
-            System.err.println("Por favor, contacte con soporte técnico si el problema persiste.");
+            System.err.println("Se ha producido un error inesperado: " + e.getMessage());
             e.printStackTrace();
             
         } finally {
-            // Cerrar el scanner al salir
-            try {
-                if (scanner != null) {
-                    scanner.close();
-                }
-            } catch (Exception e) {
-                System.err.println("Error al cerrar el scanner: " + e.getMessage());
+            // Cerrar el recurso principal
+            if (scanner != null) {
+                scanner.close();
             }
         }
     }
