@@ -1,34 +1,28 @@
 package com.emergencias.model;
 
 /**
- * Implementación concreta de EmergencyType para emergencias médicas.
- * Demuestra herencia y especialización de comportamiento.
+ * Implementación concreta para emergencias médicas.
  */
 public class MedicalEmergency extends EmergencyType {
-    
-    public MedicalEmergency() {
-        super(
-            "Problema médico",
-            8,  // Alta prioridad
-            "Emergencia relacionada con problemas de salud del usuario",
-            true  // Requiere asistencia médica
-        );
+
+    public MedicalEmergency(String name, int priority, String description) {
+        // Las emergencias médicas suelen requerir asistencia médica por defecto (true)
+        super(name, priority, description, true);
     }
 
     @Override
     public String getResponseProtocol() {
-        return """
-            PROTOCOLO DE EMERGENCIA MÉDICA:
-            1. Llamar inmediatamente a ambulancia (112)
-            2. Solicitar información médica del paciente
-            3. Realizar primeros auxilios si es necesario
-            4. Mantener al paciente calmado
-            5. Notificar a contactos de emergencia
-            """;
+        return "1. Evaluar signos vitales.\n" +
+               "2. Estabilizar al paciente.\n" +
+               "3. Preparar traslado al hospital más cercano.";
     }
 
     @Override
     public String[] getRequiredServices() {
-        return new String[]{"Ambulancia", "Hospital", "Servicio médico de emergencia"};
+        return new String[] {
+            "Ambulancia Soporte Vital Avanzado",
+            "Médico de urgencias",
+            "Enfermero"
+        };
     }
 }

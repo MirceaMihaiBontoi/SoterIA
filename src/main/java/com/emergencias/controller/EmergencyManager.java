@@ -74,7 +74,8 @@ public class EmergencyManager {
                                     System.out.print("\n¿Quieres ver todos los centros de salud de Murcia? (S/N): ");
                                     String verCentros = scanner.nextLine().trim();
                                     if (verCentros.equalsIgnoreCase("S")) {
-                                        List<CentroSalud> centros = CentroSaludUtils.cargarCentros("src/main/resources/CentrosdeSaludMurcia.json");
+                                        // CAMBIO: Usar solo el nombre del archivo, sin ruta relativa
+                                        List<CentroSalud> centros = CentroSaludUtils.cargarCentros("CentrosdeSaludMurcia.json");
                                         if (centros != null) {
                                             int count = 0;
                                             System.out.println("\n=== TODOS LOS CENTROS DE SALUD DE LA REGIÓN DE MURCIA ===");
