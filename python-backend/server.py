@@ -83,8 +83,11 @@ def correct_text(text: str) -> str:
     words = text.lower().split()
     corrected = []
     for word in words:
-        correction = spell.correction(word)
-        corrected.append(correction if correction else word)
+        if word in spell or len(word) <= 2:
+            corrected.append(word)
+        else:
+            correction = spell.correction(word)
+            corrected.append(correction if correction else word)
     return " ".join(corrected)
 
 
