@@ -5,6 +5,7 @@ import com.emergencias.alert.EmergencyLogger;
 import com.emergencias.controller.EmergencyManager;
 import com.emergencias.detector.EmergencyDetector;
 import com.emergencias.model.UserData;
+import com.emergencias.services.AIClassifierClient;
 import com.emergencias.services.IAlert;
 import java.util.Scanner;
 
@@ -28,7 +29,8 @@ public class Main {
             );
             
             // 2. Crear las dependencias (los "servicios" de la aplicación)
-            EmergencyDetector detector = new EmergencyDetector(userData, scanner);
+            AIClassifierClient aiClient = new AIClassifierClient("http://localhost:8000");
+            EmergencyDetector detector = new EmergencyDetector(userData, scanner, aiClient);
             IAlert alertSender = new AlertSender();
             EmergencyLogger logger = new EmergencyLogger();
             

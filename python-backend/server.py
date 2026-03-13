@@ -8,6 +8,7 @@ from spellchecker import SpellChecker
 
 MODEL_PATH = Path(__file__).parent / "models" / "emergency_classifier.pkl"
 DATA_PATH = Path(__file__).parent / "data" / "emergencies_dataset.csv"
+DATA_PATH = Path(__file__).parent / "data" / "emergencies_dataset.csv"
 
 app = FastAPI(title="Emergency Classifier API")
 
@@ -100,12 +101,16 @@ def correct_text(text: str) -> str:
         if len(word) <= 2 or word in VOCABULARY:
             corrected.append(word)
             continue
-        # Paso 1: buscar la palabra mas parecida en el vocabulario del CSV
+        # Paso 1: si es palabra valida en español, no tocar
+        if word in spell:
+            corrected.append(word)
+            continue
+        # Paso 2: buscar la mas parecida en el CSV (prioridad sobre pyspellchecker)
         matches = get_close_matches(word, VOCABULARY, n=1, cutoff=0.7)
         if matches:
             corrected.append(matches[0])
             continue
-        # Paso 2: si no hay match en el CSV, intentar con pyspellchecker
+        # Paso 3: fallback a pyspellchecker para palabras que no matchean el CSV
         correction = spell.correction(word)
         corrected.append(correction if correction else word)
     return " ".join(corrected)
