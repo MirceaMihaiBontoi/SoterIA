@@ -8,12 +8,22 @@ from spellchecker import SpellChecker
 
 MODEL_PATH = Path(__file__).parent / "models" / "emergency_classifier.pkl"
 DATA_PATH = Path(__file__).parent / "data" / "emergencies_dataset.csv"
-DATA_PATH = Path(__file__).parent / "data" / "emergencies_dataset.csv"
+CONFIG_PATH = Path(__file__).parent / "data" / "emergency_config.json"
 
 app = FastAPI(title="Emergency Classifier API")
 
 model = joblib.load(MODEL_PATH)
 spell = SpellChecker(language="es")
+
+# Cargar configuracion desde JSON externo
+import json
+with open(CONFIG_PATH, encoding="utf-8") as f:
+    config = json.load(f)
+
+PRIORITY_MAP = config["priority_map"]
+LABEL_NAMES = config["label_names"]
+CONTEXTUAL_INSTRUCTIONS = config["contextual_instructions"]
+CONTEXT_DESCRIPTIONS = config["context_descriptions"]
 
 # Extraer palabras del dataset como vocabulario principal de correccion
 with open(DATA_PATH, encoding="utf-8") as f:
@@ -26,72 +36,45 @@ with open(DATA_PATH, encoding="utf-8") as f:
 VOCABULARY = list(dataset_words)
 spell.word_frequency.load_words(VOCABULARY)
 
-PRIORITY_MAP = {
-    "MEDICAL": 9,
-    "FIRE": 8,
-    "TRAFFIC": 7,
-    "SECURITY": 8,
-    "NATURAL": 7,
-}
 
-INSTRUCTIONS_MAP = {
-    "MEDICAL": [
-        "Mantenga la calma y no mueva al paciente",
-        "Compruebe si respira y tiene pulso",
-        "Si no respira, inicie RCP si sabe hacerlo",
-        "Mantenga al paciente abrigado y comodo",
-        "No le de comida ni bebida",
-    ],
-    "FIRE": [
-        "Evacue la zona inmediatamente",
-        "No use ascensores, use las escaleras",
-        "Cubra su boca con un pano humedo",
-        "Cierre puertas y ventanas al salir",
-        "No regrese al edificio por ningun motivo",
-    ],
-    "TRAFFIC": [
-        "No mueva a los heridos salvo peligro inminente",
-        "Senalice el accidente con triangulos de emergencia",
-        "Apague el motor de los vehiculos implicados",
-        "Si hay derrame de combustible, alejese del vehiculo",
-        "Preste atencion a posibles lesiones de columna",
-    ],
-    "SECURITY": [
-        "Alejese de la zona de peligro",
-        "No confronte al agresor",
-        "Busque refugio en un lugar seguro",
-        "Intente recordar la descripcion del agresor",
-        "No toque nada que pueda ser evidencia",
-    ],
-    "NATURAL": [
-        "Busque refugio en una estructura solida",
-        "Alejese de ventanas, arboles y postes electricos",
-        "Si hay inundacion, vaya a zonas altas",
-        "No cruce rios o zonas inundadas a pie ni en coche",
-        "Tenga preparado un kit de emergencia",
-    ],
-}
+def get_instructions(label: str, text: str) -> list[str]:
+    category = CONTEXTUAL_INSTRUCTIONS.get(label, {})
+    text_lower = text.lower()
+    for keywords, instructions in category.items():
+        if keywords == "_default":
+            continue
+        if any(kw in text_lower for kw in keywords.split("|")):
+            return instructions
+    return category.get("_default", ["Mantenga la calma y llame al 112"])
 
-LABEL_NAMES = {
-    "MEDICAL": "Emergencia Medica",
-    "FIRE": "Incendio",
-    "TRAFFIC": "Accidente de Trafico",
-    "SECURITY": "Emergencia de Seguridad",
-    "NATURAL": "Desastre Natural",
-}
+
+def get_context(label: str, text: str) -> str:
+    contexts = CONTEXT_DESCRIPTIONS.get(label, {})
+    text_lower = text.lower()
+    for keywords, desc in contexts.items():
+        if keywords == "_default":
+            continue
+        if any(kw in text_lower for kw in keywords.split("|")):
+            return desc
+    return contexts.get("_default", "una emergencia")
 
 
 class ClassifyRequest(BaseModel):
     text: str
 
 
-class ClassifyResponse(BaseModel):
+class EmergencyDetail(BaseModel):
     type: str
     type_name: str
-    priority: int
     confidence: float
-    corrected_text: str
+    context: str
     instructions: list[str]
+
+
+class ClassifyResponse(BaseModel):
+    priority: int
+    corrected_text: str
+    emergencies: list[EmergencyDetail]
 
 
 def correct_text(text: str) -> str:
@@ -116,22 +99,66 @@ def correct_text(text: str) -> str:
     return " ".join(corrected)
 
 
+SECONDARY_THRESHOLD = 0.20
+
+
+def has_relevant_keywords(label: str, text: str) -> bool:
+    """Comprueba si el texto contiene keywords relevantes para esa categoria."""
+    # Revisar keywords en instrucciones contextuales
+    for keywords in CONTEXTUAL_INSTRUCTIONS.get(label, {}):
+        if keywords == "_default":
+            continue
+        if any(kw in text.lower() for kw in keywords.split("|")):
+            return True
+    # Revisar keywords en descripciones de contexto
+    for keywords in CONTEXT_DESCRIPTIONS.get(label, {}):
+        if keywords == "_default":
+            continue
+        if any(kw in text.lower() for kw in keywords.split("|")):
+            return True
+    return False
+
+
 @app.post("/classify", response_model=ClassifyResponse)
 def classify(request: ClassifyRequest):
     corrected = correct_text(request.text)
 
     label = model.predict([corrected])[0]
-
     probabilities = model.predict_proba([corrected])[0]
-    confidence = max(probabilities)
+    classes = model.classes_
+
+    # Ordenar por probabilidad descendente
+    ranked = sorted(zip(classes, probabilities), key=lambda x: -x[1])
+
+    primary_label, primary_conf = ranked[0]
+    primary = EmergencyDetail(
+        type=primary_label,
+        type_name=LABEL_NAMES[primary_label],
+        confidence=round(primary_conf, 2),
+        context=get_context(primary_label, corrected),
+        instructions=get_instructions(primary_label, corrected),
+    )
+
+    emergencies = [primary]
+
+    # Incluir secundaria solo si supera umbral Y tiene keywords relevantes en el texto
+    secondary_label, secondary_conf = ranked[1]
+    if secondary_conf >= SECONDARY_THRESHOLD and has_relevant_keywords(secondary_label, corrected):
+        emergencies.append(EmergencyDetail(
+            type=secondary_label,
+            type_name=LABEL_NAMES[secondary_label],
+            confidence=round(secondary_conf, 2),
+            context=get_context(secondary_label, corrected),
+            instructions=get_instructions(secondary_label, corrected),
+        ))
+
+    # Prioridad maxima entre las emergencias detectadas
+    max_priority = max(PRIORITY_MAP[e.type] for e in emergencies)
 
     return ClassifyResponse(
-        type=label,
-        type_name=LABEL_NAMES[label],
-        priority=PRIORITY_MAP[label],
-        confidence=round(confidence, 2),
+        priority=max_priority,
         corrected_text=corrected,
-        instructions=INSTRUCTIONS_MAP[label],
+        emergencies=emergencies,
     )
 
 

@@ -122,6 +122,36 @@ public class AIClassifierClient {
     }
 
     /**
+     * Extrae los objetos JSON del array "emergencies" como Strings individuales.
+     */
+    public static String[] extractEmergencies(String json) {
+        String search = "\"emergencies\":[";
+        int start = json.indexOf(search);
+        if (start == -1) return new String[0];
+        start += search.length();
+
+        java.util.List<String> objects = new java.util.ArrayList<>();
+        int depth = 0;
+        int objStart = -1;
+        for (int i = start; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '{') {
+                if (depth == 0) objStart = i;
+                depth++;
+            } else if (c == '}') {
+                depth--;
+                if (depth == 0 && objStart != -1) {
+                    objects.add(json.substring(objStart, i + 1));
+                    objStart = -1;
+                }
+            } else if (c == ']' && depth == 0) {
+                break;
+            }
+        }
+        return objects.toArray(new String[0]);
+    }
+
+    /**
      * Obtiene la ubicacion aproximada del usuario por IP.
      * Retorna null si hay error.
      */

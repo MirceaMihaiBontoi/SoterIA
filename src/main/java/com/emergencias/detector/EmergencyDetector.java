@@ -87,27 +87,40 @@ public class EmergencyDetector {
             return null;
         }
 
-        String typeName = AIClassifierClient.extractString(jsonResponse, "type_name");
-        double confidence = AIClassifierClient.extractDouble(jsonResponse, "confidence");
         String corrected = AIClassifierClient.extractString(jsonResponse, "corrected_text");
-        String[] instructions = AIClassifierClient.extractStringArray(jsonResponse, "instructions");
+        String[] emergencies = AIClassifierClient.extractEmergencies(jsonResponse);
 
         System.out.println("\n--- Resultado de la IA ---");
-        System.out.println("Tipo detectado: " + typeName);
-        System.out.printf("Confianza: %.0f%%\n", confidence * 100);
         if (!corrected.equals(description.toLowerCase())) {
             System.out.println("Texto corregido: " + corrected);
         }
 
-        if (instructions.length > 0) {
-            System.out.println("\nInstrucciones de actuacion:");
-            for (String instruction : instructions) {
-                System.out.println("  - " + instruction);
+        String typeName = null;
+        for (int i = 0; i < emergencies.length; i++) {
+            String emergency = emergencies[i];
+            String name = AIClassifierClient.extractString(emergency, "type_name");
+            String context = AIClassifierClient.extractString(emergency, "context");
+            double conf = AIClassifierClient.extractDouble(emergency, "confidence");
+            String[] instructions = AIClassifierClient.extractStringArray(emergency, "instructions");
+
+            if (i == 0) {
+                typeName = name;
+                System.out.println("\nSe ha detectado " + context + " (" + name + ", confianza: " + String.format("%.0f%%", conf * 100) + ")");
+            } else {
+                System.out.println("\nAdemas, se ha detectado " + context + " (" + name + ", confianza: " + String.format("%.0f%%", conf * 100) + ")");
             }
-            System.out.println("\n[AVISO] Modelo de prueba: las instrucciones son genericas por categoria");
-            System.out.println("y no tienen en cuenta el contexto especifico de la emergencia descrita.");
-            System.out.println("El corrector ortografico tiene un diccionario limitado y puede fallar en algunas palabras.");
+
+            if (instructions.length > 0) {
+                String header = (i == 0) ? "Instrucciones" : "Instrucciones adicionales";
+                System.out.println(header + " en caso de " + context + ":");
+                for (String instruction : instructions) {
+                    System.out.println("  - " + instruction);
+                }
+            }
         }
+
+        System.out.println("\n[AVISO] Modelo de prueba con limitaciones.");
+        System.out.println("El corrector ortografico tiene un diccionario limitado y puede fallar.");
         System.out.println("--------------------------");
 
         System.out.print("\n¿Es correcto el tipo detectado? (S/N): ");

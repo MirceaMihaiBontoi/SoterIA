@@ -1,0 +1,193 @@
+{
+  "priority_map": {
+    "MEDICAL": 9,
+    "FIRE": 8,
+    "TRAFFIC": 7,
+    "SECURITY": 8,
+    "NATURAL": 7
+  },
+  "label_names": {
+    "MEDICAL": "Emergencia Medica",
+    "FIRE": "Incendio",
+    "TRAFFIC": "Accidente de Trafico",
+    "SECURITY": "Emergencia de Seguridad",
+    "NATURAL": "Desastre Natural"
+  },
+  "contextual_instructions": {
+    "MEDICAL": {
+      "_default": [
+        "Mantenga la calma y no mueva al paciente",
+        "Compruebe si respira y tiene pulso",
+        "Si no respira, inicie RCP si sabe hacerlo",
+        "Mantenga al paciente abrigado y comodo",
+        "No le de comida ni bebida"
+      ],
+      "quemadura|quemado|queme|quema|aceite|hervir": [
+        "Enfrie la quemadura con agua fria durante al menos 10 minutos",
+        "No aplique hielo, pasta de dientes ni mantequilla",
+        "No reviente las ampollas si se forman",
+        "Cubra con un pano limpio y humedo",
+        "Si la quemadura es grande o en cara/manos/genitales, acuda a urgencias"
+      ],
+      "caido|caida|cayó|cayo|tropezado|escalera": [
+        "No mueva a la persona, puede tener lesiones de columna",
+        "Compruebe si esta consciente y responde",
+        "Si hay sangrado, presione con un pano limpio",
+        "No intente colocar huesos si sospecha fractura",
+        "Mantenga a la persona abrigada hasta que llegue ayuda"
+      ],
+      "pecho|corazon|infarto|brazo|presion": [
+        "Siente a la persona en posicion comoda, semi-incorporada",
+        "Afloje ropa ajustada (cinturon, corbata, camisa)",
+        "Si tiene medicacion para el corazon, ayudele a tomarla",
+        "Si pierde el conocimiento y no respira, inicie RCP",
+        "No le de nada de comer ni beber"
+      ],
+      "ahogando|ahogar|atragantado|atragantar|tragar|garganta": [
+        "Pida a la persona que tosa con fuerza",
+        "Si no puede toser, aplique 5 golpes en la espalda entre los omoplatos",
+        "Si los golpes no funcionan, aplique la maniobra de Heimlich",
+        "Si pierde el conocimiento, tumbe a la persona e inicie RCP",
+        "En bebes menores de 1 ano, use golpes en la espalda boca abajo"
+      ],
+      "sangre|sangrado|sangrando|herida|corte|cortado|cuchillada|apunalado": [
+        "Presione la herida con un pano limpio durante al menos 10 minutos",
+        "Eleve la zona herida por encima del corazon si es posible",
+        "No retire el pano si se empapa, anada otro encima",
+        "Si el sangrado no para en 15 minutos, acuda a urgencias",
+        "No aplique torniquete salvo hemorragia que pone en riesgo la vida"
+      ]
+    },
+    "FIRE": {
+      "_default": [
+        "Evacue la zona inmediatamente",
+        "No use ascensores, use las escaleras",
+        "Cubra su boca con un pano humedo",
+        "Cierre puertas y ventanas al salir",
+        "No regrese al edificio por ningun motivo"
+      ],
+      "cocina|sarten|aceite|gas": [
+        "No eche agua sobre fuego de aceite, empeorara",
+        "Tape la sarten o recipiente con una tapa o pano humedo",
+        "Cierre la llave del gas si es seguro hacerlo",
+        "Si el fuego se extiende, evacue y llame al 112",
+        "Use un extintor solo si sabe manejarlo"
+      ],
+      "bosque|forestal|campo|montana|monte": [
+        "Alejese en direccion contraria al viento",
+        "Busque zonas despejadas sin vegetacion",
+        "No intente cruzar el frente de fuego",
+        "Cubra su cuerpo con ropa gruesa y mojada si es posible",
+        "Si esta en coche, cierre ventanillas y encienda las luces"
+      ]
+    },
+    "TRAFFIC": {
+      "_default": [
+        "No mueva a los heridos salvo peligro inminente",
+        "Senalice el accidente con triangulos de emergencia",
+        "Apague el motor de los vehiculos implicados",
+        "Si hay derrame de combustible, alejese del vehiculo",
+        "Preste atencion a posibles lesiones de columna"
+      ],
+      "moto|motocicleta|casco": [
+        "No retire el casco al motorista salvo que no respire",
+        "Estabilice el cuello sin moverlo",
+        "Si hay sangrado, presione con un pano limpio",
+        "No mueva a la victima del suelo",
+        "Senalice la zona para evitar mas atropellos"
+      ],
+      "atropellado|atropello|peaton|cruzando": [
+        "No mueva al peaton atropellado",
+        "Compruebe si esta consciente y respira",
+        "Si hay sangrado, presione con un pano limpio",
+        "Proteja a la victima del trafico con su vehiculo",
+        "Anote la matricula del vehiculo si se da a la fuga"
+      ]
+    },
+    "SECURITY": {
+      "_default": [
+        "Alejese de la zona de peligro",
+        "No confronte al agresor",
+        "Busque refugio en un lugar seguro",
+        "Intente recordar la descripcion del agresor",
+        "No toque nada que pueda ser evidencia"
+      ],
+      "robo|robando|ladron|asalto": [
+        "No oponga resistencia, su vida vale mas que lo material",
+        "Intente recordar rasgos del agresor (ropa, altura, vehiculo)",
+        "No persiga al ladron",
+        "Preserve la escena, no toque lo que haya tocado el agresor",
+        "Llame a la policia en cuanto sea seguro"
+      ],
+      "disparo|pistola|arma|tiroteo|bala": [
+        "Tirarse al suelo inmediatamente",
+        "Busque cobertura detras de algo solido (muro, coche, columna)",
+        "No corra en linea recta, muevase en zigzag si debe huir",
+        "Silencie su telefono",
+        "No salga de su refugio hasta que la policia lo indique"
+      ]
+    },
+    "NATURAL": {
+      "_default": [
+        "Busque refugio en una estructura solida",
+        "Alejese de ventanas, arboles y postes electricos",
+        "Si hay inundacion, vaya a zonas altas",
+        "No cruce rios o zonas inundadas a pie ni en coche",
+        "Tenga preparado un kit de emergencia"
+      ],
+      "terremoto|sismo|temblor|tiembla": [
+        "Refugiese debajo de una mesa o estructura solida",
+        "Alejese de ventanas, espejos y objetos que puedan caer",
+        "Si esta en la calle, alejese de edificios y cables electricos",
+        "Despues del temblor, evacue con cuidado (puede haber replicas)",
+        "No use ascensores despues de un sismo"
+      ],
+      "inundacion|inunda|riada|rio|desbordado|lluvia": [
+        "Suba a pisos altos o zonas elevadas",
+        "No camine ni conduzca por zonas inundadas",
+        "Desconecte la electricidad si el agua sube",
+        "No beba agua de la inundacion, puede estar contaminada",
+        "Si queda atrapado, suba al tejado y pida ayuda"
+      ]
+    }
+  },
+  "context_descriptions": {
+    "MEDICAL": {
+      "_default": "una emergencia medica",
+      "quemadura|quemado|queme|quema|aceite|hervir|escaldado|plancha": "una quemadura",
+      "caido|caida|cayó|cayo|tropezado|escalera": "una caida",
+      "pecho|corazon|infarto|brazo|presion": "un posible problema cardiaco",
+      "ahogando|ahogar|atragantado|atragantar|tragar|garganta": "un atragantamiento",
+      "sangre|sangrado|herida|corte|cortado|cuchillada|apunalado": "una herida con sangrado",
+      "desmayado|desmayo|inconsciente|conocimiento": "una perdida de conocimiento",
+      "respirar|respira|asfixia|ahogo": "dificultad para respirar",
+      "roto|fractura|hueso|rotura": "una posible fractura"
+    },
+    "FIRE": {
+      "_default": "un incendio",
+      "cocina|sarten|aceite|gas": "un incendio en la cocina",
+      "bosque|forestal|campo|montana|monte": "un incendio forestal",
+      "casa|piso|edificio|habitacion|salon": "un incendio en una vivienda",
+      "coche|vehiculo|garaje|taller": "un incendio de vehiculo"
+    },
+    "TRAFFIC": {
+      "_default": "un accidente de trafico",
+      "moto|motocicleta|casco": "un accidente de moto",
+      "atropellado|atropello|peaton|cruzando": "un atropello",
+      "camion|autobus|furgoneta": "un accidente de vehiculo pesado"
+    },
+    "SECURITY": {
+      "_default": "una emergencia de seguridad",
+      "robo|robando|ladron|asalto": "un robo",
+      "disparo|pistola|arma|tiroteo|bala": "una situacion con arma de fuego",
+      "cuchillo|navaja|machete|apunalado": "una agresion con arma blanca",
+      "pelea|agresion|violencia|golpe": "una agresion"
+    },
+    "NATURAL": {
+      "_default": "un desastre natural",
+      "terremoto|sismo|temblor|tiembla": "un terremoto",
+      "inundacion|inunda|riada|rio|desbordado|lluvia": "una inundacion",
+      "tornado|huracan|viento": "un temporal de viento"
+    }
+  }
+}

@@ -10,15 +10,43 @@ text,label
 "alguien ha tenido una reaccion alergica grave",MEDICAL
 "una mujer embarazada tiene contracciones muy fuertes",MEDICAL
 "un hombre se ha cortado con un cuchillo y sangra mucho",MEDICAL
+"me han apunalado y estoy sangrando",MEDICAL
+"una persona ha sido apunalada y necesita ayuda medica",MEDICAL
+"le han clavado un cuchillo y esta herido",MEDICAL
 "mi vecino no responde y esta en el suelo",MEDICAL
 "una persona ha sufrido una descarga electrica",MEDICAL
 "alguien se ha quemado con aceite hirviendo",MEDICAL
+"me he quemado la mano con agua caliente",MEDICAL
+"me he quemado el brazo con la plancha",MEDICAL
+"mi hijo se ha quemado el dedo con la estufa",MEDICAL
+"me he quemado la piel con el sol",MEDICAL
+"tengo una quemadura en la pierna",MEDICAL
+"me cayo aceite caliente en el brazo y me queme",MEDICAL
+"un nino se ha quemado con la sopa caliente",MEDICAL
+"me he escaldado la mano con el vapor",MEDICAL
 "un nino se ha caido del columpio y no mueve el brazo",MEDICAL
 "tengo un dolor muy fuerte en el abdomen",MEDICAL
 "una persona mayor se ha desmayado por el calor",MEDICAL
 "mi companero de trabajo no puede hablar ni mover el brazo",MEDICAL
 "hay alguien con un ataque de epilepsia",MEDICAL
 "una persona se ha intoxicado con productos de limpieza",MEDICAL
+"me he torcido el tobillo y no puedo caminar",MEDICAL
+"una persona ha perdido el conocimiento en el metro",MEDICAL
+"mi madre tiene dificultad para respirar",MEDICAL
+"un hombre ha sufrido un golpe de calor",MEDICAL
+"mi hijo ha ingerido lejia por accidente",MEDICAL
+"una persona diabetica se ha puesto muy mal",MEDICAL
+"me he clavado un clavo en el pie",MEDICAL
+"alguien ha sido picado por una avispa y se hincha",MEDICAL
+"una persona se ha roto la pierna jugando al futbol",MEDICAL
+"me duele el pecho",MEDICAL
+"no puedo respirar",MEDICAL
+"se ha desmayado",MEDICAL
+"esta sangrando mucho",MEDICAL
+"me he cortado",MEDICAL
+"se ha roto un hueso",MEDICAL
+"tiene convulsiones",MEDICAL
+"me he quemado",MEDICAL
 "hay un incendio en el edificio de enfrente",FIRE
 "se esta quemando un coche en la carretera",FIRE
 "hay humo saliendo de la cocina",FIRE
@@ -39,6 +67,24 @@ text,label
 "hay fuego en la nave industrial",FIRE
 "un rayo ha provocado un incendio en el monte",FIRE
 "la chimenea ha prendido fuego al tejado",FIRE
+"he quemado la casa con aceite sin querer",FIRE
+"se ha quemado la cocina entera",FIRE
+"se esta quemando mi casa",FIRE
+"he quemado el salon con una vela",FIRE
+"el aceite de la sarten ha quemado la cocina",FIRE
+"se ha quemado el piso de mi vecino",FIRE
+"se ha prendido fuego el cuadro electrico",FIRE
+"hay un incendio en el sotano del edificio",FIRE
+"las cortinas se han prendido fuego con una vela",FIRE
+"el microondas ha explotado y hay fuego",FIRE
+"se ha incendiado un contenedor y se extiende al edificio",FIRE
+"hay humo muy negro saliendo del garaje",FIRE
+"un petardo ha provocado un incendio en el portal",FIRE
+"hay fuego",FIRE
+"se esta quemando todo",FIRE
+"hay mucho humo",FIRE
+"se ha incendiado",FIRE
+"hay llamas",FIRE
 "ha habido un accidente de trafico en la autopista",TRAFFIC
 "un coche ha atropellado a un peaton",TRAFFIC
 "dos coches han chocado en el cruce",TRAFFIC
@@ -59,6 +105,19 @@ text,label
 "hay un accidente de trafico con un herido grave",TRAFFIC
 "un taxi ha chocado con un autobus",TRAFFIC
 "un camion ha perdido la carga en la carretera",TRAFFIC
+"un coche ha chocado contra una farola",TRAFFIC
+"hay un accidente en la rotonda con tres coches",TRAFFIC
+"una persona ha sido atropellada por un patinete electrico",TRAFFIC
+"un vehiculo se ha empotrado contra un escaparate",TRAFFIC
+"hay un accidente de autobus escolar con ninos heridos",TRAFFIC
+"dos coches han tenido un alcance en la autovia",TRAFFIC
+"un conductor se ha dado a la fuga tras atropellar a alguien",TRAFFIC
+"hay un accidente con una persona atrapada bajo un camion",TRAFFIC
+"ha habido un accidente",TRAFFIC
+"un coche ha chocado",TRAFFIC
+"han atropellado a alguien",TRAFFIC
+"hay un accidente de moto",TRAFFIC
+"un coche volcado",TRAFFIC
 "hay un hombre con un cuchillo amenazando a la gente",SECURITY
 "estan robando en la tienda de al lado",SECURITY
 "hay una pelea callejera con armas",SECURITY
@@ -80,6 +139,25 @@ text,label
 "hay una persona agresiva gritando y rompiendo cosas",SECURITY
 "estan forzando la entrada de un local comercial",SECURITY
 "hay una situacion de violencia domestica en el piso de arriba",SECURITY
+"un hombre esta persiguiendo a una mujer por la calle",SECURITY
+"hay alguien con un bate de beisbol amenazando en el parque",SECURITY
+"estan vendiendo droga en la puerta del colegio",SECURITY
+"hay una persona que lleva un machete en la mano",SECURITY
+"estan intentando entrar a la fuerza en mi negocio",SECURITY
+"hay una pelea con botellas rotas en la discoteca",SECURITY
+"un grupo de encapuchados esta destrozando la calle",SECURITY
+"alguien esta acosando a menores en el parque",SECURITY
+"me han apunalado",SECURITY
+"han apunalado a una persona",SECURITY
+"le han clavado un cuchillo a alguien",SECURITY
+"hay un hombre con un cuchillo",SECURITY
+"una persona con un arma",SECURITY
+"me estan siguiendo",SECURITY
+"me estan robando",SECURITY
+"hay una pelea",SECURITY
+"me estan amenazando",SECURITY
+"hay un ladron en mi casa",SECURITY
+"alguien con una navaja",SECURITY
 "el rio se ha desbordado e inunda las calles",NATURAL
 "hay un terremoto y los edificios tiemblan",NATURAL
 "una tormenta ha tirado arboles en la carretera",NATURAL
@@ -100,3 +178,16 @@ text,label
 "hay grietas en el suelo por el terremoto",NATURAL
 "una tormenta electrica ha provocado cortes de luz",NATURAL
 "el viento huracanado esta causando destrozos",NATURAL
+"hay una ola de frio extremo y personas sin hogar en la calle",NATURAL
+"un socavon se ha abierto en mitad de la carretera",NATURAL
+"hay una alerta por tsunami en la costa",NATURAL
+"las alcantarillas estan desbordadas por la lluvia",NATURAL
+"hay una tormenta de arena que no deja ver nada",NATURAL
+"un alud de nieve ha sepultado varias casas",NATURAL
+"el rio ha crecido y amenaza con inundar el pueblo",NATURAL
+"hay una plaga de abejas peligrosas en el barrio",NATURAL
+"hay un terremoto",NATURAL
+"se esta inundando todo",NATURAL
+"hay una riada",NATURAL
+"esta temblando",NATURAL
+"hay un tornado",NATURAL
