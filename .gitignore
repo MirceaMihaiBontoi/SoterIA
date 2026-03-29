@@ -2,6 +2,8 @@
 *.log
 emergency_history.log
 user_feedback.log
+*.dat
+cache/
 
 # Archivos compilados
 *.class
@@ -25,3 +27,4 @@ Thumbs.db
 .project
 .settings/
 __pycache__/
+*.env

@@ -2,7 +2,7 @@
 
 ## 📋 Descripción del Proyecto
 
-**Sistema de Gestión de Emergencias** es una aplicación Java que proporciona un sistema completo para detectar, procesar y registrar emergencias. El sistema guía al usuario a través de un flujo estructurado de detección de emergencias, envío de alertas a servicios de emergencia (112) y recopilación de feedback posterior.
+**Sistema de Gestión de Emergencias** es una aplicación Java con interfaz gráfica JavaFX que proporciona un sistema completo para detectar, procesar y registrar emergencias. El sistema incluye un chat conversacional con IA que guía al usuario a través de un flujo estructurado de detección de emergencias, envío de alertas a servicios de emergencia (112) y recopilación de feedback posterior.
 
 Diseñado como un prototipo educativo, el proyecto demuestra principios sólidos de **Programación Orientada a Objetos (POO)**, incluyendo:
 - ✅ **Interfaces** para abstracciones
@@ -10,37 +10,43 @@ Diseñado como un prototipo educativo, el proyecto demuestra principios sólidos
 - ✅ **Polimorfismo** mediante implementaciones
 - ✅ **Control de errores** robusto
 - ✅ **Validaciones** exhaustivas
+- ✅ **Interfaz gráfica** con JavaFX
 
 Autor: **Mircea Mihai Bontoi**
 ---
 
 ## 🎯 Características Principales
 
-### 1. **Detección de Emergencias**
-El usuario puede reportar diferentes tipos de emergencias:
-- Accidente de tráfico
-- Problema médico
-- Incendio
-- Agresión
-- Otro
+### 1. **Interfaz Gráfica Moderna (JavaFX)**
+- Pantalla de login/registro con diseño moderno
+- Chat conversacional con IA
+- Reconocimiento de voz
+- Tema visual profesional
 
-Cada tipo de emergencia tiene su propio nivel de prioridad y protocolo de respuesta.
+### 2. **Detección de Emergencias con IA**
+El sistema puede detectar emergencias mediante:
+- **Análisis de texto**: Describe lo que está pasando
+- **Reconocimiento de voz**: Presiona el botón de micrófono
+- **Clasificación automática**: IA identifica el tipo de emergencia
+- **Fallback manual**: Menú de opciones si la IA no está disponible
 
-### 2. **Registro y Logging**
+Tipos de emergencia soportados:
+- 🚗 Accidente de tráfico
+- 🏥 Problema médico
+- 🔥 Incendio
+- ⚔️ Agresión
+- 🌊 Desastre natural
+
+### 3. **Registro y Logging**
 Todas las emergencias se registran automáticamente en archivos de log:
 - `logs/emergency_history.log` - Historial de emergencias
 - `logs/emergency_alerts.log` - Alertas enviadas
 - `logs/user_feedback.log` - Feedback de usuarios
 
-### 3. **Feedback del Usuario**
-Después de reportar una emergencia, el sistema solicita evaluación:
-- Puntuación de 1-5 estrellas
-- Comentarios adicionales
-- Registro de mejora continua
-
 ### 4. **Sistema de Alertas Flexible**
 Implementación de múltiples estrategias de alerta mediante interfaces:
-- **CallAlert**: Simulación de llamada telefónica al 112
+- **AlertSender**: Envío de alertas al 112
+- **EmergencyLogger**: Registro de eventos
 - Extensible para SMS, Email, etc.
 
 ### 5. **Control de Errores Integral**
@@ -57,20 +63,20 @@ Implementación de múltiples estrategias de alerta mediante interfaces:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      Main                               │
-│          (Punto de entrada de la aplicación)            │
+│                     MainApp                             │
+│          (Aplicación JavaFX principal)                  │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│                 EmergencyManager                         │
-│        (Coordinador principal del sistema)              │
+│                  ChatController                         │
+│        (Controlador de chat conversacional)             │
 ├─────────────────────────────────────────────────────────┤
 │ - EmergencyDetector (detecta emergencias)               │
 │ - IAlert alertSender (envía alertas - POLIMORFISMO)    │
 │ - EmergencyLogger (registra eventos)                    │
 │ - UserData (datos del usuario)                          │
-│ - Scanner (entrada compartida)                          │
+│ - AIClassifierClient (comunicación con IA)              │
 └─────────────────────────────────────────────────────────┘
 
 INTERFACES (Contratos):
@@ -86,7 +92,6 @@ INTERFACES (Contratos):
        │                      │                      │
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
 │  AlertSender     │  │ GPSLocationService│ │ EmergencyLogger  │
-│  CallAlert       │  │                  │  │                  │
 └──────────────────┘  └──────────────────┘  └──────────────────┘
 
 HERENCIA (Extensibilidad):
@@ -140,6 +145,19 @@ public interface IAlert {
 }
 ```
 
+#### 4. **Reutilización de Código** ♻️
+```java
+// EmergencyDetector es usado tanto por la UI como por la lógica de negocio
+public class ChatController {
+    private EmergencyDetector detector;
+    
+    public void processMessage(String message) {
+        EmergencyDetector.DetectionResult result = detector.classifyEmergency(message);
+        // Reutiliza la lógica de detección
+    }
+}
+```
+
 ---
 
 ## 📁 Estructura del Proyecto
@@ -147,78 +165,109 @@ public interface IAlert {
 ```
 src/main/java/com/emergencias/
 │
-├── Main.java                          # Punto de entrada
-│
-├── model/                             # Modelos de datos
-│   ├── UserData.java                 # Información del usuario
-│   ├── EmergencyEvent.java           # Evento de emergencia
-│   ├── UserFeedback.java             # Feedback del usuario
-│   ├── EmergencyType.java            # Clase abstracta para tipos
-│   └── MedicalEmergency.java         # Implementación: emergencia médica
-│
-├── detector/                          # Detección de emergencias
-│   └── EmergencyDetector.java        # Detecta y recopila datos
-│
-├── controller/                        # Controladores
-│   └── EmergencyManager.java         # Coordinador principal
-│
 ├── alert/                             # Sistema de alertas
 │   ├── AlertSender.java              # Implementa IAlert
 │   ├── CallAlert.java                # Alternativa: llamadas
 │   └── EmergencyLogger.java          # Registro de eventos
 │
-└── services/                          # Servicios e interfaces
-    ├── IAlert.java                   # Interfaz de alertas
-    ├── ILocationService.java         # Interfaz de ubicación
-    ├── ILogger.java                  # Interfaz de logging
-    └── GPSLocationService.java       # Implementación GPS
+├── detector/                          # Detección de emergencias
+│   └── EmergencyDetector.java        # Detecta y clasifica emergencias
+│
+├── model/                             # Modelos de datos
+│   ├── CentroSalud.java              # Modelo de centro de salud
+│   ├── CentroSaludUtils.java         # Utilidades para centros de salud
+│   ├── EmergencyEvent.java           # Evento de emergencia
+│   ├── EmergencyType.java            # Clase abstracta para tipos
+│   ├── MedicalEmergency.java         # Implementación: emergencia médica
+│   ├── UserData.java                 # Información del usuario
+│   └── UserFeedback.java             # Feedback del usuario
+│
+├── services/                          # Servicios e interfaces
+│   ├── AIClassifierClient.java       # Cliente para backend Python
+│   ├── GPSLocationService.java       # Implementación GPS
+│   ├── IAlert.java                   # Interfaz de alertas
+│   ├── ILocationService.java         # Interfaz de ubicación
+│   └── ILogger.java                  # Interfaz de logging
+│
+└── ui/                                # Interfaz de usuario (JavaFX)
+    ├── ChatController.java           # Controlador de chat conversacional
+    ├── LoginController.java          # Controlador de login/registro
+    ├── MainApp.java                  # Aplicación principal JavaFX
+    ├── MainController.java           # Controlador principal
+    └── UserFileManager.java          # Gestión de archivos de usuario
+
+src/main/resources/
+├── fxml/
+│   ├── chat-view.fxml               # Vista de chat
+│   └── login-view.fxml              # Vista de login
+├── styles/
+│   └── main.css                     # Estilos CSS
+├── CentrosdeSaludMurcia.json        # Datos de centros de salud
+└── META-INF/
+    └── MANIFEST.MF                  # Manifiesto JAR
+
+python-backend/                        # Backend Python para IA
+├── server.py                        # Servidor FastAPI
+├── train_model.py                   # Entrenamiento de modelo
+├── requirements.txt                 # Dependencias Python
+├── data/                           # Datos de entrenamiento
+└── models/                         # Modelos entrenados
 ```
 
 ---
 
 ## 🔄 Flujo de Ejecución
 
-### 1. **Inicialización**
+### 1. **Inicialización de la Aplicación**
 ```
-Main.java
-  ├─ Crear Scanner compartido
-  ├─ Crear UserData con datos de ejemplo
-  ├─ Crear EmergencyManager
-  └─ Llamar startSystem()
-```
-
-### 2. **Recopilación de Datos del Usuario**
-```
-UserData.collectUserData()
-  ├─ Nombre (validado - no vacío)
-  ├─ Teléfono (validado - no vacío)
-  ├─ Información médica (opcional)
-  └─ Contacto de emergencia (validado - no vacío)
+MainApp.java
+  ├─ Cargar pantalla de login (login-view.fxml)
+  ├─ Configurar estilos CSS
+  ├─ Verificar sesión guardada
+  └─ Mostrar ventana principal
 ```
 
-### 3. **Detección de Emergencia**
+### 2. **Login/Registro**
 ```
-EmergencyDetector.detectEmergency()
-  ├─ ¿Hay emergencia? (S/N)
-  ├─ Si SÍ:
-  │   ├─ Tipo de emergencia (1-5, reintentos)
-  │   ├─ Ubicación (o usar GPS)
-  │   ├─ Nivel de gravedad (1-10, validado)
-  │   └─ Confirmación final
-  └─ Si NO: cancelar
+LoginController.java
+  ├─ Validar credenciales
+  ├─ Registrar nuevos usuarios
+  ├─ Guardar sesión (opcional)
+  └─ Navegar a pantalla de chat
 ```
 
-### 4. **Procesamiento de Emergencia**
+### 3. **Chat Conversacional**
 ```
-EmergencyManager.startSystem()
-  ├─ LogEmergency() → genera UUID
-  ├─ AlertSender.send() → envía alerta
-  ├─ AlertSender.notifyContacts() → notifica contactos
-  ├─ EmergencyLogger.collectAndLogFeedback() → solicita puntuación
-  └─ Registrar feedback en archivo
+ChatController.java
+  ├─ Inicializar EmergencyDetector
+  ├─ Verificar disponibilidad de IA
+  ├─ Procesar mensajes del usuario
+  └─ Clasificar emergencias
 ```
 
-### 5. **Registros Generados**
+### 4. **Detección de Emergencia**
+```
+EmergencyDetector.classifyEmergency()
+  ├─ Si IA disponible:
+  │   ├─ Enviar descripción al backend Python
+  │   ├─ Recibir clasificación
+  │   ├─ Extraer tipo, confianza, instrucciones
+  │   └─ Retornar DetectionResult
+  └─ Si IA no disponible:
+      ├─ Análisis manual por palabras clave
+      └─ Retornar DetectionResult
+```
+
+### 5. **Envío de Alerta**
+```
+sendEmergencyAlert()
+  ├─ Crear EmergencyEvent
+  ├─ Registrar en EmergencyLogger
+  ├─ Enviar con AlertSender
+  └─ Notificar al usuario
+```
+
+### 6. **Registros Generados**
 ```
 logs/emergency_history.log:
 [2026-01-11 14:30:45] ID: a1b2c3d4 | Tipo: Problema médico | Ubicación: Plaza Mayor, Madrid | Gravedad: 8
@@ -242,43 +291,98 @@ El sistema implementa manejo de errores multinivel:
 
 ### Nivel 1: Validación de Entrada
 ```java
-// En UserData.collectUserData()
-while (true) {
-    String input = scanner.nextLine().trim();
-    if (!input.isEmpty()) {
-        this.fullName = input;
-        break;
-    } else {
-        System.out.println("⚠️  Error: El nombre no puede estar vacío");
-    }
+// En LoginController.handleRegister()
+if (username.isEmpty() || password.isEmpty() || name.isEmpty()) {
+    registerErrorLabel.setText("Por favor completa los campos obligatorios");
+    return;
 }
 ```
 
 ### Nivel 2: Try-Catch en Operaciones Críticas
 ```java
 try {
-    String emergencyId = logger.logEmergency(event);
-    boolean alertSent = alertSender.send(event);
-    // ...
+    EmergencyEvent event = detector.createEvent(lastDetectionResult, null, 5);
+    logger.logEmergency(event);
+    boolean sent = alertSender.send(event);
 } catch (Exception e) {
-    System.err.println("❌ Error al procesar la emergencia: " + e.getMessage());
+    addBotMessage("❌ Error: " + e.getMessage());
 }
 ```
 
-### Nivel 3: Captura Global en Main
+### Nivel 3: Verificación de Servicios Externos
 ```java
-try {
-    emergencyManager.startSystem();
-} catch (Exception e) {
-    System.err.println("\n=== ERROR CRÍTICO ===");
-    e.printStackTrace();
-} finally {
-    scanner.close();
+private void checkAIAvailability() {
+    new Thread(() -> {
+        aiAvailable = aiClient.isAvailable();
+        Platform.runLater(() -> {
+            if (aiAvailable) {
+                aiStatusLabel.setText("IA: ✅ Conectada");
+            } else {
+                aiStatusLabel.setText("IA: ❌ Desconectada");
+                addBotMessage("⚠️ Servidor de IA no disponible.\nModo básico activado.");
+            }
+        });
+    }).start();
 }
 ```
 
 ---
 
+## 🚀 Instrucciones de Uso
+
+### Requisitos Previos
+- **Java 21** o superior
+- **Maven** para dependencias
+- **Python 3.8+** (opcional, para IA)
+- **Dependencias Python** (para funcionalidad completa de IA)
+
+### Ejecución
+
+1. **Compilar el proyecto:**
+   ```bash
+   mvn clean compile
+   ```
+
+2. **Ejecutar la aplicación:**
+   ```bash
+   mvn javafx:run
+   ```
+
+3. **(Opcional) Iniciar backend Python:**
+   ```bash
+   cd python-backend
+   pip install -r requirements.txt
+   python -m uvicorn server:app --host 0.0.0.0 --port 8000
+   ```
+
+### Funcionalidades sin Backend Python
+Si el servidor Python no está disponible:
+- ✅ Login/Registro funciona
+- ✅ Chat funciona en modo básico
+- ✅ Detección manual de emergencias
+- ✅ Envío de alertas
+- ❌ Reconocimiento de voz
+- ❌ Clasificación con IA
+- ❌ Corrección ortográfica
+
+---
+
+## 🎨 Interfaz de Usuario
+
+### Pantalla de Login
+- Formulario de inicio de sesión
+- Formulario de registro
+- Recordar sesión
+- Validación de campos
+
+### Pantalla de Chat
+- Chat conversacional con mensajes de usuario y bot
+- Botón de micrófono para entrada por voz
+- Indicador de estado de IA
+- Mensajes de bienvenida personalizados
+- Instrucciones de actuación para cada emergencia
+
+---
 
 ## 🤝 Contribución y Mejoras Futuras
 
@@ -286,11 +390,32 @@ Posibles mejoras para versiones futuras:
 
 - [ ] Integración con API de Google Maps para GPS real
 - [ ] Base de datos en lugar de archivos de texto
-- [ ] Interfaz gráfica (GUI) con JavaFX o Swing
 - [ ] Envío real de SMS/Email
 - [ ] Integración con servicios de emergencia reales
 - [ ] Análisis de estadísticas de emergencias
 - [ ] Sistema de autenticación de usuarios
 - [ ] Aplicación móvil (Android/iOS)
+- [ ] Soporte para múltiples idiomas
+- [ ] Modo offline con sincronización
 
+---
 
+## 📝 Notas Técnicas
+
+### Refactorización Reciente
+- **EmergencyDetector** refactorizado para funcionar con JavaFX
+- **ChatController** reutiliza EmergencyDetector (sin duplicación)
+- Eliminados archivos obsoletos: ConsoleApp.java, EmergencyManager.java
+- Estructura de paquetes optimizada
+
+### Dependencias Principales
+- **JavaFX 21.0.1**: Interfaz gráfica
+- **Jackson 2.17.0**: Procesamiento JSON
+- **SQLite JDBC**: Base de datos (futuro)
+- **FastAPI**: Backend Python para IA
+
+---
+
+## 📄 Licencia
+
+Este proyecto es un prototipo educativo desarrollado por **Mircea Mihai Bontoi**.

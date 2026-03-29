@@ -3,279 +3,186 @@ package com.emergencias.detector;
 import com.emergencias.model.EmergencyEvent;
 import com.emergencias.model.UserData;
 import com.emergencias.services.AIClassifierClient;
-import java.util.Scanner;
 
 /**
- * Clase encargada de detectar emergencias y recopilar información inicial.
- * Soporta clasificación por IA (backend Python) con fallback a menú manual.
+ * Clase encargada de detectar emergencias.
+ * Versión refactorizada para funcionar con JavaFX (sin dependencias de consola).
  */
 public class EmergencyDetector {
     private static final int MIN_SEVERITY = 1;
     private static final int MAX_SEVERITY = 10;
 
-    private final Scanner scanner;
     private final UserData userData;
     private final AIClassifierClient aiClient;
 
-    public EmergencyDetector(UserData userData, Scanner scanner, AIClassifierClient aiClient) {
-        this.scanner = scanner;
+    /**
+     * Constructor para uso en la UI (JavaFX).
+     */
+    public EmergencyDetector(UserData userData, AIClassifierClient aiClient) {
         this.userData = userData;
         this.aiClient = aiClient;
     }
 
     /**
-     * Inicia el proceso de detección de emergencia.
+     * Clasifica un mensaje de emergencia.
+     * Método principal para uso en la UI.
      */
-    public EmergencyEvent detectEmergency() {
-        System.out.println("\n=== DETECCION DE EMERGENCIA ===");
-        System.out.print("¿Estas en una situacion de emergencia? (S/N): ");
-
-        if (scanner.nextLine().equalsIgnoreCase("S")) {
-            String emergencyType;
-            int severity;
-
-            if (aiClient != null && aiClient.isAvailable()) {
-                emergencyType = getEmergencyTypeByAI();
-                if (emergencyType == null) {
-                    emergencyType = getEmergencyTypeByMenu();
-                    severity = getSeverityLevel();
-                } else {
-                    severity = getSeverityLevel();
-                }
-            } else {
-                if (aiClient != null) {
-                    System.out.println("⚠️  Backend de IA no disponible. Usando modo manual.");
-                    System.out.println("    Para activar la IA, arranca el servidor Python:");
-                    System.out.println("    PowerShell: cd python-backend; python -m uvicorn server:app --host 0.0.0.0 --port 8000");
-                    System.out.println("    CMD:        cd python-backend && python -m uvicorn server:app --host 0.0.0.0 --port 8000");
-                }
-                emergencyType = getEmergencyTypeByMenu();
-                severity = getSeverityLevel();
-            }
-
-            String location = getLocation();
-
-            if (confirmEmergency(emergencyType, location, severity)) {
-                return new EmergencyEvent(
-                    emergencyType,
-                    location,
-                    severity,
-                    userData.toString()
-                );
-            }
+    public DetectionResult classifyEmergency(String description) {
+        if (aiClient != null && aiClient.isAvailable()) {
+            return classifyWithAI(description);
+        } else {
+            return classifyManually(description);
         }
-
-        System.out.println("Emergencia cancelada o no confirmada.");
-        return null;
     }
 
-    private String getEmergencyTypeByAI() {
-        System.out.println("\nDescribe lo que esta pasando:");
-        System.out.println("  1. Escribir");
-        System.out.println("  2. Hablar por microfono");
-        System.out.print("Elige opcion (1/2): ");
-        String inputMode = scanner.nextLine().trim();
-
-        String description;
-        if (inputMode.equals("2")) {
-            description = getDescriptionByVoice();
-            if (description == null) {
-                System.out.println("⚠️  No se pudo transcribir. Escriba manualmente:");
-                System.out.print("> ");
-                description = scanner.nextLine().trim();
-            }
-        } else {
-            System.out.print("> ");
-            description = scanner.nextLine().trim();
-        }
-
-        if (description.isEmpty()) {
-            System.out.println("⚠️  Descripcion vacia. Cambiando a modo manual.");
-            return null;
-        }
-
-        System.out.println("Analizando con IA...");
+    /**
+     * Clasificación con IA.
+     */
+    private DetectionResult classifyWithAI(String description) {
         String jsonResponse = aiClient.classify(description);
-
+        
         if (jsonResponse == null) {
-            System.out.println("⚠️  Error al clasificar. Cambiando a modo manual.");
-            return null;
+            return classifyManually(description);
         }
-
+        
         String corrected = AIClassifierClient.extractString(jsonResponse, "corrected_text");
         String[] emergencies = AIClassifierClient.extractEmergencies(jsonResponse);
-
-        System.out.println("\n--- Resultado de la IA ---");
-        if (!corrected.equals(description.toLowerCase())) {
-            System.out.println("Texto corregido: " + corrected);
+        
+        if (emergencies.length > 0) {
+            String primaryEmergency = emergencies[0];
+            String typeName = AIClassifierClient.extractString(primaryEmergency, "type_name");
+            double confidence = AIClassifierClient.extractDouble(primaryEmergency, "confidence");
+            String context = AIClassifierClient.extractString(primaryEmergency, "context");
+            String[] instructions = AIClassifierClient.extractStringArray(primaryEmergency, "instructions");
+            
+            return new DetectionResult(true, typeName, context, confidence, instructions, corrected);
         }
+        
+        return classifyManually(description);
+    }
 
+    /**
+     * Clasificación manual (fallback cuando IA no está disponible).
+     */
+    private DetectionResult classifyManually(String message) {
+        String lower = message.toLowerCase();
         String typeName = null;
-        for (int i = 0; i < emergencies.length; i++) {
-            String emergency = emergencies[i];
-            String name = AIClassifierClient.extractString(emergency, "type_name");
-            String context = AIClassifierClient.extractString(emergency, "context");
-            double conf = AIClassifierClient.extractDouble(emergency, "confidence");
-            String[] instructions = AIClassifierClient.extractStringArray(emergency, "instructions");
-
-            if (i == 0) {
-                typeName = name;
-                System.out.println("\nSe ha detectado " + context + " (" + name + ", confianza: " + String.format("%.0f%%", conf * 100) + ")");
-            } else {
-                System.out.println("\nAdemas, se ha detectado " + context + " (" + name + ", confianza: " + String.format("%.0f%%", conf * 100) + ")");
-            }
-
-            if (instructions.length > 0) {
-                String header = (i == 0) ? "Instrucciones" : "Instrucciones adicionales";
-                System.out.println(header + " en caso de " + context + ":");
-                for (String instruction : instructions) {
-                    System.out.println("  - " + instruction);
-                }
-            }
+        String context = null;
+        String[] instructions = new String[0];
+        
+        if (lower.contains("fuego") || lower.contains("incendio")) {
+            typeName = "Incendio";
+            context = "incendio";
+            instructions = new String[]{
+                "Evacua inmediatamente",
+                "Llama al 112",
+                "No uses ascensores"
+            };
+        } else if (lower.contains("accidente") || lower.contains("coche")) {
+            typeName = "Accidente de tráfico";
+            context = "accidente de tráfico";
+            instructions = new String[]{
+                "Señaliza el lugar",
+                "No muevas heridos",
+                "Llama al 112"
+            };
+        } else if (lower.contains("duele") || lower.contains("médico") || lower.contains("medico")) {
+            typeName = "Problema médico";
+            context = "emergencia médica";
+            instructions = new String[]{
+                "Mantén la calma",
+                "Siéntate",
+                "Llama al 112"
+            };
+        } else if (lower.contains("agresión") || lower.contains("agresion") || lower.contains("ataque")) {
+            typeName = "Agresión";
+            context = "agresión";
+            instructions = new String[]{
+                "Aléjate del agresor",
+                "Busca un lugar seguro",
+                "Llama al 112"
+            };
+        } else if (lower.contains("inundación") || lower.contains("inundacion") || lower.contains("terremoto")) {
+            typeName = "Desastre natural";
+            context = "desastre natural";
+            instructions = new String[]{
+                "Busca un lugar alto",
+                "Aléjate de estructuras inestables",
+                "Llama al 112"
+            };
         }
-
-        System.out.println("\n[AVISO] Modelo de prueba con limitaciones.");
-        System.out.println("El corrector ortografico tiene un diccionario limitado y puede fallar.");
-        System.out.println("--------------------------");
-
-        System.out.print("\n¿Es correcto el tipo detectado? (S/N): ");
-        if (scanner.nextLine().equalsIgnoreCase("S")) {
-            return typeName;
+        
+        if (typeName != null) {
+            return new DetectionResult(true, typeName, context, 0.0, instructions, message);
         }
-
-        System.out.println("Seleccione manualmente:");
-        return getEmergencyTypeByMenu();
+        
+        return new DetectionResult(false, null, null, 0.0, new String[0], message);
     }
 
-    private String getEmergencyTypeByMenu() {
-        while (true) {
-            System.out.println("\nTipos de emergencia disponibles:");
-            System.out.println("1. Accidente de trafico");
-            System.out.println("2. Problema medico");
-            System.out.println("3. Incendio");
-            System.out.println("4. Agresion");
-            System.out.println("5. Desastre natural");
-            System.out.println("6. Otro");
-
-            System.out.print("Seleccione el tipo de emergencia (1-6): ");
-            String input = scanner.nextLine().trim();
-
-            switch (input) {
-                case "1": return "Accidente de trafico";
-                case "2": return "Problema medico";
-                case "3": return "Incendio";
-                case "4": return "Agresion";
-                case "5": return "Desastre natural";
-                case "6": return "Otro";
-                default:
-                    System.out.println("⚠️  Opcion no valida. Debe ingresar un numero entre 1 y 6.");
-            }
+    /**
+     * Crea un EmergencyEvent a partir del resultado de detección.
+     */
+    public EmergencyEvent createEvent(DetectionResult result, String location, int severity) {
+        if (location == null || location.isEmpty()) {
+            location = "Ubicación no especificada";
         }
+        
+        return new EmergencyEvent(
+            result.getTypeName(),
+            location,
+            severity,
+            userData.toString()
+        );
     }
 
-    private String getLocation() {
-        // Intentar geolocalización automática por IP
-        if (aiClient != null && aiClient.isAvailable()) {
-            System.out.println("\nObteniendo ubicacion automatica...");
-            String geoJson = aiClient.geolocate();
-            if (geoJson != null) {
-                String city = AIClassifierClient.extractString(geoJson, "city");
-                String region = AIClassifierClient.extractString(geoJson, "region");
-                String country = AIClassifierClient.extractString(geoJson, "country");
-                double lat = AIClassifierClient.extractDouble(geoJson, "lat");
-                double lon = AIClassifierClient.extractDouble(geoJson, "lon");
-
-                String autoLocation = city + ", " + region + ", " + country;
-                System.out.println("Ubicacion detectada: " + autoLocation);
-                System.out.printf("Coordenadas: %.4f, %.4f\n", lat, lon);
-                System.out.println("[AVISO] Ubicacion aproximada por IP. Si usa VPN puede ser incorrecta.");
-
-                System.out.print("¿Es correcta esta ubicacion? (S/N): ");
-                if (scanner.nextLine().equalsIgnoreCase("S")) {
-                    return autoLocation;
-                }
-                System.out.println("Introduzca la ubicacion manualmente:");
-            } else {
-                System.out.println("⚠️  No se pudo obtener la ubicacion automatica.");
-            }
-        }
-
-        // Fallback: pedir ubicación manualmente
-        while (true) {
-            System.out.print("\nUbicacion actual de la emergencia (obligatorio): ");
-            String location = scanner.nextLine().trim();
-            if (!location.isEmpty()) {
-                return location;
-            }
-            System.out.println("⚠️  Error: La ubicacion no puede estar vacia. Intente nuevamente.");
-        }
+    /**
+     * Valida que el nivel de severidad sea correcto.
+     */
+    public boolean isValidSeverity(int severity) {
+        return severity >= MIN_SEVERITY && severity <= MAX_SEVERITY;
+    }
+    
+    /**
+     * Obtiene el nivel de severidad mínimo.
+     */
+    public int getMinSeverity() {
+        return MIN_SEVERITY;
+    }
+    
+    /**
+     * Obtiene el nivel de severidad máximo.
+     */
+    public int getMaxSeverity() {
+        return MAX_SEVERITY;
     }
 
-    private String getDescriptionByVoice() {
-        try {
-            System.out.println("\nPreparado para grabar. Hable cuando quiera (5 segundos)...");
-
-            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                    .uri(java.net.URI.create("http://localhost:8000/transcribe?duration=5"))
-                    .POST(java.net.http.HttpRequest.BodyPublishers.noBody())
-                    .timeout(java.time.Duration.ofSeconds(15))
-                    .build();
-
-            java.net.http.HttpResponse<String> response = java.net.http.HttpClient.newHttpClient()
-                    .send(request, java.net.http.HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
-
-            String body = response.body();
-            if (body.contains("\"error\"")) {
-                String error = AIClassifierClient.extractString(body, "error");
-                System.out.println("⚠️  " + error);
-                return null;
-            }
-
-            String text = AIClassifierClient.extractString(body, "text");
-            if (text != null && !text.isEmpty()) {
-                System.out.println("Transcripcion: \"" + text + "\"");
-                System.out.print("¿Es correcto? (S/N): ");
-                if (scanner.nextLine().equalsIgnoreCase("S")) {
-                    return text;
-                }
-                return null;
-            }
-            return null;
-        } catch (Exception e) {
-            System.out.println("⚠️  Error al conectar con el servicio de voz.");
-            System.out.println("    Verifique que:");
-            System.out.println("    - El servidor Python esta arrancado");
-            System.out.println("    - Las dependencias estan instaladas: pip install SpeechRecognition sounddevice soundfile");
-            System.out.println("    - Tiene un microfono conectado y activo");
-            return null;
+    // ========================================
+    // CLASE INTERNA PARA RESULTADO
+    // ========================================
+    
+    public static class DetectionResult {
+        private final boolean detected;
+        private final String typeName;
+        private final String context;
+        private final double confidence;
+        private final String[] instructions;
+        private final String correctedText;
+        
+        public DetectionResult(boolean detected, String typeName, String context, 
+                               double confidence, String[] instructions, String correctedText) {
+            this.detected = detected;
+            this.typeName = typeName;
+            this.context = context;
+            this.confidence = confidence;
+            this.instructions = instructions;
+            this.correctedText = correctedText;
         }
-    }
-
-    private int getSeverityLevel() {
-        while (true) {
-            try {
-                System.out.printf("\nNivel de gravedad (%d-%d): ", MIN_SEVERITY, MAX_SEVERITY);
-                int severity = Integer.parseInt(scanner.nextLine());
-
-                if (severity >= MIN_SEVERITY && severity <= MAX_SEVERITY) {
-                    return severity;
-                }
-
-                System.out.printf("⚠️  Por favor, ingrese un valor entre %d y %d.\n", MIN_SEVERITY, MAX_SEVERITY);
-
-            } catch (NumberFormatException e) {
-                System.out.println("⚠️  Por favor, ingrese un numero valido.");
-            }
-        }
-    }
-
-    private boolean confirmEmergency(String emergencyType, String location, int severity) {
-        System.out.println("\n=== RESUMEN DE LA EMERGENCIA ===");
-        System.out.println("Tipo: " + emergencyType);
-        System.out.println("Ubicacion: " + location);
-        System.out.println("Nivel de gravedad: " + severity + "/" + MAX_SEVERITY);
-
-        System.out.print("\n¿Confirmar envio de alerta de emergencia? (S/N): ");
-        return scanner.nextLine().equalsIgnoreCase("S");
+        
+        public boolean isDetected() { return detected; }
+        public String getTypeName() { return typeName; }
+        public String getContext() { return context; }
+        public double getConfidence() { return confidence; }
+        public String[] getInstructions() { return instructions; }
+        public String getCorrectedText() { return correctedText; }
     }
 }

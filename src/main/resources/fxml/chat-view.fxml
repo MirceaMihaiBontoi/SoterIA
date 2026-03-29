@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.emergencias.ui.ChatController" 
+      styleClass="chat-panel">
+    
+    <!-- Área de mensajes -->
+    <ScrollPane fx:id="chatScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true">
+        <VBox fx:id="chatMessages" spacing="10" styleClass="chat-messages">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+        </VBox>
+    </ScrollPane>
+    
+    <!-- Barra de entrada -->
+    <HBox styleClass="chat-input-bar" alignment="CENTER" spacing="10">
+        <padding><Insets top="10" right="15" bottom="10" left="15"/></padding>
+        <TextField fx:id="messageInput" promptText="Describe tu emergencia..." HBox.hgrow="ALWAYS" onAction="#handleSendMessage"/>
+        <Button fx:id="voiceButton" text="🎤" onAction="#handleVoiceInput" styleClass="voice-button"/>
+        <Button fx:id="sendButton" text="📤" onAction="#handleSendMessage" styleClass="send-button"/>
+    </HBox>
+    
+    <!-- Barra de estado -->
+    <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="10">
+        <padding><Insets top="5" right="15" bottom="5" left="15"/></padding>
+        <Label fx:id="statusLabel" text="Listo" styleClass="status-label"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label fx:id="aiStatusLabel" text="IA: Verificando..." styleClass="ai-status"/>
+    </HBox>
+    
+</VBox>

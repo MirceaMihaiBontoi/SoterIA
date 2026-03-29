@@ -12,7 +12,17 @@ public class UserData {
     private String emergencyContact;
 
     /**
-     * Constructor para crear un nuevo objeto UserData.
+     * Constructor vacío para crear un objeto UserData sin datos iniciales.
+     */
+    public UserData() {
+        this.fullName = "";
+        this.phoneNumber = "";
+        this.medicalInfo = "";
+        this.emergencyContact = "";
+    }
+
+    /**
+     * Constructor para crear un nuevo objeto UserData con datos.
      */
     public UserData(String fullName, String phoneNumber, String medicalInfo, String emergencyContact) {
         this.fullName = fullName;
