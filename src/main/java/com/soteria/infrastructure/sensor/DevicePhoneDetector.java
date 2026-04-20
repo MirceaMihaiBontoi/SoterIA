@@ -28,7 +28,11 @@ public final class DevicePhoneDetector {
     private DevicePhoneDetector() { }
 
     public static String detect() {
-        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        return detect(System.getProperty("os.name", ""));
+    }
+
+    static String detect(String osName) {
+        String os = osName.toLowerCase(Locale.ROOT);
         if (os.contains("android")) {
             // Placeholder for native bridge (TelephonyManager#getLine1Number).
             return UNKNOWN;

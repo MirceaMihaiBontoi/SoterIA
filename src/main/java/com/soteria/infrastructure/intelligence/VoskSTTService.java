@@ -94,7 +94,7 @@ public class VoskSTTService {
         }
     }
 
-    private String extractText(String json) {
+    static String extractText(String json) {
         try {
             JsonNode node = mapper.readTree(json);
             return node.has("text") ? node.get("text").asText() : "";
@@ -103,7 +103,7 @@ public class VoskSTTService {
         }
     }
 
-    private String extractPartial(String json) {
+    static String extractPartial(String json) {
         try {
             JsonNode node = mapper.readTree(json);
             return node.has("partial") ? node.get("partial").asText() : "";

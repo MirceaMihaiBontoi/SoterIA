@@ -46,8 +46,14 @@ public class SystemCapability {
     private final AIModelProfile recommendedProfile;
 
     public SystemCapability() {
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        this.totalMemory = osmxb.getTotalMemorySize();
+        this(((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean()).getTotalMemorySize());
+    }
+
+    /**
+     * Internal constructor for testing.
+     */
+    SystemCapability(long totalMemory) {
+        this.totalMemory = totalMemory;
         this.availableProcessors = Runtime.getRuntime().availableProcessors();
         
         long ramInGB = totalMemory / BYTES_IN_GB;

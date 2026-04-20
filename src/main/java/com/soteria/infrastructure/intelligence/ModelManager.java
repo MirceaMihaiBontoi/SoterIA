@@ -45,8 +45,15 @@ public class ModelManager {
     private final Path modelBasePath;
 
     public ModelManager(SystemCapability capability) {
+        this(capability, Paths.get(System.getProperty("user.home"), ".soteria", MODEL_DIR));
+    }
+
+    /**
+     * Internal constructor for testing.
+     */
+    ModelManager(SystemCapability capability, Path modelBasePath) {
         this.capability = capability;
-        this.modelBasePath = Paths.get(System.getProperty("user.home"), ".soteria", MODEL_DIR);
+        this.modelBasePath = modelBasePath;
 
         try {
             Files.createDirectories(modelBasePath);

@@ -76,7 +76,7 @@ public class LocalBrainService implements AutoCloseable {
      * so the system instruction is prepended to the first user turn. History
      * must alternate user/model and end with a user turn.
      */
-    private String buildGemmaPrompt(String systemInstruction, List<ChatMessage> history) {
+    static String buildGemmaPrompt(String systemInstruction, List<ChatMessage> history) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < history.size(); i++) {
             ChatMessage msg = history.get(i);

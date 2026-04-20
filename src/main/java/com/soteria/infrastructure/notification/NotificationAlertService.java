@@ -21,10 +21,21 @@ import java.util.logging.Logger;
 public class NotificationAlertService implements AlertService {
 
     private static final Logger log = Logger.getLogger(NotificationAlertService.class.getName());
-    private static final Path ALERTS_FILE = Paths.get("logs", "emergency_alerts.log");
+    private final Path alertsFile;
     private static final String EMERGENCY_NUMBER = "112";
     private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final long SIMULATED_CALL_MS = 1500;
+
+    public NotificationAlertService() {
+        this(Paths.get("logs", "emergency_alerts.log"));
+    }
+
+    /**
+     * Internal constructor for testing.
+     */
+    NotificationAlertService(Path alertsFile) {
+        this.alertsFile = alertsFile;
+    }
 
     @Override
     public boolean send(EmergencyEvent event) {
@@ -69,9 +80,11 @@ public class NotificationAlertService implements AlertService {
 
     private boolean persist(String message) {
         try {
-            Files.createDirectories(ALERTS_FILE.getParent());
+            if (alertsFile.getParent() != null) {
+                Files.createDirectories(alertsFile.getParent());
+            }
             String entry = "-".repeat(80) + System.lineSeparator() + message + System.lineSeparator();
-            Files.writeString(ALERTS_FILE, entry,
+            Files.writeString(alertsFile, entry,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             return true;
         } catch (IOException e) {

@@ -10,14 +10,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EmergencyEventTest {
 
+    private static final String TYPE = "Incendio";
+    private static final String LOCATION = "Calle Mayor 3";
+
     @Test
     @DisplayName("Constructor fills components and sets timestamp")
     void constructorFillsAllFields() {
         LocalDateTime before = LocalDateTime.now();
-        EmergencyEvent event = new EmergencyEvent("Incendio", "Calle Mayor 3", 8, "Juan");
+        EmergencyEvent event = new EmergencyEvent(TYPE, LOCATION, 8, "Juan");
         LocalDateTime after = LocalDateTime.now();
 
-        assertEquals("Incendio", event.emergencyType());
+        assertEquals(TYPE, event.emergencyType());
         assertNotNull(event.timestamp());
         
         // Check if timestamp is within range
@@ -28,11 +31,11 @@ class EmergencyEventTest {
     @Test
     @DisplayName("toString includes type, location and severity")
     void toStringIncludesKeyFields() {
-        EmergencyEvent event = new EmergencyEvent("Incendio", "Calle Mayor 3", 8, "Juan");
+        EmergencyEvent event = new EmergencyEvent(TYPE, LOCATION, 8, "Juan");
         String out = event.toString();
 
-        assertTrue(out.contains("Incendio"));
-        assertTrue(out.contains("Calle Mayor 3"));
+        assertTrue(out.contains(TYPE));
+        assertTrue(out.contains(LOCATION));
         assertTrue(out.contains("8"));
     }
     

@@ -7,9 +7,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserDataTest {
 
+    private static final String PHONE = "+34 600 111 222";
+    private static final String MEDICAL = "Asma";
+    private static final String CONTACT = "Luis 600333444";
+    private static final String LANG = "Spanish";
+
     private static UserData sample(String name) {
-        return new UserData(name, "+34 600 111 222", "Female", "1990-01-01",
-                "Asma", "Luis 600333444", "BALANCED", "Spanish", null);
+        return new UserData(name, PHONE, "Female", "1990-01-01",
+                MEDICAL, CONTACT, "BALANCED", LANG, null);
     }
 
     @Test
@@ -17,13 +22,13 @@ class UserDataTest {
     void parameterisedConstructorAssignsFields() {
         UserData u = sample("Ana");
         assertEquals("Ana", u.fullName());
-        assertEquals("+34 600 111 222", u.phoneNumber());
+        assertEquals(PHONE, u.phoneNumber());
         assertEquals("Female", u.gender());
         assertEquals("1990-01-01", u.birthDate());
-        assertEquals("Asma", u.medicalInfo());
-        assertEquals("Luis 600333444", u.emergencyContact());
+        assertEquals(MEDICAL, u.medicalInfo());
+        assertEquals(CONTACT, u.emergencyContact());
         assertEquals("BALANCED", u.preferredModel());
-        assertEquals("Spanish", u.preferredLanguage());
+        assertEquals(LANG, u.preferredLanguage());
     }
 
     @Test
@@ -31,9 +36,9 @@ class UserDataTest {
     void toStringIncludesKeyFields() {
         String out = sample("Ana").toString();
         assertTrue(out.contains("Ana"));
-        assertTrue(out.contains("+34 600 111 222"));
-        assertTrue(out.contains("Asma"));
-        assertTrue(out.contains("Luis 600333444"));
+        assertTrue(out.contains(PHONE));
+        assertTrue(out.contains(MEDICAL));
+        assertTrue(out.contains(CONTACT));
     }
 
     @Test
@@ -48,5 +53,6 @@ class UserDataTest {
     void isCompleteRejectsDrafts() {
         assertTrue(sample("Ana").isComplete());
         assertFalse(sample(UserData.INCOMPLETE_NAME).isComplete());
+        assertFalse(sample(null).isComplete());
     }
 }
