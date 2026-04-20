@@ -206,7 +206,7 @@ public class ChatController implements Initializable {
                 conversationHistory.add(ChatMessage.model(response));
                 trimHistory();
                 addBotMessage(response);
-                setStatus("Ready");
+                setStatus(STATUS_READY);
             });
         }).start();
     }

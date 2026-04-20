@@ -16,20 +16,21 @@ The foundation of the system is built on **Java Records**, ensuring that emergen
 - **EmergencyEvent**: A comprehensive record of a detected crisis, including classification, timestamp, location data, and severity levels.
 
 ### 2. Interface Layer (Dependency Inversion)
-To ensure the system is future-proof and testable, all critical infrastructure services are consumed through interfaces:
-- **AlertService**: Decouples the UI from the underlying notification mechanisms (Visual, Network, or Protocol-based).
-- **IntelligenceProvider**: Allows the seamless swapping of classification engines (e.g., transition from Remote HTTP AI to Local GGUF models via llama.cpp).
-- **LocationProvider**: Abstractions for geographic positioning and coordinate resolution.
+Critical infrastructure services are consumed through interfaces so backends can be swapped without touching callers:
+- **AlertService**: Decouples the UI from the underlying notification mechanism.
+- **LocationProvider**: Abstraction for geographic positioning.
 
-### 3. Logic Layer (Orchestration Engine)
-The `EmergencyDetector` acts as the system's brain, processing raw inputs through a hierarchical detection pipeline:
-- **Primary Engine**: Neural-based intent recognition via integrated intelligence services.
-- **Fallback Engine**: Deterministic pattern matching using a proprietary keyword and act-protocol library, ensuring 100% availability even during network failures.
+### 3. Intelligence Layer (RAG Pipeline)
+Offline reasoning is delivered by three coordinated components under `com.soteria.infrastructure.intelligence`:
+- **MedicalKnowledgeBase**: Lucene BM25 retrieval + JGraphT relationship graph over `medical_protocols.json`.
+- **LocalBrainService**: GGUF LLM inference via `de.kherud:llama` (llama.cpp JNI).
+- **VoskSTTService**: Offline speech-to-text with hardware-appropriate model size.
 
 ### 4. Infrastructure Layer (System Implementation)
 Handles the technical details of the environment:
-- **Persistence Strategy**: High-concurrency binary and JSON-based storage for user sessions and historical logging.
-- **Alert Implementations**: Concrete strategies for handling emergency dispatches, logging, and contact notifications.
+- **Persistence**: JSON-based storage for user sessions (`JsonUserPersistence`).
+- **Notification**: Local alert log + simulated emergency-service dispatch (`NotificationAlertService`). Real SMS/call integration is a later phase.
+- **Sensor**: System GPS wrapper (`SystemGPSLocation`).
 
 ### 5. UI Layer (Reactive Interface)
 A state-of-the-art JavaFX implementation using the Model-View-Controller (MVC) pattern:
@@ -42,71 +43,63 @@ A state-of-the-art JavaFX implementation using the Model-View-Controller (MVC) p
 SoterIA 2.0 introduces a state-of-the-art **Tiered Scaling Architecture** that dynamically provisions AI resources based on the device's physical hardware. All LLMs are shipped as **GGUF** single-file bundles for reproducible, dependency-free deployment.
 
 #### RAM-Based 5-Tier Scaling (GGUF via llama.cpp):
-- **Ultra-Lite (< 3GB)**: Qwen3-0.6B Q4_K_M (Reasoning) + Vosk Small (STT).
-- **Lite (3 - 4GB)**: Gemma 3n E2B-it Q4_K_M (Reasoning) + Vosk Small (STT).
-- **Balanced (4 - 6GB)**: Gemma 3n E2B-it Q8_0 (Reasoning) + Vosk Standard (STT).
-- **Performance (6 - 12GB)**: Gemma 3n E4B-it Q4_K_M (Reasoning) + Vosk Standard (STT).
-- **Ultra (≥ 12GB)**: Gemma 3n E4B-it Q8_0 High-Precision (Reasoning) + Vosk Standard (STT).
+- **Ultra-Lite (< 3GB)**: Gemma 3 1B-it Q4_K_M + Vosk Small.
+- **Lite (3 - 4GB)**: Gemma 3 1B-it Q8_0 + Vosk Small.
+- **Balanced (4 - 6GB)**: Gemma 3 4B-it Q4_K_M + Vosk Standard.
+- **Performance (6 - 12GB)**: Gemma 3 4B-it Q4_K_M + Vosk Standard.
+- **Ultra (≥ 12GB)**: Gemma 3 4B-it Q8_0 + Vosk Standard.
 
-> **Roadmap**: upgrade a Gemma 4 (E2B/E4B) pendiente de `de.kherud:llama` >= 4.3.0 con soporte nativo para la arquitectura gemma4.
+> **Roadmap**: upgrade a Gemma 4 (E2B/E4B) pendiente de `de.kherud:llama` >= 4.3.0 con soporte nativo para la arquitectura `gemma4`.
 
 ### 🏥 100% Offline RAG Pipeline
 Survival-critical reliability via a local **Retrieval-Augmented Generation** pipeline:
-- **Apache Lucene**: High-speed, in-memory indexing of professional medical protocols.
+- **Apache Lucene (BM25)**: In-memory text index over medical protocols (`title` + `keywords`), ranked by relevance.
+- **JGraphT**: Undirected knowledge graph linking protocols by shared category or cross-references in their steps. The top Lucene hit is enriched with its graph neighbors before being passed to the LLM.
 - **llama.cpp (via `de.kherud:llama`)**: Native execution of GGUF LLMs with CPU, Metal (macOS/iOS) and Vulkan (Android) backends.
-- **JGraphT**: Graph-based relationship modeling for medical triage.
 
 ### 🌍 English-Core Multilingual Strategy
 Using an "English-Core" reasoning approach for maximum precision:
 - **Cross-Lingual Reasoning**: The LLM reads English protocols and generates instructions in the user's selected language (e.g., Spanish).
 - **Semantic Mapping**: Multilingual keyword indexing allows users to trigger English protocols using native terminology.
 
-### Advanced Emergency Classification
-The system identifies and prepares unique protocols for various critical categories:
-- **Medical Emergencies**: Specialized protocols for clinical events ( CPR, Hemorrhage, Choking ).
-- **Neurological**: FAST-assessment based stroke detection.
-- **Environmental**: Thermal burns and trauma management.
+### Protocol Catalogue
+`medical_protocols.json` currently ships five core protocols (extensible without code changes):
+- **Vital**: CPR, Severe External Hemorrhage.
+- **Airway**: Choking (5-and-5 / Heimlich).
+- **Trauma**: Thermal Burns.
+- **Neurological**: Stroke (FAST assessment).
 
 ### Multimodal Input Handling
 - **Conversational Synthesis**: A guided UX that asks the right questions based on the detected emergency type.
 - **Voice-to-Action**: Real-time native voice processing (Vosk) allows hands-free reporting.
 
-### Comprehensive Operational Logging
-Every interaction is audited and stored in three specialized tracks:
-1. **Emergency History**: Chronological records of all detected events.
-2. **Alert Registry**: Detailed logs of every outbound notification.
-3. **User Feedback**: Post-event evaluation for system refinement.
+### Operational Logging
+Every dispatched alert is appended to `logs/emergency_alerts.log` as a plain-text audit trail. The file is created lazily on first alert.
 
 ## Project Structure
 
 ```text
 com.soteria.core
-├── model              # Immutable data records (UserData, EmergencyEvent)
-└── interfaces         # Service contracts for DI (AlertService, IntelligenceProvider)
-
-com.soteria.logic
-└── EmergencyDetector  # Core business logic and detection orchestration
+├── model              # Immutable records (UserData, EmergencyEvent)
+└── interfaces         # Service contracts (AlertService, LocationProvider)
 
 com.soteria.infrastructure
-├── intelligence       # AI Service clients and STT/TTS implementations
-├── persistence        # Secure data storage (JSON/Binary)
-└── alerts             # Concrete alert strategies and logging implementations
+├── intelligence       # STT, LLM, knowledge base, model provisioning
+├── notification       # NotificationAlertService (log + simulated call)
+├── persistence        # JsonUserPersistence (session + user profile)
+└── sensor             # SystemGPSLocation
 
 com.soteria.ui
-├── controller         # MVC Controllers for View management
-└── MainApp            # Application entry point and lifecycle management
+├── controller         # ChatController, LoginController
+└── MainApp            # JavaFX entry point
 ```
 
 ## System Implementation Standards
 
-### OOP Excellence
-- **Polymorphism**: Unified treatment of multiple alert strategies through `AlertService`.
-- **Encapsulation**: Strict access modifiers and record-based data transport.
-- **Abstraction**: Complex detection logic hidden behind simplified service facades.
-
-### Resilience and Error Handling
-- **Multi-Level Validation**: Input filtering at the UI, Logic, and Persistence layers.
-- **Service Availability Check**: Real-time heartbeat monitoring of intelligence backends with automated fallback to Basic Mode.
+### OOP & Language
+- **Records**: Immutable transport for `UserData`, `EmergencyEvent`, `ChatMessage`.
+- **Interfaces + DI**: `AlertService` and `LocationProvider` decouple UI from infrastructure.
+- **Java 25 target**: `<release>25</release>` in `pom.xml`.
 
 ## Setup and Installation
 
