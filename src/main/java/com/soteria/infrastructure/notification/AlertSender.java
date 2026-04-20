@@ -7,11 +7,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Class responsible for sending emergency notifications to the corresponding services.
  * Implements the AlertService interface, allowing for polymorphism and easy extension.
  */
 public class AlertSender implements AlertService {
+    private static final Logger log = Logger.getLogger(AlertSender.class.getName());
+    
     private static final String EMERGENCY_NUMBER = "112";
     private static final String ALERTS_FILE = "logs/emergency_alerts.log";
     
@@ -21,21 +26,20 @@ public class AlertSender implements AlertService {
     @Override
     public boolean send(EmergencyEvent event) {
         if (event == null) {
-            System.err.println("❌ Error: Cannot send a null alert");
+            log.severe("❌ Error: Cannot send a null alert");
             return false;
         }
 
         String alertMessage = formatAlertMessage(event);
         
-        System.out.println("\n=== ALERT SENT ===");
-        System.out.println(alertMessage);
+        log.info(() -> "\n=== ALERT SENT ===\n" + alertMessage);
         
         try (FileWriter writer = new FileWriter(ALERTS_FILE, true)) {
             writer.write("-".repeat(80) + "\n");
             writer.write(alertMessage + "\n");
             writer.flush();
         } catch (IOException e) {
-            System.err.println("❌ Error saving alert to file: " + e.getMessage());
+            log.log(Level.SEVERE, "❌ Error saving alert to file: {0}", e.getMessage());
             return false;
         }
         
@@ -44,17 +48,22 @@ public class AlertSender implements AlertService {
 
     @Override
     public void notifyContacts(UserData userData, EmergencyEvent event) {
-        System.out.println("\nNotifying emergency contacts...");
+        log.info("Notifying emergency contacts...");
         
         if (userData == null || userData.emergencyContact() == null || userData.emergencyContact().isEmpty()) {
-            System.out.println("⚠️ No emergency contacts configured.");
+            log.warning("⚠️ No emergency contacts configured.");
             return;
         }
         
-        System.out.println("✅ A notification has been sent to emergency contacts with the following data:");
-        System.out.println("Emergency Type: " + event.emergencyType());
-        System.out.println("Location: " + event.location());
-        System.out.println("Event Time: " + event.timestamp().format(TIMESTAMP_FORMAT));
+        if (log.isLoggable(Level.INFO)) {
+            log.info(() -> String.format("A notification has been sent to emergency contacts:%n" +
+                                       "Emergency Type: %s%n" +
+                                       "Location: %s%n" +
+                                       "Event Time: %s",
+                                       event.emergencyType(),
+                                       event.location(),
+                                       event.timestamp().format(TIMESTAMP_FORMAT)));
+        }
     }
 
     @Override
@@ -80,24 +89,26 @@ public class AlertSender implements AlertService {
     }
 
     private boolean simulateEmergencyServiceCall(EmergencyEvent event) {
-        System.out.println("\nConnecting to emergency service " + EMERGENCY_NUMBER + "...");
+        log.log(Level.INFO, "Connecting to emergency service {0}...", EMERGENCY_NUMBER);
         
         try {
-            for (int i = 0; i < 3; i++) {
-                System.out.print(".");
-                Thread.sleep(500);
+            Thread.sleep(1500); // Simulate connection delay
+            
+            if (log.isLoggable(Level.INFO)) {
+                log.info(() -> String.format("Connection established!%n" +
+                                           "Operator: What is your emergency?%n" +
+                                           "System: An emergency of type %s has been detected.%n" +
+                                           "Location: %s%n" +
+                                           "Help is on the way!",
+                                           event.emergencyType(),
+                                           event.location()));
             }
-            System.out.println("\n\n✅ Connection established with emergency services!");
-            System.out.println("Operator: What is your emergency?");
-            System.out.println("System: An emergency of type " + event.emergencyType() + " has been detected.");
-            System.out.println("Location: " + event.location());
-            System.out.println("\n✅ Help is on the way!");
             
             return true;
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("\n❌ Error connecting to emergency services: " + e.getMessage());
+            log.log(Level.SEVERE, "Error connecting to emergency services: {0}", e.getMessage());
             return false;
         }
     }

@@ -7,7 +7,6 @@ import com.soteria.core.interfaces.LocationProvider;
 import com.soteria.infrastructure.intelligence.*;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
-import com.soteria.ui.MainApp;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -18,11 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +35,8 @@ public class ChatController implements Initializable {
     @FXML private Label aiStatusLabel;
     @FXML private Label statusLabel;
     
+    private static final String STATUS_READY = "Ready";
+    
     // Phase 3 Native Services
     private SystemCapability systemCapability;
     private ModelManager modelManager;
@@ -50,8 +47,12 @@ public class ChatController implements Initializable {
     private UserData currentUser;
     private boolean aiAvailable = false;
     private boolean isRecording = false;
-    private final List<String> chatHistory = new ArrayList<>();
     private String currentLanguage = "Spanish"; // Placeholder for Phase 5 UI Selection
+
+    // Conversation history passed to the local brain on every turn.
+    // Alternates user/model. Capped to avoid blowing the 2048-token context.
+    private static final int MAX_HISTORY_TURNS = 10;
+    private final List<ChatMessage> conversationHistory = new ArrayList<>();
 
     private LocationProvider locationProvider;
     private AlertService alertService;
@@ -101,7 +102,7 @@ public class ChatController implements Initializable {
                     aiAvailable = true;
                     aiStatusLabel.setText("Soteria: ✅ Native AI Ready (" + systemCapability.getRecommendedProfile() + ")");
                     aiStatusLabel.setStyle("-fx-text-fill: #10b981;");
-                    setStatus("Ready");
+                    setStatus(STATUS_READY);
                 });
 
             } catch (Exception e) {
@@ -122,18 +123,6 @@ public class ChatController implements Initializable {
                      "• Providing action instructions\n" +
                      "• Sending alerts to emergency services\n\n" +
                      "Describe what is happening or press 🎤 to speak.");
-    }
-
-    private void updateAIStatus() {
-        Platform.runLater(() -> {
-            if (modelManager != null) {
-                aiStatusLabel.setText("Soteria: ✅ Local Native AI");
-                aiStatusLabel.setStyle("-fx-text-fill: #10b981;");
-            } else {
-                aiStatusLabel.setText("Soteria: ❌ Error");
-                aiStatusLabel.setStyle("-fx-text-fill: #ef4444;");
-            }
-        });
     }
 
     @FXML
@@ -191,7 +180,7 @@ public class ChatController implements Initializable {
         isRecording = false;
         voiceButton.setText("🎤");
         voiceButton.setStyle("");
-        setStatus("Ready");
+        setStatus(STATUS_READY);
     }
 
     private void processMessage(String message) {
@@ -202,28 +191,34 @@ public class ChatController implements Initializable {
 
         if (knowledgeBase == null) return;
 
+        conversationHistory.add(ChatMessage.user(message));
+        trimHistory();
+
         setStatus("AI Thinking...");
+        List<ChatMessage> snapshot = List.copyOf(conversationHistory);
         new Thread(() -> {
-            // 1. Semantic Search in Lucene
             List<Protocol> results = knowledgeBase.findProtocols(message);
-            String context = results.isEmpty() ? "General emergency" : results.get(0).getContent();
-            
-            // 2. Generate specialized response via Local Brain (Gemma 4 / Qwen 3)
-            // The background reasoning happens using English protocols, but output matches currentLanguage
-            String response = brainService.generateResponse(message, context, currentLanguage);
-            
+            String context = results.isEmpty() ? "No specific protocol matched." : results.get(0).getContent();
+
+            String response = brainService.generateResponse(snapshot, context, currentLanguage);
+
             Platform.runLater(() -> {
+                conversationHistory.add(ChatMessage.model(response));
+                trimHistory();
                 addBotMessage(response);
-                if (!results.isEmpty() && results.get(0).getPriority() == 1) {
-                    if (currentLanguage.equalsIgnoreCase("Spanish")) {
-                        addBotMessage("⚠️ **Protocolo oficial:** Se han detectado signos de alta prioridad. Inicie maniobras inmediatamente.");
-                    } else {
-                        addBotMessage("⚠️ **Official Protocol:** High-priority signs detected. Start life-saving maneuvers immediately.");
-                    }
-                }
                 setStatus("Ready");
             });
         }).start();
+    }
+
+    private void trimHistory() {
+        while (conversationHistory.size() > MAX_HISTORY_TURNS) {
+            conversationHistory.remove(0);
+        }
+        // Gemma template requires the conversation to start with a user turn.
+        while (!conversationHistory.isEmpty() && !"user".equals(conversationHistory.get(0).role())) {
+            conversationHistory.remove(0);
+        }
     }
 
     private void addUserMessage(String message) {
@@ -263,14 +258,6 @@ public class ChatController implements Initializable {
         scrollToBottom();
     }
     
-    private void streamTextAndAudio(String message) {
-        // Implementation for audio streaming if needed
-        Platform.runLater(() -> {
-            addBotMessage(message);
-            setStatus("Ready");
-        });
-    }
-
     private void scrollToBottom() {
         Platform.runLater(() -> {
             chatScrollPane.layout();

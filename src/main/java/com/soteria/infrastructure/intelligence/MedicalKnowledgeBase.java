@@ -100,7 +100,7 @@ public class MedicalKnowledgeBase {
                         .ifPresent(results::add);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Retrieval failed for query: " + queryText, e);
+            logger.log(Level.WARNING, e, () -> "Retrieval failed for query: " + queryText);
         }
         return results;
     }

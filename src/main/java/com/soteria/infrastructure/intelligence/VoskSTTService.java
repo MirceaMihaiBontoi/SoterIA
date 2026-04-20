@@ -30,7 +30,7 @@ public class VoskSTTService {
 
     public VoskSTTService(Path modelPath) throws IOException {
         LibVosk.setLogLevel(LogLevel.WARNINGS);
-        logger.info("Loading Vosk model from: " + modelPath);
+        logger.log(Level.INFO, "Loading Vosk model from: {0}", modelPath);
         this.model = new Model(modelPath.toString());
         this.recognizer = new Recognizer(model, 16000.0f);
         this.executor = Executors.newSingleThreadExecutor();

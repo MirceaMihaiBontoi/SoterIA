@@ -9,12 +9,16 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class in charge of registering and storing the history of emergencies and user feedback.
  * Also implements HistoryLogger for general system logging.
  */
 public class EmergencyHistoryPersistence implements HistoryLogger {
+    private static final Logger log = Logger.getLogger(EmergencyHistoryPersistence.class.getName());
+    
     private static final String HISTORY_FILE = "logs/emergency_history.log";
     private static final String FEEDBACK_FILE = "logs/user_feedback.log";
     private static final String SYSTEM_LOG_FILE = "logs/system.log";
@@ -99,7 +103,7 @@ public class EmergencyHistoryPersistence implements HistoryLogger {
         try (FileWriter writer = new FileWriter(fileName, true)) {
             writer.write(content);
         } catch (IOException e) {
-            System.err.println("❌ Error writing to log file: " + e.getMessage());
+            log.log(Level.SEVERE, "❌ Error writing to log file: {0}", e.getMessage());
         }
     }
 }

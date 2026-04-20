@@ -1,21 +1,26 @@
 package com.soteria.infrastructure.sensor;
 
 import com.soteria.core.interfaces.LocationProvider;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Simulated implementation of LocationProvider.
  * In a real application, it would integrate with device GPS APIs.
  */
 public class SystemGPSLocation implements LocationProvider {
+    private static final Logger log = Logger.getLogger(SystemGPSLocation.class.getName());
+    
     private boolean hasPermission = false;
     private static final String DEFAULT_COORDINATES = "40.4168° N, 3.7038° W";
     private static final String DEFAULT_LOCATION = "Plaza Mayor, Madrid";
+    private static final String UNKNOWN_LOCATION = "Unknown";
 
     @Override
     public String getCoordinates() {
         if (!hasPermission) {
-            System.out.println("⚠️ Location permission not granted. Using default location.");
-            return DEFAULT_COORDINATES;
+            log.warning("⚠️ Location permission not granted. Using default location.");
+            return UNKNOWN_LOCATION;
         }
         return DEFAULT_COORDINATES;
     }
@@ -27,9 +32,9 @@ public class SystemGPSLocation implements LocationProvider {
 
     @Override
     public boolean requestPermission() {
-        System.out.println("📍 Requesting location permission...");
+        log.info("📍 Requesting location permission...");
         this.hasPermission = true;
-        System.out.println("✅ Location permission granted.");
+        log.info("✅ Location permission granted.");
         return true;
     }
 

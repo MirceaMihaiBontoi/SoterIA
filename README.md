@@ -43,10 +43,12 @@ SoterIA 2.0 introduces a state-of-the-art **Tiered Scaling Architecture** that d
 
 #### RAM-Based 5-Tier Scaling (GGUF via llama.cpp):
 - **Ultra-Lite (< 3GB)**: Qwen3-0.6B Q4_K_M (Reasoning) + Vosk Small (STT).
-- **Lite (3 - 4GB)**: Gemma 4 E2B-it Q4_K_M (Reasoning) + Vosk Small (STT).
-- **Balanced (4 - 6GB)**: Gemma 4 E2B-it Q8_0 (Reasoning) + Vosk Standard (STT).
-- **Performance (6 - 12GB)**: Gemma 4 E4B-it Q4_K_M (Reasoning) + Vosk Standard (STT).
-- **Ultra (≥ 12GB)**: Gemma 4 E4B-it Q8_0 High-Precision (Reasoning) + Vosk Standard (STT).
+- **Lite (3 - 4GB)**: Gemma 3n E2B-it Q4_K_M (Reasoning) + Vosk Small (STT).
+- **Balanced (4 - 6GB)**: Gemma 3n E2B-it Q8_0 (Reasoning) + Vosk Standard (STT).
+- **Performance (6 - 12GB)**: Gemma 3n E4B-it Q4_K_M (Reasoning) + Vosk Standard (STT).
+- **Ultra (≥ 12GB)**: Gemma 3n E4B-it Q8_0 High-Precision (Reasoning) + Vosk Standard (STT).
+
+> **Roadmap**: upgrade a Gemma 4 (E2B/E4B) pendiente de `de.kherud:llama` >= 4.3.0 con soporte nativo para la arquitectura gemma4.
 
 ### 🏥 100% Offline RAG Pipeline
 Survival-critical reliability via a local **Retrieval-Augmented Generation** pipeline:

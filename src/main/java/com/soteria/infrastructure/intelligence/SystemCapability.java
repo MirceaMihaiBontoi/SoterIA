@@ -31,7 +31,7 @@ public class SystemCapability {
 
     public SystemCapability() {
         OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-        this.totalMemory = osmxb.getTotalPhysicalMemorySize();
+        this.totalMemory = osmxb.getTotalMemorySize();
         this.availableProcessors = Runtime.getRuntime().availableProcessors();
         
         long ramInGB = totalMemory / BYTES_IN_GB;
@@ -48,7 +48,7 @@ public class SystemCapability {
             this.recommendedProfile = AIModelProfile.ULTRA;
         }
         
-        logger.info(String.format("System Resources Detected: %d GB RAM, %d CPU cores. Recommended Profile: %s",
+        logger.info(() -> String.format("System Resources Detected: %d GB RAM, %d CPU cores. Recommended Profile: %s",
                 ramInGB, availableProcessors, recommendedProfile));
     }
 

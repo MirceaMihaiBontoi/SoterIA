@@ -22,7 +22,7 @@ public record EmergencyEvent(
     @Override
     public String toString() {
         return String.format(
-            "[%s] Emergency: %s\nLocation: %s\nSeverity: %d\nUser: %s",
+            "[%s] Emergency: %s%nLocation: %s%nSeverity: %d%nUser: %s",
             timestamp, emergencyType, location, severityLevel, userData
         );
     }

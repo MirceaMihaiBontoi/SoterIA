@@ -4,10 +4,14 @@ import com.soteria.core.interfaces.AlertService;
 import com.soteria.core.model.EmergencyEvent;
 import com.soteria.core.model.UserData;
 
+import java.util.logging.Logger;
+
 /**
  * Implementation of AlertService that handles notifications via multiple channels.
  */
 public class NotificationAlertService implements AlertService {
+    
+    private static final Logger log = Logger.getLogger(NotificationAlertService.class.getName());
     
     private final AlertSender alertSender;
     private final CallAlert callAlert;
@@ -19,7 +23,7 @@ public class NotificationAlertService implements AlertService {
 
     @Override
     public boolean send(EmergencyEvent event) {
-        System.out.println("SoterIA Notification: Dispatching multi-channel emergency alert...");
+        log.info("SoterIA Notification: Dispatching multi-channel emergency alert...");
         
         // Use the implementations directly
         boolean alertSent = alertSender.send(event);
@@ -30,7 +34,7 @@ public class NotificationAlertService implements AlertService {
 
     @Override
     public void notifyContacts(UserData userData, EmergencyEvent event) {
-        System.out.println("SoterIA Notification: Notifying emergency contacts...");
+        log.info("SoterIA Notification: Notifying emergency contacts...");
         alertSender.notifyContacts(userData, event);
         callAlert.notifyContacts(userData, event);
     }

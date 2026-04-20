@@ -13,8 +13,9 @@ public class Protocol {
     private List<String> steps;
     private int priority;
 
-    // Default constructor for Jackson
-    public Protocol() {}
+    public Protocol() {
+        // Default constructor required for Jackson JSON deserialization
+    }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }

@@ -9,7 +9,7 @@ public abstract class EmergencyType {
     protected String description;
     protected boolean requiresMedicalAssistance;
 
-    public EmergencyType(String name, int priority, String description, boolean requiresMedicalAssistance) {
+    protected EmergencyType(String name, int priority, String description, boolean requiresMedicalAssistance) {
         this.name = name;
         this.priority = priority;
         this.description = description;
@@ -39,7 +39,7 @@ public abstract class EmergencyType {
     @Override
     public String toString() {
         return String.format(
-            "Emergency: %s\nPriority: %d/10\nDescription: %s\nMedical Assistance: %s",
+            "Emergency: %s%nPriority: %d/10%nDescription: %s%nMedical Assistance: %s",
             name, priority, description, 
             requiresMedicalAssistance ? "Yes" : "No"
         );

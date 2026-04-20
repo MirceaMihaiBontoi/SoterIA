@@ -12,6 +12,8 @@ import javafx.application.Platform;
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Controller for the login and registration screen.
@@ -38,6 +40,8 @@ public class LoginController implements Initializable {
     
     private JsonUserPersistence userManager;
     private MainApp mainApp;
+    private static final Logger log = Logger.getLogger(LoginController.class.getName());
+    
     private static final String CACHE_DIR = "cache";
     private static final String SESSION_FILE = CACHE_DIR + "/session.dat";
 
@@ -67,12 +71,12 @@ public class LoginController implements Initializable {
                 if (username != null && password != null) {
                     UserData userData = userManager.loginUser(username, password);
                     if (userData != null && mainApp != null) {
-                        System.out.println("✅ Auto-login: " + username);
+                        log.log(Level.INFO, "✅ Auto-login: {0}", username);
                         mainApp.showChatScreen(userData);
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Error loading session: " + e.getMessage());
+                log.log(Level.SEVERE, "Error loading session", e);
             }
         }
     }
@@ -91,7 +95,7 @@ public class LoginController implements Initializable {
         
         if (userData != null) {
             loginErrorLabel.setText("");
-            System.out.println("✅ Login successful: " + username);
+            log.log(Level.INFO, "✅ Login successful: {0}", username);
             
             if (rememberSessionCheck.isSelected()) {
                 saveSession(username, password);
@@ -143,7 +147,7 @@ public class LoginController implements Initializable {
         
         if (success) {
             registerErrorLabel.setText("");
-            System.out.println("✅ User registered: " + username);
+            log.log(Level.INFO, "✅ User registered: {0}", username);
             
             UserData userData = userManager.loginUser(username, password);
             if (userData != null && mainApp != null) {
@@ -180,7 +184,7 @@ public class LoginController implements Initializable {
             writer.println(username);
             writer.println(password);
         } catch (IOException e) {
-            System.err.println("Error saving session: " + e.getMessage());
+            log.log(Level.SEVERE, "Error saving session: {0}", e.getMessage());
         }
     }
 }

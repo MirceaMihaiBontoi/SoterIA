@@ -12,7 +12,7 @@ public record UserData(
     @Override
     public String toString() {
         return String.format(
-            "Name: %s\nPhone: %s\nEmergency Contact: %s\nMedical Info: %s",
+            "Name: %s%nPhone: %s%nEmergency Contact: %s%nMedical Info: %s",
             fullName, phoneNumber, emergencyContact, medicalInfo
         );
     }

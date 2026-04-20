@@ -6,12 +6,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * User manager using a plain text file.
  * Used when no database is available.
  */
 public class JsonUserPersistence {
+    private static final Logger log = Logger.getLogger(JsonUserPersistence.class.getName());
+    
     private static final String CACHE_DIR = "cache";
     private static final String USERS_FILE = CACHE_DIR + "/users.dat";
     private final Map<String, String[]> users; // username -> [passwordHash, name, phone, contact, medical]
@@ -46,7 +50,7 @@ public class JsonUserPersistence {
                 }
             }
         } catch (IOException e) {
-            System.err.println("❌ Error loading users: " + e.getMessage());
+            log.log(Level.SEVERE, "❌ Error loading users: {0}", e.getMessage());
         }
     }
     
@@ -59,7 +63,7 @@ public class JsonUserPersistence {
                 writer.println(username + "|" + data[0] + "|" + data[1] + "|" + data[2] + "|" + data[3] + "|" + data[4]);
             }
         } catch (IOException e) {
-            System.err.println("❌ Error saving users: " + e.getMessage());
+            log.log(Level.SEVERE, "❌ Error saving users: {0}", e.getMessage());
         }
     }
     

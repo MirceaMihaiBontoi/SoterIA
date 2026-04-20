@@ -7,11 +7,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Implementation of AlertService for standard phone alerts.
  * Demonstrates the use of interfaces and Strategy pattern implementation.
  */
 public class CallAlert implements AlertService {
+    private static final Logger log = Logger.getLogger(CallAlert.class.getName());
+    
     private static final String EMERGENCY_NUMBER = "112";
     private static final String ALERTS_FILE = "logs/emergency_alerts.log";
     private static final DateTimeFormatter TIMESTAMP_FORMAT = 
@@ -20,21 +25,20 @@ public class CallAlert implements AlertService {
     @Override
     public boolean send(EmergencyEvent event) {
         if (event == null) {
-            System.err.println("❌ Error: Cannot send a null alert");
+            log.severe("❌ Error: Cannot send a null alert");
             return false;
         }
 
         String alertMessage = formatAlertMessage(event);
         
-        System.out.println("\n=== CALL ALERT SENT ===");
-        System.out.println(alertMessage);
+        log.info(() -> "\n=== CALL ALERT SENT ===\n" + alertMessage);
         
         try (FileWriter writer = new FileWriter(ALERTS_FILE, true)) {
             writer.write("-".repeat(80) + "\n");
             writer.write("[CALL] " + alertMessage + "\n");
             writer.flush();
         } catch (IOException e) {
-            System.err.println("❌ Error saving alert: " + e.getMessage());
+            log.log(Level.SEVERE, "❌ Error saving alert: {0}", e.getMessage());
             return false;
         }
         
@@ -43,13 +47,13 @@ public class CallAlert implements AlertService {
 
     @Override
     public void notifyContacts(UserData userData, EmergencyEvent event) {
-        System.out.println("\nNotifying contacts via call...");
+        log.info("Notifying contacts via call...");
         if (userData == null || userData.emergencyContact() == null || userData.emergencyContact().isEmpty()) {
-            System.out.println("⚠️ No emergency contacts configured.");
+            log.warning("⚠️ No emergency contacts configured.");
             return;
         }
         
-        System.out.println("✅ Call sent to contact: " + userData.emergencyContact());
+        log.log(Level.INFO, "✅ Call sent to contact: {0}", userData.emergencyContact());
     }
 
     @Override
@@ -68,17 +72,14 @@ public class CallAlert implements AlertService {
     }
 
     private boolean simulateEmergencyCall(EmergencyEvent event) {
-        System.out.println("\nConnecting to " + EMERGENCY_NUMBER + "...");
+        log.log(Level.INFO, "Connecting to {0}...", EMERGENCY_NUMBER);
         try {
-            for (int i = 0; i < 3; i++) {
-                System.out.print(".");
-                Thread.sleep(500);
-            }
-            System.out.println("\n✅ Connection established!");
-            System.out.println("Emergency: " + event.emergencyType());
+            Thread.sleep(1500); // Simulate connection delay
+            log.log(Level.INFO, "✅ Connection established! Emergency: {0}", event.emergencyType());
             return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            log.log(Level.SEVERE, "Call simulation interrupted: {0}", e.getMessage());
             return false;
         }
     }

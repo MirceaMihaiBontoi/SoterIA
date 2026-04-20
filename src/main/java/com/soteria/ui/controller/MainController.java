@@ -38,16 +38,10 @@ public class MainController implements Initializable {
     
     private RemoteIntelligenceService aiClient;
     private EmergencyDetector detector;
-    private AlertService alertService;
-    private HistoryLogger logger;
-    
-    private boolean aiAvailable = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         aiClient = new RemoteIntelligenceService("http://localhost:8000");
-        alertService = new NotificationAlertService();
-        logger = new EmergencyHistoryPersistence();
         
         // Temporary placeholder for UserData until MainApp sets it
         UserData dummyUser = new UserData("User", "000", "None", "000");
@@ -61,9 +55,9 @@ public class MainController implements Initializable {
 
     private void checkAIAvailability() {
         new Thread(() -> {
-            aiAvailable = aiClient.isAvailable();
+            boolean isAiAvailable = aiClient.isAvailable();
             Platform.runLater(() -> {
-                if (aiAvailable) {
+                if (isAiAvailable) {
                     aiStatusLabel.setText("IA: ✅ Connected");
                     aiStatusLabel.setStyle("-fx-text-fill: #10b981;");
                 } else {

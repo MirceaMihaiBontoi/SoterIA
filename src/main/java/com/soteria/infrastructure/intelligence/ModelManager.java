@@ -31,12 +31,14 @@ public class ModelManager {
     private static final String VOSK_EN_LITE_URL = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip";
     private static final String VOSK_EN_PERF_URL = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip";
 
-    // Brain (LLM) — GGUFs publicados por unsloth en HuggingFace.
-    private static final String LLM_ULTRA_LITE_URL  = "https://huggingface.co/unsloth/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_K_M.gguf";
-    private static final String LLM_LITE_URL        = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf";
-    private static final String LLM_BALANCED_URL    = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q8_0.gguf";
-    private static final String LLM_PERFORMANCE_URL = "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf";
-    private static final String LLM_ULTRA_URL       = "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q8_0.gguf";
+    // Brain (LLM) — GGUFs published by unsloth on HuggingFace.
+    // TODO (SOTERIA-22): Migrate to Gemma 4 (gemma-4-E2B/E4B-it-GGUF) when kherud:llama >= 4.3.0
+    //                    includes soporte for gemma4 architecture.
+    private static final String LLM_ULTRA_LITE_URL  = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf";
+    private static final String LLM_LITE_URL        = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q8_0.gguf";
+    private static final String LLM_BALANCED_URL    = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
+    private static final String LLM_PERFORMANCE_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
+    private static final String LLM_ULTRA_URL       = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
 
     private final SystemCapability capability;
     private final Path modelBasePath;
@@ -107,7 +109,7 @@ public class ModelManager {
     }
 
     private CompletableFuture<Path> downloadFile(String url, Path target) {
-        logger.info("Downloading " + url + " -> " + target);
+        logger.log(Level.INFO, "Downloading {0} -> {1}", new Object[]{url, target});
 
         try {
             Files.createDirectories(target.getParent());
@@ -129,7 +131,7 @@ public class ModelManager {
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofFile(target))
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
-                        throw new RuntimeException("Download failed. HTTP " + response.statusCode() + " for " + url);
+                        throw new UncheckedIOException(new IOException("Download failed. HTTP " + response.statusCode() + " for " + url));
                     }
                     return target;
                 });
@@ -163,11 +165,11 @@ public class ModelManager {
 
     public String getBrainModelFileName() {
         return switch (capability.getRecommendedProfile()) {
-            case ULTRA_LITE -> "Qwen3-0.6B-Q4_K_M.gguf";
-            case LITE -> "gemma-4-E2B-it-Q4_K_M.gguf";
-            case BALANCED -> "gemma-4-E2B-it-Q8_0.gguf";
-            case PERFORMANCE -> "gemma-4-E4B-it-Q4_K_M.gguf";
-            case ULTRA -> "gemma-4-E4B-it-Q8_0.gguf";
+            case ULTRA_LITE -> "gemma-3-1b-it-Q4_K_M.gguf";
+            case LITE -> "gemma-3-1b-it-Q8_0.gguf";
+            case BALANCED -> "gemma-3-4b-it-Q4_K_M.gguf";
+            case PERFORMANCE -> "gemma-3-4b-it-Q4_K_M.gguf";
+            case ULTRA -> "gemma-3-4b-it-Q8_0.gguf";
         };
     }
 
@@ -193,7 +195,7 @@ public class ModelManager {
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to extract zip", e);
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
