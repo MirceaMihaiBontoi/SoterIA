@@ -1,0 +1,182 @@
+[
+  {
+    "id": "TRAF_001",
+    "title": "Vehicle Accident (Multi-Vehicle)",
+    "category": "Traffic",
+    "keywords": ["car", "crash", "road", "accident", "emergency", "coche", "choque", "carretera", "accidente", "emergencia"],
+    "steps": [
+      "Ensure your own safety first; do not enter a dangerous traffic zone.",
+      "Call emergency services with exact location and number of victims.",
+      "If safe, turn off the ignition of involved vehicles to prevent fire.",
+      "Apply the parking brake or block wheels of unstable vehicles.",
+      "Do NOT move injured persons unless there is an immediate threat of fire or explosion.",
+      "Use hazard lights, flares, or warning triangles to alert other drivers."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_002",
+    "title": "Pedestrian Struck by Vehicle",
+    "category": "Traffic",
+    "keywords": ["pedestrian", "hit", "struck", "car", "accident", "road", "atropello", "golpeado", "coche", "accidente", "carretera"],
+    "steps": [
+      "Ensure traffic is stopped or diverted to protect the victim and yourself.",
+      "Call emergency services immediately with the location and victim's condition.",
+      "Do NOT move the person unless there is an immediate threat to life (e.g., fire).",
+      "Keep the victim's head and neck still to prevent spinal injury.",
+      "Check for consciousness and breathing; provide basic first aid (bleeding control) if safe.",
+      "Calm the victim and prevent them from trying to stand up until paramedics arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_003",
+    "title": "Vehicle Fire",
+    "category": "Traffic",
+    "keywords": ["car", "fire", "smoke", "engine", "burning", "vehicle", "coche", "fuego", "humo", "motor", "quemando", "vehículo"],
+    "steps": [
+      "Pull over as quickly and safely as possible. Turn off the engine.",
+      "Get all passengers out of the vehicle and move at least 100 feet (30 meters) away.",
+      "Do NOT open the hood if smoke or flames are coming from it (air will feed the fire).",
+      "Call emergency services immediately.",
+      "If the fire is small and in the interior, use a fire extinguisher. Do NOT put yourself at risk.",
+      "Stay away from the vehicle to avoid toxic fumes or potential explosions."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_004",
+    "title": "Bicycle Accident",
+    "category": "Traffic",
+    "keywords": ["bicycle", "bike", "cyclist", "helmet", "accident", "crash", "bicicleta", "bici", "ciclista", "casco", "accidente", "choque"],
+    "steps": [
+      "Ensure the cyclist is in a safe location away from moving traffic.",
+      "Do NOT remove the helmet unless it is obstructing the airway.",
+      "Check for responsiveness and bleeding.",
+      "Immobilize the head and neck if you suspect a spinal injury.",
+      "If the cyclist was wearing a helmet that took an impact, it must be replaced (it is no longer safe).",
+      "Collect witness information and photos of the scene if possible."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "TRAF_005",
+    "title": "Public Transit Incident (Train/Bus)",
+    "category": "Traffic",
+    "keywords": ["train", "bus", "metro", "transit", "accident", "derailment", "tren", "autobús", "metro", "transporte", "accidente", "descarrilamiento"],
+    "steps": [
+      "If on a train, stay away from doors and windows during impact.",
+      "Be aware of high-voltage 'Third Rails' or overhead lines; do NOT touch the tracks.",
+      "Locate emergency exits and hammers (if needed to break glass).",
+      "Follow the driver's or conductor's instructions immediately.",
+      "If you must evacuate onto tracks, watch for other moving transit vehicles.",
+      "Help others evacuate if safe to do so."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_006",
+    "title": "Submerged Vehicle (Car in Water)",
+    "category": "Traffic",
+    "keywords": ["water", "sinking", "drowning", "car", "lake", "river", "agua", "hundiendo", "ahogo", "coche", "lago", "río"],
+    "steps": [
+      "Do NOT use your cell phone until you are out of the vehicle. Every second counts.",
+      "UNBUCKLE your seatbelt immediately. Help children unbuckle theirs.",
+      "Open or BREAK the side window. Doors may be impossible to open due to water pressure.",
+      "Get out through the window. Children should go first.",
+      "If you cannot open the window, wait until the car is nearly full of water; the pressure will equalize, allowing the door to open.",
+      "Once out, swim to the surface and move away from any currents or the vehicle."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_007",
+    "title": "Brake Failure",
+    "category": "Traffic",
+    "keywords": ["brakes", "stopping", "speed", "emergency", "control", "safety", "frenos", "parada", "velocidad", "emergencia", "control", "seguridad"],
+    "steps": [
+      "Pump the brake pedal fast and hard. You may be able to build up enough pressure to stop.",
+      "Shift into a lower gear (downshift) to let the engine slow the car down.",
+      "Use the parking brake (emergency brake) gradually. Do NOT pull it up all the way at once (risk of skidding).",
+      "Look for an escape route, such as a grassy area, an open field, or an upgrade.",
+      "If you must hit something, look for something soft like bushes or a guardrail.",
+      "Use your horn and lights to warn other drivers that your car is out of control."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_008",
+    "title": "Tire Blowout at High Speed",
+    "category": "Traffic",
+    "keywords": ["tire", "blowout", "rubber", "steering", "wheel", "highway", "neumático", "reventón", "rueda", "directiön", "autopista"],
+    "steps": [
+      "Grip the steering wheel firmly with both hands to maintain control.",
+      "Do NOT slam on the brakes. Hard braking will cause you to lose control of the vehicle.",
+      "Gradually ease off the accelerator to let the car slow down on its own.",
+      "Correct the steering to stay in your lane; the car will pull to the side of the blowout.",
+      "Once you have regained control and slowed down, signal and pull off to a safe spot.",
+      "Turn on your hazard lights and call for roadside assistance; do not change the tire on a busy highway."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_009",
+    "title": "Stuck Throttle / Unintended Acceleration",
+    "category": "Traffic",
+    "keywords": ["gas", "pedal", "throttle", "unintended", "acceleration", "speed", "acelerador", "pedal", "involuntario", "aceleración", "velocidad"],
+    "steps": [
+      "Shift the vehicle into NEUTRAL (N). This will disconnect the engine from the wheels.",
+      "Apply the brakes firmly and steadily. Do NOT pump them (loses vacuum assist).",
+      "Steer the vehicle to a safe location off the road.",
+      "Once stopped, turn off the engine. Do NOT turn it off while moving (loses power steering/breaks).",
+      "Check if the floor mat is interfering with the pedal.",
+      "Do not drive the car again until it has been inspected by a professional mechanic."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_010",
+    "title": "Wrong-Way Driver Response",
+    "category": "Traffic",
+    "keywords": ["wrong", "way", "head-on", "collision", "highway", "lane", "sentido", "contrario", "choque", "autopista", "carril"],
+    "steps": [
+      "Slow down and move as far to the right as possible immediately.",
+      "Flash your headlights and honk your horn to get the other driver's attention.",
+      "Do NOT pull onto the left shoulder; that is where the wrong-way driver is most likely to go.",
+      "If a collision is imminent, aim for the 'least dangerous' object (bush, fence) rather than the vehicle.",
+      "Once the vehicle has passed, safely pull over and call 112/911 to report the incident.",
+      "Stay alert for other drivers who may be swerving to avoid the wrong-way vehicle."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_011",
+    "title": "Stuck in Traffic / Gridlock Emergency",
+    "category": "Traffic",
+    "keywords": ["traffic", "jam", "gridlock", "stuck", "road", "heat", "atasco", "tráfico", "atrapado", "calor"],
+    "steps": [
+      "If you are stuck for a long period in extreme heat, turn off the engine to prevent overheating, but stay inside if it is safer.",
+      "Stay hydrated. Keep emergency water in your car for these situations.",
+      "Keep your doors locked and windows up if the area is unsafe or congestion is due to civil unrest.",
+      "Monitor local radio or GPS apps for the cause of the delay and estimated clearance time.",
+      "Do NOT use the shoulder for passing unless instructed by emergency personnel; the shoulder is for emergency vehicles only.",
+      "If you have a medical emergency while stuck, call 112/911 and provide your exact coordinates and car description."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "TRAF_012",
+    "title": "Wildlife on Road (Collision Avoidance)",
+    "category": "Traffic",
+    "keywords": ["animal", "deer", "collision", "road", "safety", "moose", "animal", "ciervo", "choque", "carretera", "seguridad"],
+    "steps": [
+      "If an animal (like a deer) jumps in front of you, BRAKE firmly and stay in your lane. Do NOT swerve.",
+      "Swerving to avoid an animal can lead to a much more dangerous head-on collision or rollover.",
+      "Use your high beams at night in wildlife areas to spot eyes reflected in the distance.",
+      "If you hit a large animal, pull over safely and stay away from it; injured animals can be very dangerous.",
+      "Report the collision to local authorities, especially if the animal is obstructing the roadway.",
+      "Check your vehicle for fluid leaks or damage before attempting to drive again."
+    ],
+    "priority": 1
+  }
+]

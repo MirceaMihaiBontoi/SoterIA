@@ -1,0 +1,182 @@
+[
+  {
+    "id": "FIRE_001",
+    "title": "Structural Fire (Building)",
+    "category": "Fire",
+    "keywords": ["fire", "smoke", "building", "building fire", "evacuation", "fuego", "humo", "incendio", "edificio", "evacuación"],
+    "steps": [
+      "Get out, stay out, and call emergency services.",
+      "If you see smoke, stay low to the floor where the air is cleaner.",
+      "Before opening any door, touch the door handle or door with the back of your hand; if it is hot, do NOT open it.",
+      "If your clothes catch fire: Stop, Drop, and Roll.",
+      "Do NOT use elevators during a fire.",
+      "If you are trapped, close all doors between you and the fire, and use cloth to seal cracks around doors."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_002",
+    "title": "Electrical Fire",
+    "category": "Fire",
+    "keywords": ["fire", "electricity", "spark", "wire", "short circuit", "appliance", "fuego", "electricidad", "chispa", "cable", "cortocircuito"],
+    "steps": [
+      "Do NOT attempt to use water on an electrical fire (risk of electrocution).",
+      "Identify the source and, if safe, turn off the main power supply.",
+      "Use a Class C (or CO2/Dry Powder) fire extinguisher if available.",
+      "Do not touch any wires or appliances involved in the fire.",
+      "If the fire is inside a wall or appliance, evacuate immediately and call emergency services.",
+      "Do not turn the power back on until a certified electrician has inspected the damage."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_003",
+    "title": "Wildfire / Forest Fire",
+    "category": "Fire",
+    "keywords": ["wildfire", "forest", "bush", "smoke", "evacuation", "trees", "incendio", "bosque", "monte", "humo", "evacuación"],
+    "steps": [
+      "Monitor local news and emergency alerts for evacuation orders.",
+      "If ordered to evacuate, leave immediately. Do NOT wait.",
+      "Close all windows and doors to prevent embers from entering the structure.",
+      "If trapped outdoors, find an area clear of vegetation (like a rocky area or a body of water).",
+      "Stay low to the ground and cover your mouth with a damp cloth to filter smoke.",
+      "Wear long-sleeved clothing made of natural fibers (cotton/wool) to protect against heat."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_004",
+    "title": "Chimney Fire",
+    "category": "Fire",
+    "keywords": ["chimney", "flue", "fireplace", "soot", "roof", "chimenea", "fuego", "tejado", "hollín"],
+    "steps": [
+      "Evacuate everyone from the house immediately.",
+      "Call emergency services.",
+      "If safe, close the fireplace doors or dampen the air intake to starve the fire of oxygen.",
+      "Do NOT throw water down the chimney (can cause explosive steam or crack the flue).",
+      "Wait outside for the fire department to arrive.",
+      "Do not use the fireplace again until inspected and cleaned by a professional."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_005",
+    "title": "Wildfire Survival in Vehicle",
+    "category": "Fire",
+    "keywords": ["wildfire", "car", "trapped", "smoke", "heat", "incendio", "coche", "atrapado", "humo", "calor"],
+    "steps": [
+      "If you cannot escape, park the car away from heavy vegetation.",
+      "Turn on the headlights and hazard lights to stay visible.",
+      "Close all windows and vents. Turn the AC to 'recirculate'.",
+      "Get on the floor of the car and cover yourself with a wool or cotton blanket/coat.",
+      "Stay in the car until the main fire front passes; the car's body provides protection against radiant heat.",
+      "Expect the car to shake and fill with light smoke. Stay low and breathe through a damp cloth."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_006",
+    "title": "Kitchen Grease Fire",
+    "category": "Fire",
+    "keywords": ["cooking", "grease", "oil", "pan", "kitchen", "cocina", "grasa", "aceite", "sartén"],
+    "steps": [
+      "Do NOT throw water on a grease fire (it will cause an explosion of flames).",
+      "If safe, turn off the heat source immediately.",
+      "Smother the flames by sliding a metal lid or cookie sheet over the pan.",
+      "Leave the pan covered until it has cooled completely.",
+      "Do NOT attempt to move the pan or carry it outside.",
+      "If the fire spreads beyond the pan, evacuate and call emergency services."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_007",
+    "title": "Clothing Fire (Stop, Drop, Roll)",
+    "category": "Fire",
+    "keywords": ["clothes", "skin", "burning", "fire", "rescue", "ropa", "piel", "quemando", "rescate"],
+    "steps": [
+      "STOP immediately. Do not run, as running fans the flames and makes the fire grow.",
+      "DROP to the ground and cover your face with your hands.",
+      "ROLL back and forth until the fire is out.",
+      "If someone else is on fire, smother the flames with a heavy blanket or coat.",
+      "Once the fire is out, cool the burned area with cool (not cold) water for 10-20 minutes.",
+      "Do not apply ice, ointments, or bandages to a severe burn; seek medical help."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_008",
+    "title": "Office / Workplace Fire",
+    "category": "Fire",
+    "keywords": ["office", "computer", "workplace", "server", "desk", "oficina", "trabajo", "ordenador"],
+    "steps": [
+      "Activate the nearest fire alarm pull station immediately.",
+      "Evacuate using the nearest safe exit or stairs. Never use elevators.",
+      "If you are the last one out, close doors behind you to contain the fire.",
+      "Proceed to the designated assembly area outside.",
+      "If trapped, stay in a room with a window and call 112/911. Signal your location through the window.",
+      "Account for all colleagues and report missing persons to the fire department."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_009",
+    "title": "Boat / Vessel Fire",
+    "category": "Fire",
+    "keywords": ["boat", "water", "sea", "engine", "sinking", "vessel", "barco", "agua", "mar", "motor", "hundiendo", "barco"],
+    "steps": [
+      "Alert everyone on board and ensure all passengers have life jackets on.",
+      "Stop the boat or position it so the wind blows the fire away from the vessel.",
+      "If the fire is in the engine space, shut off fuel valves and use the fire port to discharge an extinguisher.",
+      "Radio for help (Mayday or Pan-Pan) with your exact coordinates.",
+      "Prepare to abandon ship if the fire cannot be controlled.",
+      "If you must enter the water, stay together and stay away from any burning fuel on the surface."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_010",
+    "title": "Vehicle Battery Fire (EV / Hybrid)",
+    "category": "Fire",
+    "keywords": ["electric", "lithium", "battery", "car", "explosive", "thermal", "eléctrico", "litio", "batería", "coche", "explosivo"],
+    "steps": [
+      "Immediately pull over and evacuate all passengers to a safe distance (at least 50 meters).",
+      "Call emergency services and specify that an Electric Vehicle (EV) is on fire.",
+      "BEWARE: EV fires can release highly toxic gases (fluorides) and can experience 'thermal runaway'.",
+      "Do NOT attempt to extinguish a large battery fire with a standard fire extinguisher.",
+      "Expect the fire to be extremely intense and difficult to put out; it may bridge/re-ignite hours later.",
+      "Stay upwind to avoid inhalation of toxic smoke."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_011",
+    "title": "High-Rise Building Fire",
+    "category": "Fire",
+    "keywords": ["high-rise", "skyscraper", "floor", "stairwell", "rascacielos", "piso", "escalera"],
+    "steps": [
+      "Check the stairwell for smoke before entering; if it is smoke-filled, return to your room.",
+      "Never use elevators. They can become traps and may open on the fire floor.",
+      "If you cannot evacuate, stay in your room, seal the door with wet towels, and call emergency services.",
+      "Signal your location by hanging a brightly colored cloth or using a flashlight at the window.",
+      "If there is smoke in the room, stay low to the floor where the air is fresher.",
+      "Do NOT break windows unless absolutely necessary (broken glass can injure people below and provide oxygen to the fire)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_012",
+    "title": "Gas Station / Fuel Fire",
+    "category": "Fire",
+    "keywords": ["gas", "station", "fuel", "petrol", "pump", "flammable", "gasolinera", "combustible", "gasolina", "bomba", "inflamable"],
+    "steps": [
+      "If a fire starts while you are fueling, do NOT remove the nozzle from the car (this will spray fire).",
+      "Immediately hit the emergency shut-off button at the pump or station office.",
+      "Evacuate everyone from the vehicle and the immediate area of the fire.",
+      "Call emergency services and warn others to stay away.",
+      "Do NOT start your engine or use any electronic devices near the fuel spill or fire.",
+      "Wait at a safe distance (at least 100 meters) for the fire department to arrive."
+    ],
+    "priority": 1
+  }
+]

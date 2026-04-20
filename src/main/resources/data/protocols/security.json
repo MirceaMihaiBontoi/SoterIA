@@ -1,0 +1,180 @@
+[
+  {
+    "id": "SEC_001",
+    "title": "Personal Security / Intrusión",
+    "category": "Security",
+    "keywords": ["security", "thief", "intrusion", "lockdown", "threat", "seguridad", "ladrón", "intrusión", "bloqueo", "amenaza", "intruso"],
+    "steps": [
+      "If you suspect an intruder, do not announce your presence.",
+      "Lock yourself in a room with a phone and call 112/911.",
+      "Turn off lights and stay silent.",
+      "If confronted, try to escape to a safe location outside.",
+      "Provide a description of the intruder to the operator if possible.",
+      "Stay on the line until police arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_002",
+    "title": "Active Shooter (Run, Hide, Fight)",
+    "category": "Security",
+    "keywords": ["shooter", "gun", "weapon", "attack", "violence", "threat", "tirador", "arma", "ataque", "violencia", "amenaza", "balas"],
+    "steps": [
+      "RUN: Have an escape route and plan in mind. Leave your belongings. Keep your hands visible.",
+      "HIDE: Hide in an area out of the shooter's view. Block entry to your hiding place and lock doors. Silence your cell phone.",
+      "FIGHT: As a last resort and only when your life is in imminent danger. Attempt to incapacitate the shooter. Act with physical aggression.",
+      "Call 112/911 only when it is safe to do so.",
+      "When law enforcement arrives, keep your hands empty and visible at all times. Follow all instructions."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_003",
+    "title": "Suspicious Package / Bomb Threat",
+    "category": "Security",
+    "keywords": ["bomb", "package", "suspicious", "explosive", "threat", "bomba", "paquete", "sospechoso", "explosivo", "amenaza"],
+    "steps": [
+      "Do NOT touch, move, or open the package.",
+      "Evacuate the immediate area and prevent others from entering.",
+      "Do NOT use two-way radios or cell phones within 50 feet (15 meters) of the object.",
+      "Call emergency services from a safe distance outside the building.",
+      "Be prepared to provide a description: size, shape, markings, and any sounds (ticking) or smells.",
+      "Follow evacuation routes and stay away from windows or glass partitions."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_004",
+    "title": "Abduction / Kidnapping Attempt",
+    "category": "Security",
+    "keywords": ["kidnapping", "abduction", "missing", "threat", "violence", "secuestro", "amenaza", "violencia", "desaparecido"],
+    "steps": [
+      "If someone attempts to force you into a vehicle, fight back aggressively and yell for help.",
+      "Draw as much attention as possible to the situation.",
+      "If you are abducted, try to leave markers (scent, clothing, objects) for search teams.",
+      "Note descriptions of the abductor: age, height, marks/tattoos, and vehicle details.",
+      "If safe, use your phone to send your 'Live Location' to trust contacts immediately.",
+      "Stay as calm as possible and look for any opportunity to escape safely."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_005",
+    "title": "Animal Attack (Domestic / Wild)",
+    "category": "Security",
+    "keywords": ["animal", "dog", "bear", "attack", "bite", "safety", "animal", "perro", "oso", "ataque", "mordida", "seguridad"],
+    "steps": [
+      "DOG: Stay still, do not make eye contact. If it attacks, use a jacket or bag as a shield.",
+      "BEAR: Speak calmly and back away slowly without turning your back. If it's a grizzly, play dead; if black bear, fight back.",
+      "SNAKE: Back away slowly; do not attempt to kill it. If bitten, stay calm and keep the limb below heart level.",
+      "WILD CAT (Cougar/Lion): Stand tall, look large, and do NOT run (triggers chase instinct).",
+      "Seek immediate medical attention for any bite or scratch (risk of rabies/infection)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_006",
+    "title": "Identity Theft / Digital Security Breach",
+    "category": "Security",
+    "keywords": ["identity", "password", "bank", "scam", "hacking", "identidad", "contraseña", "banco", "estafa", "hackeo"],
+    "steps": [
+      "If you suspect identity theft, freeze your credit reports immediately with major bureaus.",
+      "Change all passwords for sensitive accounts (banking, email, social media) using a safe device.",
+      "Enable Multi-Factor Authentication (MFA) on all accounts that support it.",
+      "Notify your bank and credit card issuers to flag fraudulent transactions.",
+      "File a report with the police or your national identity theft agency.",
+      "Monitor your financial statements and credit reports closely for at least 12 months."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_007",
+    "title": "Civil Unrest / Riot Survival",
+    "category": "Security",
+    "keywords": ["riot", "mob", "street", "violence", "protest", "disturbance", "disturbios", "multitud", "calle", "violencia", "protesta"],
+    "steps": [
+      "If you see a large, agitated crowd forming, leave the area immediately.",
+      "Avoid wearing clothes that make you look like a participant or a specific target.",
+      "If caught in a crowd, stay on the periphery. Do not move against the flow of people.",
+      "Avoid glass storefronts and entranceways; stay close to sturdy walls.",
+      "If you are indoors, stay away from windows and lock all doors. Turn off lights if the building is a target.",
+      "Do not stop to watch or take photos; your priority is moving to a safe, quiet location."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_008",
+    "title": "Home Invasion (Occupied)",
+    "category": "Security",
+    "keywords": ["invasion", "home", "robbery", "intruder", "threat", "invasión", "casa", "robo", "intruso", "amenaza"],
+    "steps": [
+      "If someone breaks in while you are home, your priority is escape. Use a window or back door if possible.",
+      "If you cannot escape, LOCK yourself in a 'safe room' (like a bedroom or bathroom) and barricade the door.",
+      "Call emergency services immediately and stay on the line. Speak in a whisper.",
+      "If confronted, do not resist if the intruder only wants property. Give them what they ask for.",
+      "Avoid making eye contact or sudden movements that could be interpreted as a threat.",
+      "Try to remember specific details about the intruder for the police report."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_009",
+    "title": "Vehicle Carjacking",
+    "category": "Security",
+    "keywords": ["carjacking", "car", "theft", "weapon", "road", "robbery", "atraco", "coche", "robo", "arma", "carretera"],
+    "steps": [
+      "If someone attempts to take your car by force, do NOT resist. Your life is more valuable than the vehicle.",
+      "Get yourself and any passengers out of the car as quickly as possible.",
+      "Keep your hands visible and avoid making sudden movements.",
+      "If there is a child in the car, state clearly: 'My child is in the car, I am taking them out.'",
+      "Once you are out, move away from the vehicle and call emergency services immediately.",
+      "Provide a description of the car, license plate, and the direction in which the thief fled."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_010",
+    "title": "Stalking / Persistent Harassment",
+    "category": "Security",
+    "keywords": ["stalking", "harassment", "threat", "safety", "following", "acoso", "amenaza", "seguridad", "siguiendo"],
+    "steps": [
+      "Trust your instincts. If you feel you are being followed, go to a well-lit, public place immediately.",
+      "Do NOT go home if you are being followed. Drive to a police station or fire station.",
+      "Keep a detailed log of all incidents, including dates, times, locations, and descriptions.",
+      "Inform family, friends, and coworkers about the situation so they can watch for suspicious activity.",
+      "Enhance your home security (cameras, locks) and vary your daily routes and routines.",
+      "Seek a protection order or restraining order through local law enforcement."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_011",
+    "title": "ATM / Cash Withdrawal Security",
+    "category": "Security",
+    "keywords": ["ATM", "bank", "cash", "robbery", "pin", "cajero", "banco", "efectivo", "robo"],
+    "steps": [
+      "Use well-lit, busy ATMs. Avoid using them late at night or in isolated areas.",
+      "Check the ATM for skimmers or loose parts before inserting your card.",
+      "Shield the keypad with your hand while entering your PIN.",
+      "If you are approached by someone after a withdrawal, do not count your money; put it away and leave immediately.",
+      "If someone attempts to rob you, comply. Your cash is replaceable, your life is not.",
+      "Call the bank and the police immediately if your card is stolen or you suspect fraudulent activity."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "SEC_012",
+    "title": "Workplace Violence / Suspicious Colleague",
+    "category": "Security",
+    "keywords": ["workplace", "colleague", "violence", "threat", "report", "trabajo", "compañero", "violencia", "amenaza"],
+    "steps": [
+      "If a colleague makes direct or indirect threats, report it to HR or Security immediately. Do NOT ignore it.",
+      "Watch for 'Red Flags': extreme agitation, mentions of weapons, or sudden changes in behavior.",
+      "If an incident occurs, move to a safe room with a lock and stay quiet.",
+      "Avoid escalating the situation by arguing or confronting the aggressive individual alone.",
+      "Familiarize yourself with your company's emergency response plan and exit routes.",
+      "Call emergency services if you believe there is an immediate threat to life or safety."
+    ],
+    "priority": 1
+  }
+ ]

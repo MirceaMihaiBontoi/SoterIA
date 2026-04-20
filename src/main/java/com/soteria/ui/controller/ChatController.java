@@ -7,7 +7,7 @@ import com.soteria.core.model.UserData;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
 import com.soteria.infrastructure.intelligence.ChatMessage;
 import com.soteria.infrastructure.intelligence.LocalBrainService;
-import com.soteria.infrastructure.intelligence.MedicalKnowledgeBase;
+import com.soteria.infrastructure.intelligence.EmergencyKnowledgeBase;
 import com.soteria.infrastructure.intelligence.Protocol;
 import com.soteria.infrastructure.intelligence.STTListener;
 import com.soteria.infrastructure.intelligence.VoskSTTService;
@@ -50,7 +50,7 @@ public class ChatController {
 
     private VoskSTTService sttService;
     private LocalBrainService brainService;
-    private MedicalKnowledgeBase knowledgeBase;
+    private EmergencyKnowledgeBase knowledgeBase;
 
     private boolean aiAvailable = false;
     private boolean isRecording = false;

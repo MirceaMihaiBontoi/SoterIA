@@ -2,7 +2,7 @@ package com.soteria.infrastructure.bootstrap;
 
 import com.soteria.infrastructure.intelligence.ChatMessage;
 import com.soteria.infrastructure.intelligence.LocalBrainService;
-import com.soteria.infrastructure.intelligence.MedicalKnowledgeBase;
+import com.soteria.infrastructure.intelligence.EmergencyKnowledgeBase;
 import com.soteria.infrastructure.intelligence.ModelManager;
 import com.soteria.infrastructure.intelligence.SystemCapability;
 import com.soteria.infrastructure.intelligence.VoskSTTService;
@@ -44,7 +44,7 @@ public class BootstrapService {
 
     private SystemCapability capability;
     private ModelManager modelManager;
-    private MedicalKnowledgeBase knowledgeBase;
+    private EmergencyKnowledgeBase knowledgeBase;
     private VoskSTTService sttService;
     private LocalBrainService brainService;
 
@@ -62,7 +62,7 @@ public class BootstrapService {
             modelManager = new ModelManager(capability);
 
             update("Building knowledge base...", 0.30);
-            knowledgeBase = new MedicalKnowledgeBase();
+            knowledgeBase = new EmergencyKnowledgeBase();
             
             update("System ready for setup", 1.0);
         } catch (Exception e) {
@@ -206,7 +206,7 @@ public class BootstrapService {
 
     public SystemCapability capability()       { return capability; }
     public ModelManager modelManager()         { return modelManager; }
-    public MedicalKnowledgeBase knowledgeBase(){ return knowledgeBase; }
+    public EmergencyKnowledgeBase knowledgeBase(){ return knowledgeBase; }
     public VoskSTTService sttService()         { return sttService; }
     public LocalBrainService brainService()    { return brainService; }
 

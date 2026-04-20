@@ -24,21 +24,25 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Native Medical Knowledge Base using Apache Lucene (retrieval) and
- * JGraphT (related-protocol discovery).
+ * Native Emergency Knowledge Base using Apache Lucene (retrieval) and
+ * JGraphT (related-protocol discovery). Supports multiple domains including
+ * Medical, Fire, Security, Environmental, and Traffic accidents.
  */
-public class MedicalKnowledgeBase {
-    private static final Logger logger = Logger.getLogger(MedicalKnowledgeBase.class.getName());
+public class EmergencyKnowledgeBase {
+    private static final Logger logger = Logger.getLogger(EmergencyKnowledgeBase.class.getName());
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MAX_RESULTS = 3;
+
+    private static final String PROTOCOLS_PATH = "/data/protocols/";
+    private static final String INDEX_FILE = "index.json";
 
     private List<Protocol> protocols;
     private Map<String, Protocol> protocolsById;
     private Directory index;
-    private StandardAnalyzer analyzer;
-    private Graph<String, DefaultEdge> knowledgeGraph;
+    private final StandardAnalyzer analyzer;
+    private final Graph<String, DefaultEdge> knowledgeGraph;
 
-    public MedicalKnowledgeBase() {
+    public EmergencyKnowledgeBase() {
         this.analyzer = new StandardAnalyzer();
         this.index = new ByteBuffersDirectory();
         this.knowledgeGraph = new SimpleGraph<>(DefaultEdge.class);
@@ -47,24 +51,48 @@ public class MedicalKnowledgeBase {
         buildKnowledgeGraph();
     }
 
+    /**
+     * Loads protocols from category-based JSON files based on the manifest index.
+     */
     private void loadProtocols() {
-        try (InputStream is = getClass().getResourceAsStream("/data/medical_protocols.json")) {
-            if (is == null) {
-                logger.severe("CRITICAL: medical_protocols.json not found in resources.");
-                this.protocols = new ArrayList<>();
-                this.protocolsById = new LinkedHashMap<>();
+        this.protocols = new ArrayList<>();
+        this.protocolsById = new LinkedHashMap<>();
+
+        try (InputStream indexStream = getClass().getResourceAsStream(PROTOCOLS_PATH + INDEX_FILE)) {
+            if (indexStream == null) {
+                logger.severe("CRITICAL: Protocols index.json not found in " + PROTOCOLS_PATH);
                 return;
             }
-            this.protocols = mapper.readValue(is, new TypeReference<List<Protocol>>() {});
-            this.protocolsById = new LinkedHashMap<>();
-            for (Protocol p : protocols) {
-                protocolsById.put(p.getId(), p);
+
+            List<String> categoryFiles = mapper.readValue(indexStream, new TypeReference<List<String>>() {});
+            for (String fileName : categoryFiles) {
+                loadCategoryProtocols(fileName);
             }
-            logger.info("Loaded " + protocols.size() + " medical protocols.");
+
+            logger.info("Loaded " + protocols.size() + " emergency protocols from " + categoryFiles.size() + " category files.");
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to parse medical protocols JSON", e);
-            this.protocols = new ArrayList<>();
-            this.protocolsById = new LinkedHashMap<>();
+            logger.log(Level.SEVERE, "Failed to load emergency protocols via manifest", e);
+        }
+    }
+
+    private void loadCategoryProtocols(String fileName) {
+        String fullPath = PROTOCOLS_PATH + fileName;
+        try (InputStream is = getClass().getResourceAsStream(fullPath)) {
+            if (is == null) {
+                logger.warning("Category file not found: " + fullPath);
+                return;
+            }
+            List<Protocol> categoryList = mapper.readValue(is, new TypeReference<List<Protocol>>() {});
+            if (categoryList != null) {
+                for (Protocol p : categoryList) {
+                    if (p.getId() != null) {
+                        this.protocols.add(p);
+                        this.protocolsById.put(p.getId(), p);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to parse category file: " + fullPath, e);
         }
     }
 
@@ -87,8 +115,7 @@ public class MedicalKnowledgeBase {
     /**
      * Builds an undirected relationship graph. Two protocols are linked when:
      *   (a) they share the same category, or
-     *   (b) one protocol's steps explicitly reference another by title
-     *       (e.g. choking → CPR via "start CPR immediately").
+     *   (b) one protocol's steps explicitly reference another by title.
      */
     private void buildKnowledgeGraph() {
         for (Protocol p : protocols) {

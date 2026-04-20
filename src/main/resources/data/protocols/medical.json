@@ -1,0 +1,182 @@
+[
+  {
+    "id": "VITAL_001",
+    "title": "CPR (Cardiopulmonary Resuscitation)",
+    "category": "Vital",
+    "keywords": ["cpr", "unconscious", "breathing", "heart attack", "reanimación", "rcp", "inconsciente", "respiración", "parada cardiaca"],
+    "steps": [
+      "Check the scene for safety and the person for responsiveness.",
+      "Call emergency services immediately if no response.",
+      "Place the person on their back on a firm, flat surface.",
+      "Give 30 chest compressions (2 inches deep, 100-120 bpm).",
+      "Give 2 rescue breaths if trained, or continue compressions only.",
+      "Repeat until professional help arrives or an AED is available."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAUMA_001",
+    "title": "Severe Hemorrhage",
+    "category": "Trauma",
+    "keywords": ["bleeding", "hemorrhage", "wound", "blood", "artery", "sangrado", "hemorragia", "herida", "sangre", "arteria"],
+    "steps": [
+      "Apply direct pressure to the wound with a clean cloth or gauze.",
+      "Maintain pressure without lifting the cloth to check the wound.",
+      "If the dressing becomes soaked, add move gauze on top (do not remove original).",
+      "Elevate the injury above the heart level if possible.",
+      "If bleeding is life-threatening and on a limb, apply a tourniquet 2-3 inches above the wound.",
+      "Monitor for signs of shock (pale skin, rapid pulse, shallow breathing)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "VITAL_002",
+    "title": "Choking (Heimlich Maneuver)",
+    "category": "Vital",
+    "keywords": ["choking", "blocked airway", "can't breathe", "obstruction", "atragantamiento", "obstrucción", "respirar"],
+    "steps": [
+      "Ask 'Are you choking?' and encourage them to cough.",
+      "If they cannot breathe/cough, stand behind them and wrap your arms around their waist.",
+      "Make a fist and place it just above the navel.",
+      "Perform 5 quick, upward abdominal thrusts.",
+      "Alternate with 5 back blows between the shoulder blades.",
+      "Continue until the object is forced out or the person becomes unconscious (then start CPR)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAUMA_002",
+    "title": "Severe Burns",
+    "category": "Trauma",
+    "keywords": ["burn", "fire", "scald", "heat", "chemical", "quemadura", "fuego", "calor", "químico"],
+    "steps": [
+      "Stop the burning process: Remove from heat or douse with water.",
+      "Run cool (not cold) water over the burn for at least 10-20 minutes.",
+      "Remove jewelry or tight clothing before swelling begins.",
+      "Cover the burn loosely with a sterile, non-stick bandage or plastic wrap.",
+      "Do NOT apply ice, butter, or ointments to a severe burn.",
+      "Do NOT pop blisters."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "VITAL_003",
+    "title": "Stroke (FAST)",
+    "category": "Vital",
+    "keywords": ["stroke", "brain", "paralysis", "speech", "face", "ictus", "cerebro", "parálisis", "habla", "cara"],
+    "steps": [
+      "FACE: Ask the person to smile. Does one side of the face droop?",
+      "ARMS: Ask the person to raise both arms. Does one arm drift downward?",
+      "SPEECH: Ask the person to repeat a simple phrase. Is their speech slurred or strange?",
+      "TIME: If you observe any of these signs, call emergency services immediately.",
+      "Note the time when symptoms first appeared.",
+      "Keep the person calm and lying down until help arrives."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "MED_001",
+    "title": "Seizure Response",
+    "category": "Medical",
+    "keywords": ["seizure", "epilepsy", "shaking", "convulsion", "faint", "ataque", "epilepsia", "convulsión", "temblor", "desmayo"],
+    "steps": [
+      "Gently place the person on the floor and clear the area of hard or sharp objects.",
+      "Place something soft (like a folded jacket) under their head.",
+      "Turn the person onto their side to keep the airway clear.",
+      "Do NOT put anything in their mouth (risk of injury to you or them).",
+      "Do NOT restrain the person; let the seizure run its course.",
+      "Time the seizure; call emergency services if it lasts more than 5 minutes."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "MED_002",
+    "title": "Poisoning",
+    "category": "Medical",
+    "keywords": ["poison", "toxic", "swallowed", "chemical", "veneno", "tóxico", "ingerido", "químico"],
+    "steps": [
+      "Try to identify the substance and the amount ingested.",
+      "Call the local Poison Control Center or emergency services immediately.",
+      "Do NOT induce vomiting unless specifically instructed by a professional.",
+      "If the substance is on the skin or eyes, flush with water for 15-20 minutes.",
+      "If the person is unconscious but breathing, place them on their side.",
+      "Save the container or label to show to medical personnel."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAUMA_003",
+    "title": "Drowning / Water Rescue",
+    "category": "Trauma",
+    "keywords": ["drowning", "water", "pool", "submersion", "suffocation", "ahogamiento", "agua", "piscina", "asfixia"],
+    "steps": [
+      "Get the person out of the water as quickly as possible without endangering yourself.",
+      "Check for responsiveness and breathing.",
+      "If not breathing, start rescue breathing immediately (even in the water if safe).",
+      "Perform CPR (30 compressions, 2 breaths) as soon as on a firm surface.",
+      "If person vomits, turn their head to the side to prevent choking.",
+      "Always seek medical attention, even if the person seems fine (risk of secondary drowning)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "MED_002_ANAPH",
+    "title": "Anaphylaxis (Severe Allergic Reaction)",
+    "category": "Medical",
+    "keywords": ["allergic", "reaction", "anaphylaxis", "bee sting", "peanut", "swelling", "epi-pen", "alergia", "anafilaxia", "picadura", "hinchazón"],
+    "steps": [
+      "Call emergency services immediately.",
+      "Check if the person is carrying an epinephrine auto-injector (EpiPen).",
+      "Administer the auto-injector: Press firmly against the outer thigh and hold for 3-10 seconds.",
+      "Have the person lie flat on their back with feet elevated.",
+      "If breathing stops, begin CPR immediately.",
+      "Keep the used auto-injector to show to medical personnel.",
+      "Even if symptoms improve, the person MUST go to the hospital as a second wave of reaction is possible."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "MED_003",
+    "title": "Hypothermia / Cold Exposure",
+    "category": "Medical",
+    "keywords": ["cold", "hypothermia", "freezing", "shivering", "ice", "winter", "frío", "hipotermia", "congelación", "temblor", "hielo", "invierno"],
+    "steps": [
+      "Move the person out of the cold and into a dry, warm location.",
+      "Gently remove wet clothing and replace with dry blankets or clothes.",
+      "Warm the person gradually; start with the center of the body (chest, neck, groin).",
+      "Provide warm, non-alcoholic, non-caffeinated beverages if they are conscious.",
+      "Do NOT use direct heat (hot water, heating pads) or rub limbs, as this can cause heart rhythm issues.",
+      "Keep the person lying down and monitor breathing until medical help arrives."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAUMA_004",
+    "title": "Fractures and Dislocations",
+    "category": "Trauma",
+    "keywords": ["bone", "fracture", "break", "dislocation", "joint", "limb", "hueso", "fractura", "rotura", "dislocación", "articulación", "brazo", "pierna"],
+    "steps": [
+      "Do NOT attempt to move the person unless there is an immediate danger.",
+      "Do NOT try to realign the bone or push it back in.",
+      "Apply a sterile dressing to any open wounds before splinting.",
+      "Immobilize the injured area: Use a split (folded cardboard, wood) that extends beyond the joints above and below the break.",
+      "Apply ice packs to reduce swelling (do not apply directly to skin).",
+      "Check for circulation (pulse/warmth) below the injury site after splinting."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "MED_005",
+    "title": "Diabetic Emergency",
+    "category": "Medical",
+    "keywords": ["diabetes", "insulin", "sugar", "glucose", "faint", "shaking", "diabetes", "insulina", "azúcar", "glucosa", "desmayo", "temblor"],
+    "steps": [
+      "If the person is conscious and can swallow, give them 15-20g of fast-acting sugar (fruit juice, soda, candy).",
+      "Wait 15 minutes and repeat if they do not feel better.",
+      "If they are unconscious: Call emergency services immediately. Do NOT put anything in their mouth.",
+      "If they are carrying a Glucagon kit, it may be administered by a trained person.",
+      "Note the time and what was given to inform the paramedics."
+    ],
+    "priority": 1
+  }
+]

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "ENV_001",
+    "title": "Natural Gas Leak",
+    "category": "Environmental",
+    "keywords": ["gas", "leak", "smell", "rotten eggs", "explosion", "fuga", "gas", "olor", "huevos podridos", "explosión"],
+    "steps": [
+      "If you smell gas, do NOT turn on or off any lights or electrical appliances.",
+      "Do NOT use cell phones or landlines inside the building.",
+      "Open all windows and doors to ventilate the area.",
+      "Evacuate everyone from the building immediately.",
+      "Call emergency services and your gas utility provider from a safe distance outside.",
+      "Do not re-enter the building until it is declared safe by professionals."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_002",
+    "title": "Earthquake",
+    "category": "Environmental",
+    "keywords": ["earthquake", "shaking", "ground", "building safety", "terremoto", "temblor", "suelo", "seguridad"],
+    "steps": [
+      "DROP to the ground before the earthquake drops you.",
+      "COVER your head and neck with your arms and seek shelter under a sturdy table.",
+      "HOLD ON to your shelter until the shaking stops.",
+      "If outdoors, move to an open area away from buildings, trees, and power lines.",
+      "If in a vehicle, stop as quickly as safety permits and stay inside.",
+      "Be prepared for aftershocks."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_003",
+    "title": "Flash Flood Response",
+    "category": "Environmental",
+    "keywords": ["flood", "water", "rain", "storm", "river", "inundación", "inundacion", "agua", "lluvia", "tormenta", "rio"],
+    "steps": [
+      "Move to higher ground immediately. Do NOT wait for instructions.",
+      "Avoid walking or driving through floodwaters. Just 6 inches (15 cm) of moving water can knock you down.",
+      "If your vehicle stalls in rapidly rising water, abandon it immediately and move to higher ground.",
+      "Stay away from bridges over fast-moving water, as the ground underneath can be unstable.",
+      "Turn off utilities at the main switches if safe to do so.",
+      "Avoid contact with floodwater, as it may be contaminated or contain dangerous debris."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_004",
+    "title": "Hazardous Chemical Spill",
+    "category": "Environmental",
+    "keywords": ["chemical", "spill", "toxic", "acid", "gas", "leak", "químico", "derrame", "tóxico", "ácido", "gas", "fuga"],
+    "steps": [
+      "Evacuate the area immediately and move upwind (direction the wind is blowing away from).",
+      "Do NOT attempt to clean up the spill unless you are specifically trained.",
+      "Seal the area to prevent others from entering.",
+      "If the chemical is on skin or eyes, flush with large amounts of water for at least 15 minutes.",
+      "Turn off ventilation systems if outdoors. If indoors, open windows away from the spill site.",
+      "Identify the substance (via label or SDS) only if safe to do so."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_005",
+    "title": "Landslide / Mudslide",
+    "category": "Environmental",
+    "keywords": ["landslide", "mudslide", "mountain", "earth", "slope", "debris", "desprendimiento", "deslave", "montaña", "tierra", "pendiente", "escombros"],
+    "steps": [
+      "If you are inside, stay inside. Move to the part of the building furthest from the slope.",
+      "If you are outside, run to the nearest high ground away from the path of the slide.",
+      "If escape is impossible, curl into a tight ball and protect your head.",
+      "Listen for unusual sounds like trees cracking or boulders knocking together.",
+      "Stay away from the slide area; additional slides may occur.",
+      "Check for injured or trapped persons without entering the slide path directly."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_006",
+    "title": "Tornado / High Wind Shelter",
+    "category": "Environmental",
+    "keywords": ["tornado", "wind", "storm", "shelter", "warning", "siren", "tornado", "viento", "tormenta", "refugio", "alerta", "sirena"],
+    "steps": [
+      "Go to a pre-designated 'safe room', basement, or the lowest level of the building.",
+      "Inner hallways and closets are the safest spots if no basement is available.",
+      "Stay away from windows, glass, and exterior walls.",
+      "Get under a sturdy piece of furniture (like a heavy table) and use your arms to protect your head and neck.",
+      "If outdoors or in a mobile home, seek shelter in a sturdy building immediately.",
+      "As a last resort, lie flat in a low-lying area (like a ditch) and cover your head."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_007",
+    "title": "Nuclear / Radiological Hazard",
+    "category": "Environmental",
+    "keywords": ["nuclear", "radiation", "radiological", "hazard", "fallout", "nuclear", "radiación", "radiación", "peligro", "radiológico"],
+    "steps": [
+      "GET INSIDE: Go to the center of a sturdy building or a basement.",
+      "STAY INSIDE: Close all windows and doors. Turn off fans and AC units.",
+      "STAY TUNED: Listen to emergency broadcasts for official instructions.",
+      "If you were outside, remove your outer layer of clothing and seal it in a plastic bag.",
+      "Shower gently with soap and water to wash away contamination (do not scrub or use hair conditioner).",
+      "Only consume sealed bottled water and food from sealed containers."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_008",
+    "title": "Extreme Heat (Heatstroke Prevention)",
+    "category": "Environmental",
+    "keywords": ["heat", "sun", "hot", "dehydration", "summer", "calor", "sol", "deshidratación", "verano", "golpe de calor"],
+    "steps": [
+      "Drink plenty of fluids (water, electrolytes) even if you don't feel thirsty. Avoid alcohol and caffeine.",
+      "Stay in air-conditioned buildings as much as possible. If home is hot, go to a library or mall.",
+      "Wear lightweight, light-colored, loose-fitting clothing.",
+      "Limit outdoor activity to when it's coolest, like morning and evening.",
+      "Check on neighbors, especially seniors and those living alone, twice a day.",
+      "NEVER leave children or pets in a parked car, even with windows cracked."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_009",
+    "title": "Extreme Cold / Winter Storm",
+    "category": "Environmental",
+    "keywords": ["cold", "ice", "snow", "winter", "freeze", "frío", "hielo", "nieve", "invierno", "helada", "hipotermia"],
+    "steps": [
+      "Stay indoors during the storm. If you must go out, wear several layers of loose-fitting, lightweight, warm clothing.",
+      "Keep dry. Change out of wet clothes immediately to prevent loss of body heat.",
+      "Watch for signs of frostbite: numbness, white or grayish-yellow skin, firm or waxy skin.",
+      "Watch for signs of hypothermia: shivering, exhaustion, confusion, fumbling hands, slurred speech.",
+      "If you lose power, close off unneeded rooms, stuff towels in cracks under doors, and wear layers.",
+      "Ensure space heaters are kept at least 3 feet away from anything that can burn."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_010",
+    "title": "Thunderstorm / Lightning Safety",
+    "category": "Environmental",
+    "keywords": ["storm", "lightning", "thunder", "rain", "electric", "tormenta", "rayo", "trueno", "lluvia", "eléctrico"],
+    "steps": [
+      "When thunder roars, go indoors. A sturdy building is the safest place.",
+      "If no building is available, a hard-topped metal vehicle with windows rolled up is a safe second choice.",
+      "Stay away from windows and doors, and stay off porches.",
+      "Do NOT use corded phones, computers, or other electrical equipment that puts you in contact with electricity.",
+      "Avoid plumbing, including sinks, baths, and faucets.",
+      "If caught outdoors, get to a low spot. Stay away from tall trees, poles, or metal objects."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_011",
+    "title": "Sandstorm / Dust Storm",
+    "category": "Environmental",
+    "keywords": ["sand", "dust", "storm", "visibility", "breathing", "tormenta", "arena", "polvo", "visibilidad", "respiración"],
+    "steps": [
+      "If driving, pull off the road as far as possible, turn off all lights (otherwise others might follow you into the shoulder), and set the emergency brake.",
+      "If you are outside, wear an N95 mask or wrap a damp cloth around your nose and mouth.",
+      "Stay indoors with all windows and doors closed. Turn off AC/ventilation systems to prevent dust entry.",
+      "Protect your eyes with goggles or glasses; avoid wearing contact lenses.",
+      "Stay in place until visibility improves. Do NOT attempt to walk through the storm.",
+      "Clean any dust from your skin and hair once the storm passes to avoid irritation."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_012",
+    "title": "Volcanic Ash Fall",
+    "category": "Environmental",
+    "keywords": ["volcano", "ash", "eruption", "air", "quality", "shelter", "volcán", "ceniza", "erupción", "aire", "refugio"],
+    "steps": [
+      "Stay indoors and away from 'downwind' areas of the volcano.",
+      "Close all windows, doors, and fireplace dampers. Turn off all fans and heating/cooling systems.",
+      "If you must go outside, use a mask (N95) and wear goggles to protect your eyes from abrasive ash.",
+      "Wear long-sleeved clothing and pants to minimize ash contact with skin.",
+      "Do NOT drive in heavy ash fall; ash is abrasive and can damage car engines and clog filters.",
+      "Remove heavy ash from your roof if safe to do so, as ash is heavy and can cause structural collapse when wet."
+    ],
+    "priority": 1
+  }
+]

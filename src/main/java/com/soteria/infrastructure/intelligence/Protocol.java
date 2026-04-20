@@ -3,7 +3,8 @@ package com.soteria.infrastructure.intelligence;
 import java.util.List;
 
 /**
- * Represents a medical protocol for emergency response.
+ * Represents an emergency protocol for response across various domains
+ * (Medical, Fire, Security, etc.).
  */
 public class Protocol {
     private String id;
