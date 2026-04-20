@@ -18,11 +18,27 @@ public class SystemCapability {
     private static final long BYTES_IN_GB = 1024L * 1024L * 1024L;
 
     public enum AIModelProfile {
-        ULTRA_LITE,  // For < 3GB RAM (Qwen3-0.6B Q4)
-        LITE,        // For 4GB RAM (Gemma 4 E2B Q4)
-        BALANCED,    // For 6GB RAM (Gemma 4 E2B Q8)
-        PERFORMANCE, // For 8GB RAM (Gemma 4 E4B Q4)
-        ULTRA        // For 12GB+ RAM (Gemma 4 E4B Q8)
+        ULTRA_LITE("gemma-3-1b-it-q4_k_m.gguf", 0.7),
+        LITE("gemma-3-1b-it-q8_0.gguf", 1.2),
+        BALANCED("gemma-3-4b-it-q4_k_m.gguf", 2.7),
+        PERFORMANCE("gemma-3-4b-it-q4_k_m.gguf", 2.7),
+        ULTRA("gemma-3-4b-it-q8_0.gguf", 4.3);
+
+        private final String displayName;
+        private final double sizeGB;
+
+        AIModelProfile(String displayName, double sizeGB) {
+            this.displayName = displayName;
+            this.sizeGB = sizeGB;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public double getSizeGB() {
+            return sizeGB;
+        }
     }
 
     private final long totalMemory;

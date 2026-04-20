@@ -28,14 +28,16 @@ Offline reasoning is delivered by three coordinated components under `com.soteri
 
 ### 4. Infrastructure Layer (System Implementation)
 Handles the technical details of the environment:
-- **Persistence**: JSON-based storage for user sessions (`JsonUserPersistence`).
+- **Persistence**: JSON-based storage for the single device-owner profile (`ProfileRepository` → `~/.soteria/profile.json`).
 - **Notification**: Local alert log + simulated emergency-service dispatch (`NotificationAlertService`). Real SMS/call integration is a later phase.
-- **Sensor**: System GPS wrapper (`SystemGPSLocation`).
+- **Sensor**: System GPS wrapper (`SystemGPSLocation`) and best-effort device phone number read (`DevicePhoneDetector`).
+- **Bootstrap**: `BootstrapService` orchestrates background downloads, engine loading and a silent LLM warmup turn so the KV cache holds the system prompt before the user's first real message. Exposes observable `statusProperty` / `progressProperty` / `readyProperty` for direct FXML binding.
 
 ### 5. UI Layer (Reactive Interface)
-A state-of-the-art JavaFX implementation using the Model-View-Controller (MVC) pattern:
-- **Asynchronous Execution**: All network and heavy logic operations are offloaded from the Application Thread to prevent UI freezing during critical moments.
-- **CSS-Driven Design**: A professional, high-contrast theme optimized for readability in emergency contexts.
+JavaFX + **AtlantaFX PrimerDark** theme with a thin overrides stylesheet (`main.css`). No login screen — SoterIA is single-user by design:
+- **Onboarding wizard** (`OnboardingController` + `onboarding-view.fxml`): step 1 picks AI model (with RAM-based *Recommended* tag and weight in GB) and language (pre-selected from GPS/locale, English fallback) plus an optional custom GGUF URL that is verified against the server before letting the user continue. Step 2 captures the emergency profile. An installation overlay covers the gap if downloads aren't finished when the user submits.
+- **Chat screen** (`ChatController` + `chat-view.fxml`): conversation with text + voice input, rendered as custom bubbles on top of the PrimerDark base.
+- **Asynchronous Execution**: All I/O and LLM/STT calls run on worker threads; the FX thread only touches the scene graph.
 
 ## Key Features and Capabilities
 
@@ -84,14 +86,15 @@ com.soteria.core
 └── interfaces         # Service contracts (AlertService, LocationProvider)
 
 com.soteria.infrastructure
+├── bootstrap          # BootstrapService (background downloads, engine warmup)
 ├── intelligence       # STT, LLM, knowledge base, model provisioning
 ├── notification       # NotificationAlertService (log + simulated call)
-├── persistence        # JsonUserPersistence (session + user profile)
-└── sensor             # SystemGPSLocation
+├── persistence        # ProfileRepository (device-owner profile.json)
+└── sensor             # SystemGPSLocation, DevicePhoneDetector
 
 com.soteria.ui
-├── controller         # ChatController, LoginController
-└── MainApp            # JavaFX entry point
+├── controller         # OnboardingController, ChatController
+└── MainApp            # JavaFX entry point (AtlantaFX PrimerDark)
 ```
 
 ## System Implementation Standards

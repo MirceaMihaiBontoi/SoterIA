@@ -6,14 +6,25 @@ package com.soteria.core.model;
 public record UserData(
     String fullName,
     String phoneNumber,
+    String gender,
+    String birthDate,
     String medicalInfo,
-    String emergencyContact
+    String emergencyContact,
+    String preferredModel,
+    String preferredLanguage,
+    String customModelUrl
 ) {
+    public static final String INCOMPLETE_NAME = "[INCOMPLETE]";
+
+    public boolean isComplete() {
+        return fullName != null && !fullName.equals(INCOMPLETE_NAME);
+    }
+
     @Override
     public String toString() {
         return String.format(
-            "Name: %s%nPhone: %s%nEmergency Contact: %s%nMedical Info: %s",
-            fullName, phoneNumber, emergencyContact, medicalInfo
+            "Name: %s%nPhone: %s%nGender: %s%nBirthDate: %s%nEmergency Contact: %s%nMedical Info: %s",
+            fullName, phoneNumber, gender, birthDate, emergencyContact, medicalInfo
         );
     }
 }

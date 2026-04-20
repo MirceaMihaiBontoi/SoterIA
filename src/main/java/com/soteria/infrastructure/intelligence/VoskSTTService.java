@@ -27,6 +27,7 @@ public class VoskSTTService {
     private TargetDataLine line;
     private ExecutorService executor;
     private volatile boolean listening = false;
+    private final java.util.concurrent.CountDownLatch shutdownLatch = new java.util.concurrent.CountDownLatch(1);
 
     public VoskSTTService(Path modelPath) throws IOException {
         LibVosk.setLogLevel(LogLevel.WARNINGS);
@@ -81,6 +82,7 @@ public class VoskSTTService {
                 listener.onError(e);
             } finally {
                 listening = false;
+                shutdownLatch.countDown();
             }
         });
     }
@@ -113,6 +115,14 @@ public class VoskSTTService {
     public void shutdown() {
         stopListening();
         executor.shutdownNow();
+        try {
+            // Give the background thread a moment to finish before freeing native memory
+            if (!shutdownLatch.await(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                logger.warning("Vosk listener background thread did not terminate within timeout.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         if (recognizer != null) recognizer.close();
         if (model != null) model.close();
     }

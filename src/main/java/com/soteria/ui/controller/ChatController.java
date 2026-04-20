@@ -1,32 +1,39 @@
 package com.soteria.ui.controller;
 
-import com.soteria.core.model.UserData;
-import com.soteria.core.model.EmergencyEvent;
 import com.soteria.core.interfaces.AlertService;
 import com.soteria.core.interfaces.LocationProvider;
-import com.soteria.infrastructure.intelligence.*;
+import com.soteria.core.model.EmergencyEvent;
+import com.soteria.core.model.UserData;
+import com.soteria.infrastructure.bootstrap.BootstrapService;
+import com.soteria.infrastructure.intelligence.ChatMessage;
+import com.soteria.infrastructure.intelligence.LocalBrainService;
+import com.soteria.infrastructure.intelligence.MedicalKnowledgeBase;
+import com.soteria.infrastructure.intelligence.Protocol;
+import com.soteria.infrastructure.intelligence.STTListener;
+import com.soteria.infrastructure.intelligence.VoskSTTService;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
-/**
- * Controller for the conversational chat interface.
- */
-public class ChatController implements Initializable {
+public class ChatController {
+
+    private static final String STATUS_READY = "Ready";
+    private static final int MAX_HISTORY_TURNS = 10;
 
     @FXML private ScrollPane chatScrollPane;
     @FXML private VBox chatMessages;
@@ -34,102 +41,49 @@ public class ChatController implements Initializable {
     @FXML private Button voiceButton;
     @FXML private Label aiStatusLabel;
     @FXML private Label statusLabel;
-    
-    private static final String STATUS_READY = "Ready";
-    
-    // Phase 3 Native Services
-    private SystemCapability systemCapability;
-    private ModelManager modelManager;
+
+    private final List<ChatMessage> conversationHistory = new ArrayList<>();
+    private final LocationProvider locationProvider = new SystemGPSLocation();
+    private final AlertService alertService = new NotificationAlertService();
+
+    private UserData currentUser;
+
     private VoskSTTService sttService;
     private LocalBrainService brainService;
     private MedicalKnowledgeBase knowledgeBase;
 
-    private UserData currentUser;
     private boolean aiAvailable = false;
     private boolean isRecording = false;
-    private String currentLanguage = "Spanish"; // Placeholder for Phase 5 UI Selection
+    private String currentLanguage = "Spanish";
 
-    // Conversation history passed to the local brain on every turn.
-    // Alternates user/model. Capped to avoid blowing the 2048-token context.
-    private static final int MAX_HISTORY_TURNS = 10;
-    private final List<ChatMessage> conversationHistory = new ArrayList<>();
+    public void init(UserData profile, BootstrapService bootstrap) {
+        this.currentUser = profile;
 
-    private LocationProvider locationProvider;
-    private AlertService alertService;
+        addBotMessage("Hi " + profile.fullName() + ". I am Soteria, your emergency assistant. "
+                + "Describe what is happening, or press the microphone.");
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        locationProvider = new SystemGPSLocation();
-        alertService = new NotificationAlertService();
-        
-        initializeNativeIntelligence();
-        voiceButton.setOnAction(event -> handleVoiceInput());
-    }
+        aiStatusLabel.setText("AI: warming up...");
+        setStatus("Preparing...");
 
-    private void initializeNativeIntelligence() {
-        new Thread(() -> {
-            try {
-                Platform.runLater(() -> setStatus("Initializing System..."));
-                systemCapability = new SystemCapability();
-                modelManager = new ModelManager(systemCapability);
-                knowledgeBase = new MedicalKnowledgeBase();
-
-                // 1. Download Vosk ( Hearing )
-                if (!modelManager.isVoskModelReady(currentLanguage)) {
-                    Platform.runLater(() -> {
-                        aiStatusLabel.setText("Soteria: ⏳ Downloading Hearing (" + currentLanguage + ")...");
-                        aiStatusLabel.setStyle("-fx-text-fill: #f59e0b;");
-                        addBotMessage("SoterIA Setup: Provisional hearing (STT) models for " + systemCapability.getRecommendedProfile() + "...");
-                    });
-                    modelManager.downloadVoskModel(currentLanguage).join();
-                }
-
-                // 2. Download Brain ( Reasoning )
-                String brainName = modelManager.getBrainModelFileName();
-                if (!modelManager.isBrainModelReady()) {
-                    Platform.runLater(() -> {
-                        aiStatusLabel.setText("Soteria: ⏳ Downloading Brain...");
-                        addBotMessage("SoterIA Setup: Provisioning brain (" + brainName + ") for specialized offline reasoning...");
-                    });
-                    modelManager.downloadBrainModel().join();
-                }
-
-                // Initializing Services
-                sttService = new VoskSTTService(modelManager.getVoskModelPath(currentLanguage));
-                brainService = new LocalBrainService(modelManager.getBrainModelPath());
-
-                Platform.runLater(() -> {
-                    aiAvailable = true;
-                    aiStatusLabel.setText("Soteria: ✅ Native AI Ready (" + systemCapability.getRecommendedProfile() + ")");
-                    aiStatusLabel.setStyle("-fx-text-fill: #10b981;");
-                    setStatus(STATUS_READY);
-                });
-
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    aiStatusLabel.setText("Soteria: ❌ Error");
-                    aiStatusLabel.setStyle("-fx-text-fill: #ef4444;");
-                    setStatus("Initialization Failed");
-                });
+        bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> {
+            if (err != null) {
+                aiStatusLabel.setText("AI: error");
+                setStatus("Init failed");
+                return;
             }
-        }).start();
-    }
-
-    public void setUserData(UserData userData) {
-        this.currentUser = userData;
-        addBotMessage("Hi " + userData.fullName() + "! 👋\n\n" +
-                     "I am **Soteria**, your emergency assistant. I can help you by:\n" +
-                     "• Classifying emergencies via text or voice\n" +
-                     "• Providing action instructions\n" +
-                     "• Sending alerts to emergency services\n\n" +
-                     "Describe what is happening or press 🎤 to speak.");
+            this.sttService = bootstrap.sttService();
+            this.brainService = bootstrap.brainService();
+            this.knowledgeBase = bootstrap.knowledgeBase();
+            this.aiAvailable = true;
+            aiStatusLabel.setText("AI: ready (" + bootstrap.capability().getRecommendedProfile() + ")");
+            setStatus(STATUS_READY);
+        }));
     }
 
     @FXML
     private void handleSendMessage() {
         String message = messageInput.getText().trim();
         if (message.isEmpty()) return;
-        
         addUserMessage(message);
         messageInput.clear();
         setStatus("Processing...");
@@ -138,21 +92,15 @@ public class ChatController implements Initializable {
 
     @FXML
     private void handleVoiceInput() {
-        toggleRecording();
-    }
-
-    private void toggleRecording() {
         if (!aiAvailable) {
-            addBotMessage("⚠️ System is still initializing models. Please wait.");
+            addBotMessage("System is still initializing. Please wait.");
             return;
         }
 
         if (!isRecording) {
             isRecording = true;
-            voiceButton.setText("⏹️");
-            voiceButton.setStyle("-fx-background-color: #ef4444;");
-            setStatus("🎤 Listening...");
-
+            voiceButton.setText("⏹");
+            setStatus("Listening...");
             sttService.startListening(new STTListener() {
                 @Override public void onResult(String text) {
                     if (!text.isEmpty()) {
@@ -163,10 +111,10 @@ public class ChatController implements Initializable {
                     }
                 }
                 @Override public void onPartialResult(String text) {
-                    Platform.runLater(() -> setStatus("🎤 " + text));
+                    Platform.runLater(() -> setStatus("… " + text));
                 }
                 @Override public void onError(Throwable t) {
-                    Platform.runLater(() -> setStatus("Mic Error: " + t.getMessage()));
+                    Platform.runLater(() -> setStatus("Mic error: " + t.getMessage()));
                     stopRecordingUI();
                 }
             });
@@ -179,7 +127,6 @@ public class ChatController implements Initializable {
     private void stopRecordingUI() {
         isRecording = false;
         voiceButton.setText("🎤");
-        voiceButton.setStyle("");
         setStatus(STATUS_READY);
     }
 
@@ -188,27 +135,24 @@ public class ChatController implements Initializable {
             handleEmergencyAlert(message);
             return;
         }
-
-        if (knowledgeBase == null) return;
+        if (!aiAvailable) return;
 
         conversationHistory.add(ChatMessage.user(message));
         trimHistory();
 
-        setStatus("AI Thinking...");
+        setStatus("AI thinking...");
         List<ChatMessage> snapshot = List.copyOf(conversationHistory);
         new Thread(() -> {
             List<Protocol> results = knowledgeBase.findProtocols(message);
             String context = results.isEmpty() ? "No specific protocol matched." : results.get(0).getContent();
-
             String response = brainService.generateResponse(snapshot, context, currentLanguage);
-
             Platform.runLater(() -> {
                 conversationHistory.add(ChatMessage.model(response));
                 trimHistory();
                 addBotMessage(response);
                 setStatus(STATUS_READY);
             });
-        }).start();
+        }, "soteria-inference").start();
     }
 
     private void trimHistory() {
@@ -222,42 +166,32 @@ public class ChatController implements Initializable {
     }
 
     private void addUserMessage(String message) {
-        HBox messageBox = new HBox();
-        messageBox.setAlignment(Pos.CENTER_RIGHT);
-        messageBox.setPadding(new Insets(5, 0, 5, 50));
-        
-        VBox bubble = new VBox();
-        bubble.setStyle("-fx-background-color: #2563eb; -fx-background-radius: 15; -fx-padding: 10 15;");
-        
-        Text text = new Text(message);
-        text.setStyle("-fx-fill: white; -fx-font-size: 14;");
-        text.setWrappingWidth(300);
-        
-        bubble.getChildren().add(text);
-        messageBox.getChildren().add(bubble);
-        chatMessages.getChildren().add(messageBox);
-        scrollToBottom();
+        addBubble(message, "chat-bubble-user", Pos.CENTER_RIGHT, new Insets(5, 0, 5, 50));
     }
 
     private void addBotMessage(String message) {
-        HBox messageBox = new HBox();
-        messageBox.setAlignment(Pos.CENTER_LEFT);
-        messageBox.setPadding(new Insets(5, 50, 5, 0));
-        
+        addBubble(message, "chat-bubble-bot", Pos.CENTER_LEFT, new Insets(5, 50, 5, 0));
+    }
+
+    private void addBubble(String message, String bubbleClass, Pos alignment, Insets padding) {
+        HBox box = new HBox();
+        box.setAlignment(alignment);
+        box.setPadding(padding);
+
         VBox bubble = new VBox();
-        bubble.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 15; -fx-padding: 10 15;");
-        
-        TextFlow textFlow = new TextFlow();
+        bubble.getStyleClass().add(bubbleClass);
+
         Text text = new Text(message);
-        text.setStyle("-fx-fill: #1e293b; -fx-font-size: 14;");
-        textFlow.getChildren().add(text);
-        
-        bubble.getChildren().add(textFlow);
-        messageBox.getChildren().add(bubble);
-        chatMessages.getChildren().add(messageBox);
+        text.getStyleClass().add(bubbleClass + "-text");
+        text.setWrappingWidth(420);
+
+        TextFlow flow = new TextFlow(text);
+        bubble.getChildren().add(flow);
+        box.getChildren().add(bubble);
+        chatMessages.getChildren().add(box);
         scrollToBottom();
     }
-    
+
     private void scrollToBottom() {
         Platform.runLater(() -> {
             chatScrollPane.layout();
@@ -271,40 +205,34 @@ public class ChatController implements Initializable {
 
     private boolean isEmergencyCommand(String message) {
         String msg = message.toLowerCase();
-        return msg.contains("112") || msg.contains("alert") || msg.contains("emergency") || 
-               msg.contains("help") || msg.contains("ambulance");
+        return msg.contains("112") || msg.contains("alert") || msg.contains("emergency")
+                || msg.contains("help") || msg.contains("ambulance");
     }
 
     private void handleEmergencyAlert(String message) {
-        setStatus("🚨 SENDING ALERT...");
-        
+        setStatus("Sending alert...");
         new Thread(() -> {
             try {
                 String location = locationProvider.getLocationDescription();
-                
                 EmergencyEvent event = new EmergencyEvent(
-                    "CHAT EMERGENCY: " + message,
-                    location,
-                    10,
-                    currentUser != null ? currentUser.fullName() : "Unknown"
-                );
-
+                        "CHAT EMERGENCY: " + message,
+                        location,
+                        10,
+                        currentUser != null ? currentUser.fullName() : "Unknown");
                 boolean success = alertService.send(event);
-
                 Platform.runLater(() -> {
                     if (success) {
-                        addBotMessage("🚨 **EMERGENCY ALERT SENT** 🚨\n\n" +
-                                     "Detected location: " + location + "\n" +
-                                     "Professional help is on the way. Stay calm.");
-                        setStatus("🚨 ACTIVE ALERT");
+                        addBotMessage("Emergency alert sent. Detected location: " + location
+                                + ". Professional help is on the way — stay calm.");
+                        setStatus("Active alert");
                     } else {
-                        addBotMessage("⚠️ Automated alert failed. Please call 112/911 immediately.");
+                        addBotMessage("Automated alert failed. Please call 112/911 immediately.");
                         setStatus("Error");
                     }
                 });
             } catch (Exception e) {
                 Platform.runLater(() -> setStatus("Error"));
             }
-        }).start();
+        }, "soteria-alert").start();
     }
 }

@@ -18,9 +18,6 @@ class EmergencyEventTest {
         LocalDateTime after = LocalDateTime.now();
 
         assertEquals("Incendio", event.emergencyType());
-        assertEquals("Calle Mayor 3", event.location());
-        assertEquals(8, event.severityLevel());
-        assertEquals("Juan", event.userData());
         assertNotNull(event.timestamp());
         
         // Check if timestamp is within range

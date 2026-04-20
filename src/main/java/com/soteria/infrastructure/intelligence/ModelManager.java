@@ -9,6 +9,7 @@ import java.nio.file.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -54,11 +55,22 @@ public class ModelManager {
         }
     }
 
+    private String getCustomFileName(String url) {
+        return "custom-" + Integer.toHexString(url.hashCode()) + ".gguf";
+    }
+
     /**
      * Returns the on-disk path for a brain model (GGUF file), whether it exists or not.
      */
     public Path getBrainModelPath() {
-        return modelBasePath.resolve(getBrainModelFileName());
+        return getBrainModelPath(capability.getRecommendedProfile(), null);
+    }
+
+    public Path getBrainModelPath(SystemCapability.AIModelProfile profile, String customUrl) {
+        if (customUrl != null && !customUrl.isBlank()) {
+            return modelBasePath.resolve(getCustomFileName(customUrl));
+        }
+        return modelBasePath.resolve(getBrainModelFileName(profile));
     }
 
     /**
@@ -69,7 +81,11 @@ public class ModelManager {
     }
 
     public boolean isBrainModelReady() {
-        return Files.exists(getBrainModelPath());
+        return isBrainModelReady(capability.getRecommendedProfile(), null);
+    }
+
+    public boolean isBrainModelReady(SystemCapability.AIModelProfile profile, String customUrl) {
+        return Files.exists(getBrainModelPath(profile, customUrl));
     }
 
     public boolean isVoskModelReady(String language) {
@@ -77,14 +93,32 @@ public class ModelManager {
     }
 
     /**
-     * Downloads the GGUF for the current hardware tier. No-op if already present.
+     * Downloads a specific GGUF model profile.
      */
-    public CompletableFuture<Path> downloadBrainModel() {
-        Path target = getBrainModelPath();
+    public CompletableFuture<Path> downloadBrainModel(SystemCapability.AIModelProfile profile) {
+        return downloadBrainModel(profile, null);
+    }
+
+    /**
+     * Downloads a GGUF model from a profile or a custom URL.
+     */
+    public CompletableFuture<Path> downloadBrainModel(SystemCapability.AIModelProfile profile, String customUrl) {
+        if (customUrl != null && !customUrl.isBlank()) {
+            Path target = modelBasePath.resolve(getCustomFileName(customUrl));
+            if (Files.exists(target)) {
+                return CompletableFuture.completedFuture(target);
+            }
+            return downloadFile(customUrl, target);
+        }
+
+        String url = getBrainModelUrl(profile);
+        String fileName = getBrainModelFileName(profile);
+        Path target = modelBasePath.resolve(fileName);
+        
         if (Files.exists(target)) {
             return CompletableFuture.completedFuture(target);
         }
-        return downloadFile(getBrainModelUrl(), target);
+        return downloadFile(url, target);
     }
 
     /**
@@ -108,33 +142,79 @@ public class ModelManager {
                 });
     }
 
-    private CompletableFuture<Path> downloadFile(String url, Path target) {
-        logger.log(Level.INFO, "Downloading {0} -> {1}", new Object[]{url, target});
+    private CompletableFuture<Path> downloadFile(String url, Path finalTarget) {
+        Path partFile = Paths.get(finalTarget.toString() + ".part");
+        logger.log(Level.INFO, "Downloading {0} -> {1}", new Object[]{url, partFile});
 
         try {
-            Files.createDirectories(target.getParent());
+            Files.createDirectories(partFile.getParent());
         } catch (IOException e) {
-            logger.warning("Could not prepare target dir: " + e.getMessage());
+            logger.log(Level.WARNING, "Could not prepare target dir: {0}", e.getMessage());
+        }
+
+        long existingSize = 0;
+        try {
+            if (Files.exists(partFile)) {
+                existingSize = Files.size(partFile);
+            }
+        } catch (IOException ignored) {
+            // Safe to ignore: if we can't read the size, we'll just start fresh (0 bytes)
         }
 
         HttpClient client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .build();
 
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("User-Agent", "SoterIA/1.0 (llama.cpp ModelManager)")
-                .header("Accept", "*/*")
-                .GET()
-                .build();
+                .header("Accept", "*/*");
 
-        return client.sendAsync(request, HttpResponse.BodyHandlers.ofFile(target))
-                .thenApply(response -> {
-                    if (response.statusCode() != 200) {
-                        throw new UncheckedIOException(new IOException("Download failed. HTTP " + response.statusCode() + " for " + url));
+        if (existingSize > 0) {
+            logger.log(Level.INFO, "Resuming download from byte {0}", existingSize);
+            requestBuilder.header("Range", "bytes=" + existingSize + "-");
+        }
+
+        HttpRequest request = requestBuilder.GET().build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+                .thenCompose(response -> {
+                    int status = response.statusCode();
+                    if (status != 200 && status != 206) {
+                        return CompletableFuture.failedFuture(new IOException("Download failed. HTTP " + status + " for " + url));
                     }
-                    return target;
+
+                    boolean append = (status == 206);
+                    return CompletableFuture.runAsync(() -> {
+                        try (InputStream is = response.body()) {
+                            writeStreamToFile(is, partFile, append);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    }).thenApply(v -> finalizeDownload(partFile, finalTarget));
                 });
+    }
+
+    private void writeStreamToFile(InputStream is, Path target, boolean append) throws IOException {
+        try (OutputStream os = Files.newOutputStream(target, 
+                append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE, 
+                StandardOpenOption.WRITE)) {
+            byte[] buffer = new byte[16384];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                os.write(buffer, 0, read);
+            }
+        }
+    }
+
+    private Path finalizeDownload(Path partFile, Path finalTarget) {
+        try {
+            Files.move(partFile, finalTarget, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            logger.log(Level.INFO, "Download success: {0}", finalTarget);
+            return finalTarget;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public String getVoskModelUrl(String language) {
@@ -154,7 +234,11 @@ public class ModelManager {
     }
 
     public String getBrainModelUrl() {
-        return switch (capability.getRecommendedProfile()) {
+        return getBrainModelUrl(capability.getRecommendedProfile());
+    }
+
+    public String getBrainModelUrl(SystemCapability.AIModelProfile profile) {
+        return switch (profile) {
             case ULTRA_LITE -> LLM_ULTRA_LITE_URL;
             case LITE -> LLM_LITE_URL;
             case BALANCED -> LLM_BALANCED_URL;
@@ -164,7 +248,11 @@ public class ModelManager {
     }
 
     public String getBrainModelFileName() {
-        return switch (capability.getRecommendedProfile()) {
+        return getBrainModelFileName(capability.getRecommendedProfile());
+    }
+
+    public String getBrainModelFileName(SystemCapability.AIModelProfile profile) {
+        return switch (profile) {
             case ULTRA_LITE -> "gemma-3-1b-it-Q4_K_M.gguf";
             case LITE -> "gemma-3-1b-it-Q8_0.gguf";
             case BALANCED -> "gemma-3-4b-it-Q4_K_M.gguf";
@@ -174,7 +262,7 @@ public class ModelManager {
     }
 
     private void extractZip(Path zipFile, Path destDir) {
-        logger.info("Extracting: " + zipFile.getFileName());
+        logger.log(Level.INFO, "Extracting: {0}", zipFile.getFileName());
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {

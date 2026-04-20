@@ -7,33 +7,46 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserDataTest {
 
-    @Test
-    @DisplayName("Record constructor assigns all components correctly")
-    void parameterisedConstructorAssignsFields() {
-        UserData u = new UserData("Ana", "600111222", "Asma", "Luis 600333444");
-        assertEquals("Ana", u.fullName());
-        assertEquals("600111222", u.phoneNumber());
-        assertEquals("Asma", u.medicalInfo());
-        assertEquals("Luis 600333444", u.emergencyContact());
+    private static UserData sample(String name) {
+        return new UserData(name, "+34 600 111 222", "Female", "1990-01-01",
+                "Asma", "Luis 600333444", "BALANCED", "Spanish", null);
     }
 
     @Test
-    @DisplayName("Record toString include components")
+    @DisplayName("Record constructor assigns all components correctly")
+    void parameterisedConstructorAssignsFields() {
+        UserData u = sample("Ana");
+        assertEquals("Ana", u.fullName());
+        assertEquals("+34 600 111 222", u.phoneNumber());
+        assertEquals("Female", u.gender());
+        assertEquals("1990-01-01", u.birthDate());
+        assertEquals("Asma", u.medicalInfo());
+        assertEquals("Luis 600333444", u.emergencyContact());
+        assertEquals("BALANCED", u.preferredModel());
+        assertEquals("Spanish", u.preferredLanguage());
+    }
+
+    @Test
+    @DisplayName("Record toString includes core components")
     void toStringIncludesKeyFields() {
-        UserData u = new UserData("Ana", "600111222", "Asma", "Luis 600333444");
-        String out = u.toString();
+        String out = sample("Ana").toString();
         assertTrue(out.contains("Ana"));
-        assertTrue(out.contains("600111222"));
+        assertTrue(out.contains("+34 600 111 222"));
         assertTrue(out.contains("Asma"));
         assertTrue(out.contains("Luis 600333444"));
     }
-    
+
     @Test
     @DisplayName("Record equals and hashCode work correctly")
     void recordsEquality() {
-        UserData u1 = new UserData("Ana", "123", "None", "Mom");
-        UserData u2 = new UserData("Ana", "123", "None", "Mom");
-        assertEquals(u1, u2);
-        assertEquals(u1.hashCode(), u2.hashCode());
+        assertEquals(sample("Ana"), sample("Ana"));
+        assertEquals(sample("Ana").hashCode(), sample("Ana").hashCode());
+    }
+
+    @Test
+    @DisplayName("isComplete() flags draft/placeholder profiles")
+    void isCompleteRejectsDrafts() {
+        assertTrue(sample("Ana").isComplete());
+        assertFalse(sample(UserData.INCOMPLETE_NAME).isComplete());
     }
 }

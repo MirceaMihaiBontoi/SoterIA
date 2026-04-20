@@ -94,6 +94,13 @@
             <artifactId>jgrapht-core</artifactId>
             <version>1.5.2</version>
         </dependency>
+
+        <!-- AtlantaFX: JavaFX theming moderno -->
+        <dependency>
+            <groupId>io.github.mkpaz</groupId>
+            <artifactId>atlantafx-base</artifactId>
+            <version>2.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -105,6 +112,10 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>25</release>
+                    <!-- Preserves record component names so Jackson can
+                         deserialize UserData from profile.json without
+                         explicit @JsonProperty annotations. -->
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
 

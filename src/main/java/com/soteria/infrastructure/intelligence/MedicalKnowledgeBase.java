@@ -161,16 +161,22 @@ public class MedicalKnowledgeBase {
                 }
             }
 
-            if (!results.isEmpty()) {
-                for (Protocol related : getRelatedProtocols(results.get(0).getId())) {
-                    if (results.size() >= MAX_RESULTS) break;
-                    if (!results.contains(related)) results.add(related);
-                }
-            }
+            enrichWithRelated(results);
         } catch (Exception e) {
             logger.log(Level.WARNING, e, () -> "Retrieval failed for query: " + queryText);
         }
         return results;
+    }
+
+    private void enrichWithRelated(List<Protocol> results) {
+        if (results.isEmpty()) return;
+        String topHitId = results.get(0).getId();
+        for (Protocol related : getRelatedProtocols(topHitId)) {
+            if (results.size() >= MAX_RESULTS) break;
+            if (!results.contains(related)) {
+                results.add(related);
+            }
+        }
     }
 
     /**
