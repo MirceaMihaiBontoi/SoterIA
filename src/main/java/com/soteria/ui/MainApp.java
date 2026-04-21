@@ -34,6 +34,10 @@ public class MainApp extends Application {
 
     private static final String MAIN_CSS = "/styles/main.css";
 
+    // Mobile-preview window size (≈9:19.5, close to modern Android viewport)
+    private static final double MOBILE_WIDTH = 400;
+    private static final double MOBILE_HEIGHT = 860;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
@@ -54,7 +58,9 @@ public class MainApp extends Application {
         );
 
         primaryStage.setTitle("SoterIA");
-        primaryStage.setMinWidth(640);
+        primaryStage.setWidth(MOBILE_WIDTH);
+        primaryStage.setHeight(MOBILE_HEIGHT);
+        primaryStage.setMinWidth(360);
         primaryStage.setMinHeight(720);
         primaryStage.setOnCloseRequest(e -> bootstrap.shutdown());
         primaryStage.show();
@@ -67,15 +73,14 @@ public class MainApp extends Application {
         }
 
         try {
-            showInstallationProgress();
-            
+            showChatScreen(profile);
+
             SystemCapability.AIModelProfile profileType = parseModelProfile(profile.preferredModel());
             String lang = (profile.preferredLanguage() != null && !profile.preferredLanguage().isBlank())
                     ? profile.preferredLanguage()
                     : "English";
 
             bootstrap.startProvisioning(profileType, lang, profile.customModelUrl());
-            // No need for a local listener here, the global one in start() will handle it
         } catch (Exception e) {
             log.log(Level.SEVERE, "Session initialization failed", e);
         }
@@ -107,27 +112,11 @@ public class MainApp extends Application {
         OnboardingController controller = loader.getController();
         controller.init(bootstrap, profiles, this);
 
-        Scene scene = new Scene(root, 720, 820);
+        Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
         primaryStage.setScene(scene);
         
         // Navigation is now handled by the global readyProperty listener in start()
-    }
-
-    private void showInstallationProgress() throws Exception {
-        // Reuse the onboarding FXML but show only the installation overlay
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/onboarding-view.fxml"));
-        Parent root = loader.load();
-        OnboardingController controller = loader.getController();
-        controller.init(bootstrap, profiles, this);
-        
-        // Manually switch to installation state
-        root.lookup("#step1Container").setVisible(false);
-        root.lookup("#installationOverlay").setVisible(true);
-
-        Scene scene = new Scene(root, 720, 820);
-        scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
-        primaryStage.setScene(scene);
     }
 
     /**
@@ -160,7 +149,7 @@ public class MainApp extends Application {
         ChatController controller = loader.getController();
         controller.init(profile, bootstrap);
 
-        Scene scene = new Scene(root, 820, 780);
+        Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setTitle("SoterIA — " + profile.fullName());

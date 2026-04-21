@@ -33,8 +33,10 @@ public class EmergencyKnowledgeBase {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MAX_RESULTS = 3;
 
-    private static final String PROTOCOLS_PATH = "/data/protocols/";
+    private static final String DEFAULT_PROTOCOLS_PATH = "/data/protocols/";
     private static final String INDEX_FILE = "index.json";
+
+    private final String protocolsPath;
 
     private List<Protocol> protocols;
     private Map<String, Protocol> protocolsById;
@@ -43,6 +45,11 @@ public class EmergencyKnowledgeBase {
     private final Graph<String, DefaultEdge> knowledgeGraph;
 
     public EmergencyKnowledgeBase() {
+        this(DEFAULT_PROTOCOLS_PATH);
+    }
+
+    public EmergencyKnowledgeBase(String protocolsPath) {
+        this.protocolsPath = protocolsPath;
         this.analyzer = new StandardAnalyzer();
         this.index = new ByteBuffersDirectory();
         this.knowledgeGraph = new SimpleGraph<>(DefaultEdge.class);
@@ -58,9 +65,9 @@ public class EmergencyKnowledgeBase {
         this.protocols = new ArrayList<>();
         this.protocolsById = new LinkedHashMap<>();
 
-        try (InputStream indexStream = getClass().getResourceAsStream(PROTOCOLS_PATH + INDEX_FILE)) {
+        try (InputStream indexStream = getClass().getResourceAsStream(protocolsPath + INDEX_FILE)) {
             if (indexStream == null) {
-                logger.severe("CRITICAL: Protocols index.json not found in " + PROTOCOLS_PATH);
+                logger.log(Level.SEVERE, "CRITICAL: Protocols index.json not found in {0}", protocolsPath);
                 return;
             }
 
@@ -76,10 +83,10 @@ public class EmergencyKnowledgeBase {
     }
 
     private void loadCategoryProtocols(String fileName) {
-        String fullPath = PROTOCOLS_PATH + fileName;
+        String fullPath = protocolsPath + fileName;
         try (InputStream is = getClass().getResourceAsStream(fullPath)) {
             if (is == null) {
-                logger.warning("Category file not found: " + fullPath);
+                logger.log(Level.WARNING, "Category file not found: {0}", fullPath);
                 return;
             }
             List<Protocol> categoryList = mapper.readValue(is, new TypeReference<List<Protocol>>() {});
@@ -92,7 +99,7 @@ public class EmergencyKnowledgeBase {
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to parse category file: " + fullPath, e);
+            logger.log(Level.WARNING, e, () -> "Failed to parse category file: " + fullPath);
         }
     }
 

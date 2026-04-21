@@ -2,32 +2,68 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.soteria.ui.controller.ChatController" 
-      styleClass="chat-panel">
-    
-    <!-- Área de mensajes -->
-    <ScrollPane fx:id="chatScrollPane" VBox.vgrow="ALWAYS" fitToWidth="true">
-        <VBox fx:id="chatMessages" spacing="10" styleClass="chat-messages">
-            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.soteria.ui.controller.ChatController"
+           styleClass="voice-shell">
+
+    <!-- Voice-first shell: top bar + centered face + mic FAB row -->
+    <VBox>
+
+        <!-- Top bar: brand + AI status pill -->
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="8">
+            <padding><Insets top="10" right="12" bottom="10" left="14"/></padding>
+            <Label text="SoterIA" styleClass="brand-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox fx:id="statusPill" styleClass="status-pill" alignment="CENTER" spacing="6">
+                <padding><Insets top="5" right="10" bottom="5" left="9"/></padding>
+                <Circle fx:id="statusDot" radius="4" styleClass="status-dot"/>
+                <Label fx:id="aiStatusLabel" text="Preparando" styleClass="status-pill-label"/>
+            </HBox>
+        </HBox>
+
+        <!-- Centered face + subtitle + partial transcript -->
+        <VBox alignment="CENTER" spacing="18" VBox.vgrow="ALWAYS" styleClass="voice-center">
+            <padding><Insets top="8" right="20" bottom="8" left="20"/></padding>
+            <StackPane fx:id="faceHolder" prefWidth="240" prefHeight="240"/>
+            <Label fx:id="subtitleLabel" text="Pulsa el micro para hablar" styleClass="subtitle-label"
+                   wrapText="true" maxWidth="340" textAlignment="CENTER"/>
+            <Label fx:id="partialTranscriptLabel" text="" styleClass="partial-transcript"
+                   wrapText="true" maxWidth="340" textAlignment="CENTER"/>
         </VBox>
-    </ScrollPane>
-    
-    <!-- Barra de entrada -->
-    <HBox styleClass="chat-input-bar" alignment="CENTER" spacing="10">
-        <padding><Insets top="10" right="15" bottom="10" left="15"/></padding>
-        <TextField fx:id="messageInput" promptText="Describe tu emergencia..." HBox.hgrow="ALWAYS" onAction="#handleSendMessage"/>
-        <Button fx:id="voiceButton" text="🎤" onAction="#handleVoiceInput" styleClass="voice-button"/>
-        <Button fx:id="sendButton" text="📤" onAction="#handleSendMessage" styleClass="send-button"/>
-    </HBox>
-    
-    <!-- Barra de estado -->
-    <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="10">
-        <padding><Insets top="5" right="15" bottom="5" left="15"/></padding>
-        <Label fx:id="statusLabel" text="Listo" styleClass="status-label"/>
-        <Pane HBox.hgrow="ALWAYS"/>
-        <Label fx:id="aiStatusLabel" text="IA: Verificando..." styleClass="ai-status"/>
-    </HBox>
-    
-</VBox>
+
+        <!-- Bottom FAB row: alert (left) + mic (center) + chat (right) -->
+        <HBox alignment="CENTER" spacing="24" styleClass="fab-row">
+            <padding><Insets top="8" right="12" bottom="22" left="12"/></padding>
+            <Button fx:id="alertButton" text="SOS" onAction="#handleEmergencyButton" styleClass="alert-fab"/>
+            <Button fx:id="micButton" text="🎙" onAction="#handleVoiceInput" styleClass="mic-fab"/>
+            <Button fx:id="chatButton" text="💬" onAction="#toggleChatSheet" styleClass="chat-fab"/>
+        </HBox>
+
+    </VBox>
+
+    <!-- Chat bottom sheet: hidden by default; slides up when chat FAB tapped -->
+    <VBox fx:id="chatSheet" styleClass="chat-sheet" StackPane.alignment="BOTTOM_CENTER"
+          visible="false" managed="false" maxHeight="520">
+        <Region styleClass="sheet-grabber" prefHeight="4" maxWidth="60"/>
+        <HBox styleClass="sheet-header" alignment="CENTER_LEFT" spacing="10">
+            <padding><Insets top="10" right="16" bottom="10" left="18"/></padding>
+            <Label text="Conversación" styleClass="sheet-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕" onAction="#closeChatSheet" styleClass="sheet-close"/>
+        </HBox>
+        <ScrollPane fx:id="chatScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="chat-scroll">
+            <VBox fx:id="chatMessages" spacing="10" styleClass="chat-messages">
+                <padding><Insets top="12" right="14" bottom="12" left="14"/></padding>
+            </VBox>
+        </ScrollPane>
+        <HBox styleClass="chat-input-bar" alignment="CENTER" spacing="10">
+            <padding><Insets top="10" right="14" bottom="14" left="14"/></padding>
+            <TextField fx:id="messageInput" promptText="Escribe si no puedes hablar…"
+                       HBox.hgrow="ALWAYS" onAction="#handleSendMessage"/>
+            <Button fx:id="sendButton" text="→" onAction="#handleSendMessage" styleClass="send-button"/>
+        </HBox>
+    </VBox>
+
+</StackPane>

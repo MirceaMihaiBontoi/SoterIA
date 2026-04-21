@@ -13,7 +13,12 @@ import com.soteria.infrastructure.intelligence.STTListener;
 import com.soteria.infrastructure.intelligence.VoskSTTService;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
+import com.soteria.ui.component.SoterIAFace;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -23,29 +28,40 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatController {
 
-    private static final String STATUS_READY = "Ready";
     private static final int MAX_HISTORY_TURNS = 10;
+    private static final String PROMPT_READY = "Pulsa el micro para hablar";
 
+    @FXML private StackPane faceHolder;
+    @FXML private Label subtitleLabel;
+    @FXML private Label partialTranscriptLabel;
+    @FXML private Label aiStatusLabel;
+    @FXML private Circle statusDot;
+    @FXML private Button micButton;
+    @FXML private Button alertButton;
+    @FXML private Button chatButton;
+    @FXML private VBox chatSheet;
     @FXML private ScrollPane chatScrollPane;
     @FXML private VBox chatMessages;
     @FXML private TextField messageInput;
-    @FXML private Button voiceButton;
-    @FXML private Label aiStatusLabel;
-    @FXML private Label statusLabel;
+    @FXML private Button sendButton;
 
     private final List<ChatMessage> conversationHistory = new ArrayList<>();
     private final LocationProvider locationProvider = new SystemGPSLocation();
     private final AlertService alertService = new NotificationAlertService();
 
+    private SoterIAFace face;
     private UserData currentUser;
 
     private VoskSTTService sttService;
@@ -54,29 +70,57 @@ public class ChatController {
 
     private boolean aiAvailable = false;
     private boolean isRecording = false;
+    private boolean sheetOpen = false;
     private String currentLanguage = "Spanish";
+
+    @FXML
+    private void initialize() {
+        face = new SoterIAFace(85);
+        faceHolder.getChildren().add(face);
+        setSubtitle(PROMPT_READY);
+        setPartialTranscript("");
+        setAiStatusPill("Preparando IA", "warming");
+        setInputLocked(true);
+    }
+
+    private void setInputLocked(boolean locked) {
+        micButton.setDisable(locked);
+        chatButton.setDisable(locked);
+        if (sendButton != null) sendButton.setDisable(locked);
+        if (messageInput != null) messageInput.setDisable(locked);
+    }
 
     public void init(UserData profile, BootstrapService bootstrap) {
         this.currentUser = profile;
+        addBotMessage("Hola " + profile.fullName() + ". Soy SoterIA. "
+                + "Pulsa el micro y cuéntame qué pasa, o escribe si no puedes hablar.");
 
-        addBotMessage("Hi " + profile.fullName() + ". I am Soteria, your emergency assistant. "
-                + "Describe what is happening, or press the microphone.");
+        setAiStatusPill("Cargando", "warming");
+        String initialStatus = bootstrap.statusProperty().get();
+        setSubtitle(initialStatus == null || initialStatus.isBlank() ? "Preparando asistente…" : initialStatus);
 
-        aiStatusLabel.setText("AI: warming up...");
-        setStatus("Preparing...");
+        // Mirror boot progress in the subtitle until the AI is up. Once ready
+        // we detach and the subtitle goes back to user-facing prompts.
+        bootstrap.statusProperty().addListener((obs, old, nw) -> {
+            if (!aiAvailable && nw != null && !nw.isBlank()) {
+                setSubtitle(nw);
+            }
+        });
 
         bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> {
             if (err != null) {
-                aiStatusLabel.setText("AI: error");
-                setStatus("Init failed");
+                setAiStatusPill("IA offline", "offline");
+                setSubtitle("No puedo escucharte ahora. Usa el botón SOS si es urgente.");
+                face.setState(SoterIAFace.State.IDLE);
                 return;
             }
             this.sttService = bootstrap.sttService();
             this.brainService = bootstrap.brainService();
             this.knowledgeBase = bootstrap.knowledgeBase();
             this.aiAvailable = true;
-            aiStatusLabel.setText("AI: ready (" + bootstrap.capability().getRecommendedProfile() + ")");
-            setStatus(STATUS_READY);
+            setAiStatusPill("IA lista", "ready");
+            setSubtitle(PROMPT_READY);
+            setInputLocked(false);
         }));
     }
 
@@ -86,36 +130,41 @@ public class ChatController {
         if (message.isEmpty()) return;
         addUserMessage(message);
         messageInput.clear();
-        setStatus("Processing...");
         processMessage(message);
     }
 
     @FXML
     private void handleVoiceInput() {
         if (!aiAvailable) {
-            addBotMessage("System is still initializing. Please wait.");
+            setSubtitle("La IA aún se está preparando. Espera unos segundos.");
             return;
         }
 
         if (!isRecording) {
             isRecording = true;
-            voiceButton.setText("⏹");
-            setStatus("Listening...");
+            micButton.getStyleClass().add("mic-fab-active");
+            micButton.setText("⏹");
+            face.setState(SoterIAFace.State.LISTENING);
+            setSubtitle("Escuchando…");
+            setPartialTranscript("");
             sttService.startListening(new STTListener() {
                 @Override public void onResult(String text) {
                     if (!text.isEmpty()) {
                         Platform.runLater(() -> {
+                            stopRecordingUI();
                             addUserMessage(text);
                             processMessage(text);
                         });
                     }
                 }
                 @Override public void onPartialResult(String text) {
-                    Platform.runLater(() -> setStatus("… " + text));
+                    Platform.runLater(() -> setPartialTranscript(text));
                 }
                 @Override public void onError(Throwable t) {
-                    Platform.runLater(() -> setStatus("Mic error: " + t.getMessage()));
-                    stopRecordingUI();
+                    Platform.runLater(() -> {
+                        stopRecordingUI();
+                        setSubtitle("Error del micro: " + t.getMessage());
+                    });
                 }
             });
         } else {
@@ -124,10 +173,59 @@ public class ChatController {
         }
     }
 
+    @FXML
+    private void handleEmergencyButton() {
+        handleEmergencyAlert("Botón SOS pulsado manualmente");
+    }
+
+    @FXML
+    private void toggleChatSheet() {
+        if (sheetOpen) closeChatSheet();
+        else openChatSheet();
+    }
+
+    @FXML
+    private void closeChatSheet() {
+        if (!sheetOpen) return;
+        sheetOpen = false;
+        Timeline tl = new Timeline(
+                new KeyFrame(Duration.millis(220),
+                        new KeyValue(chatSheet.translateYProperty(),
+                                chatSheet.getHeight() > 0 ? chatSheet.getHeight() : 520,
+                                Interpolator.EASE_IN),
+                        new KeyValue(chatSheet.opacityProperty(), 0, Interpolator.EASE_IN))
+        );
+        tl.setOnFinished(e -> {
+            chatSheet.setVisible(false);
+            chatSheet.setManaged(false);
+        });
+        tl.play();
+    }
+
+    private void openChatSheet() {
+        sheetOpen = true;
+        chatSheet.setVisible(true);
+        chatSheet.setManaged(true);
+        double start = chatSheet.getHeight() > 0 ? chatSheet.getHeight() : 520;
+        chatSheet.setTranslateY(start);
+        chatSheet.setOpacity(0);
+        Timeline tl = new Timeline(
+                new KeyFrame(Duration.millis(240),
+                        new KeyValue(chatSheet.translateYProperty(), 0, Interpolator.EASE_OUT),
+                        new KeyValue(chatSheet.opacityProperty(), 1, Interpolator.EASE_OUT))
+        );
+        tl.play();
+    }
+
     private void stopRecordingUI() {
         isRecording = false;
-        voiceButton.setText("🎤");
-        setStatus(STATUS_READY);
+        micButton.getStyleClass().remove("mic-fab-active");
+        micButton.setText("🎙");
+        setPartialTranscript("");
+        if (face.getState() == SoterIAFace.State.LISTENING) {
+            face.setState(SoterIAFace.State.IDLE);
+        }
+        setSubtitle(PROMPT_READY);
     }
 
     private void processMessage(String message) {
@@ -140,7 +238,8 @@ public class ChatController {
         conversationHistory.add(ChatMessage.user(message));
         trimHistory();
 
-        setStatus("AI thinking...");
+        face.setState(SoterIAFace.State.THINKING);
+        setSubtitle("Pensando…");
         List<ChatMessage> snapshot = List.copyOf(conversationHistory);
         new Thread(() -> {
             List<Protocol> results = knowledgeBase.findProtocols(message);
@@ -150,7 +249,8 @@ public class ChatController {
                 conversationHistory.add(ChatMessage.model(response));
                 trimHistory();
                 addBotMessage(response);
-                setStatus(STATUS_READY);
+                face.setState(SoterIAFace.State.IDLE);
+                setSubtitle(PROMPT_READY);
             });
         }, "soteria-inference").start();
     }
@@ -159,7 +259,6 @@ public class ChatController {
         while (conversationHistory.size() > MAX_HISTORY_TURNS) {
             conversationHistory.remove(0);
         }
-        // Gemma template requires the conversation to start with a user turn.
         while (!conversationHistory.isEmpty() && !"user".equals(conversationHistory.get(0).role())) {
             conversationHistory.remove(0);
         }
@@ -199,8 +298,20 @@ public class ChatController {
         });
     }
 
-    private void setStatus(String status) {
-        Platform.runLater(() -> statusLabel.setText(status));
+    private void setSubtitle(String text) {
+        Platform.runLater(() -> subtitleLabel.setText(text));
+    }
+
+    private void setPartialTranscript(String text) {
+        Platform.runLater(() -> partialTranscriptLabel.setText(text == null ? "" : text));
+    }
+
+    private void setAiStatusPill(String text, String dotClass) {
+        Platform.runLater(() -> {
+            aiStatusLabel.setText(text);
+            statusDot.getStyleClass().removeAll("ready", "warming", "offline", "alert");
+            statusDot.getStyleClass().add(dotClass);
+        });
     }
 
     private boolean isEmergencyCommand(String message) {
@@ -210,7 +321,9 @@ public class ChatController {
     }
 
     private void handleEmergencyAlert(String message) {
-        setStatus("Sending alert...");
+        face.setState(SoterIAFace.State.ALERT);
+        setAiStatusPill("Alerta activa", "alert");
+        setSubtitle("Enviando alerta…");
         new Thread(() -> {
             try {
                 String location = locationProvider.getLocationDescription();
@@ -222,16 +335,20 @@ public class ChatController {
                 boolean success = alertService.send(event);
                 Platform.runLater(() -> {
                     if (success) {
-                        addBotMessage("Emergency alert sent. Detected location: " + location
-                                + ". Professional help is on the way — stay calm.");
-                        setStatus("Active alert");
+                        addBotMessage("Alerta enviada. Ubicación detectada: " + location
+                                + ". La ayuda está en camino — mantén la calma.");
+                        setSubtitle("Alerta enviada. Mantente en la línea.");
                     } else {
-                        addBotMessage("Automated alert failed. Please call 112/911 immediately.");
-                        setStatus("Error");
+                        addBotMessage("No pude enviar la alerta automática. Llama al 112/911 ahora.");
+                        setSubtitle("Llama al 112 directamente.");
+                        setAiStatusPill("Alerta falló", "offline");
                     }
                 });
             } catch (Exception e) {
-                Platform.runLater(() -> setStatus("Error"));
+                Platform.runLater(() -> {
+                    setSubtitle("Error al enviar alerta.");
+                    setAiStatusPill("Alerta falló", "offline");
+                });
             }
         }, "soteria-alert").start();
     }
