@@ -178,5 +178,20 @@
       "Note the time and what was given to inform the paramedics."
     ],
     "priority": 1
+  },
+  {
+    "id": "MED_006",
+    "title": "Syncope (Fainting)",
+    "category": "Medical",
+    "keywords": ["faint", "syncope", "passing out", "dizzy", "unconscious", "desmayo", "síncope", "mareo", "lipotimia", "vaguez"],
+    "steps": [
+      "Lay the person flat on their back and elevate their legs about 12 inches (if no injury).",
+      "Loosen any tight clothing (collars, belts) to improve circulation.",
+      "Check for breathing and responsiveness; if they don't wake up quickly, call emergency services.",
+      "If they vomited, turn them onto their side to prevent choking.",
+      "Do NOT splash water on their face or try to give them anything to drink until fully conscious.",
+      "Keep them lying down for at least 10-15 minutes after they wake up."
+    ],
+    "priority": 1
   }
 ]

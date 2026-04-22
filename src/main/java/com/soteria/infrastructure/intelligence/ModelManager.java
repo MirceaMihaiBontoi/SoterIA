@@ -38,8 +38,11 @@ public class ModelManager {
     private static final String LLM_ULTRA_LITE_URL  = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf";
     private static final String LLM_LITE_URL        = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q8_0.gguf";
     private static final String LLM_BALANCED_URL    = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
-    private static final String LLM_PERFORMANCE_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
     private static final String LLM_ULTRA_URL       = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
+
+    // Embedding (Vector) Model — Compact multilingual model for semantic search
+    private static final String EMBEDDING_MODEL_URL = "https://huggingface.co/mykor/paraphrase-multilingual-MiniLM-L12-v2.gguf/resolve/main/paraphrase-multilingual-MiniLM-L12-118M-v2-F16.gguf";
+    private static final String EMBEDDING_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-118M-v2-F16.gguf";
 
     private final SystemCapability capability;
     private final Path modelBasePath;
@@ -81,10 +84,30 @@ public class ModelManager {
     }
 
     /**
+     * Returns the on-disk path for the embedding model.
+     */
+    public Path getEmbeddingModelPath() {
+        return modelBasePath.resolve(EMBEDDING_MODEL_NAME);
+    }
+
+    /**
      * Returns the on-disk path for a Vosk model directory, whether it exists or not.
      */
     public Path getVoskModelPath(String language) {
         return modelBasePath.resolve(getVoskModelName(language));
+    }
+
+    /**
+     * Gets the path to the persistent Knowledge Base index.
+     */
+    public Path getKBIndexPath() {
+        Path indexPath = modelBasePath.getParent().resolve("index");
+        try {
+            Files.createDirectories(indexPath);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Could not create index directory", e);
+        }
+        return indexPath;
     }
 
     public boolean isBrainModelReady() {
@@ -97,6 +120,10 @@ public class ModelManager {
 
     public boolean isVoskModelReady(String language) {
         return Files.exists(getVoskModelPath(language));
+    }
+
+    public boolean isEmbeddingModelReady() {
+        return Files.exists(getEmbeddingModelPath());
     }
 
     /**
@@ -126,6 +153,17 @@ public class ModelManager {
             return CompletableFuture.completedFuture(target);
         }
         return downloadFile(url, target);
+    }
+
+    /**
+     * Downloads the multilingual embedding model.
+     */
+    public CompletableFuture<Path> downloadEmbeddingModel() {
+        Path target = getEmbeddingModelPath();
+        if (Files.exists(target)) {
+            return CompletableFuture.completedFuture(target);
+        }
+        return downloadFile(EMBEDDING_MODEL_URL, target);
     }
 
     /**
@@ -249,7 +287,6 @@ public class ModelManager {
             case ULTRA_LITE -> LLM_ULTRA_LITE_URL;
             case LITE -> LLM_LITE_URL;
             case BALANCED -> LLM_BALANCED_URL;
-            case PERFORMANCE -> LLM_PERFORMANCE_URL;
             case ULTRA -> LLM_ULTRA_URL;
         };
     }
@@ -263,7 +300,6 @@ public class ModelManager {
             case ULTRA_LITE -> "gemma-3-1b-it-Q4_K_M.gguf";
             case LITE -> "gemma-3-1b-it-Q8_0.gguf";
             case BALANCED -> "gemma-3-4b-it-Q4_K_M.gguf";
-            case PERFORMANCE -> "gemma-3-4b-it-Q4_K_M.gguf";
             case ULTRA -> "gemma-3-4b-it-Q8_0.gguf";
         };
     }

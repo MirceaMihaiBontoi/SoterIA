@@ -4,6 +4,7 @@ emergency_history.log
 user_feedback.log
 *.dat
 cache/
+logs/
 
 # Archivos compilados
 *.class
@@ -27,4 +28,5 @@ Thumbs.db
 .project
 .settings/
 ROADMAP.md
-
+execution_flow.txt
+*aider*

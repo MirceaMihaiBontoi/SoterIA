@@ -123,7 +123,12 @@ public class VoskSTTService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        if (recognizer != null) recognizer.close();
-        if (model != null) model.close();
+        try {
+            if (recognizer != null) recognizer.close();
+            if (model != null) model.close();
+        } catch (Throwable t) {
+            // Silently swallow native memory access errors during shutdown
+            logger.log(Level.FINE, "Silent failure during Vosk memory cleanup", t);
+        }
     }
 }

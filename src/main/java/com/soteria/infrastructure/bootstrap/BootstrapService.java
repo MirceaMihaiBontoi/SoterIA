@@ -39,6 +39,8 @@ public class BootstrapService {
     private final ReadOnlyDoubleWrapper progress = new ReadOnlyDoubleWrapper(0.0);
     private final ReadOnlyBooleanWrapper readyToChat = new ReadOnlyBooleanWrapper(false);
     
+    private static final String PROTOCOLS_PATH = System.getProperty("soteria.protocols.path", "/data/protocols/");
+
     // Low-level future for internal synchronization
     private final AtomicReference<CompletableFuture<Void>> ready = new AtomicReference<>(new CompletableFuture<>());
 
@@ -62,7 +64,7 @@ public class BootstrapService {
             modelManager = new ModelManager(capability);
 
             update("Building knowledge base...", 0.30);
-            knowledgeBase = new EmergencyKnowledgeBase();
+            knowledgeBase = new EmergencyKnowledgeBase(PROTOCOLS_PATH, modelManager.getKBIndexPath(), capability);
             
             update("System ready for setup", 1.0);
         } catch (Exception e) {
@@ -113,53 +115,88 @@ public class BootstrapService {
 
     private void runProvisioning(SystemCapability.AIModelProfile profile, String language, String customUrl) {
         try {
-            if (Thread.currentThread().isInterrupted()) return;
+            if (isInterrupted()) return;
+            provisionSTT(language);
 
-            if (!modelManager.isVoskModelReady(language)) {
-                update("Downloading speech model...", 0.10);
-                activeDownload = modelManager.downloadVoskModel(language);
-                activeDownload.join();
-            }
+            if (isInterrupted()) return;
+            provisionBrainModel(profile, customUrl);
 
-            if (Thread.currentThread().isInterrupted()) return;
+            if (isInterrupted()) return;
+            provisionKnowledgeBase();
 
-            update("Loading speech recognition...", 0.30);
-            if (sttService != null) sttService.shutdown();
-            sttService = new VoskSTTService(modelManager.getVoskModelPath(language));
-
-            if (Thread.currentThread().isInterrupted()) return;
-
-            String modelDisplay = (customUrl != null && !customUrl.isBlank()) ? "Custom" : profile.getDisplayName();
-            update("Downloading AI brain (" + modelDisplay + ")...", 0.40);
-            activeDownload = modelManager.downloadBrainModel(profile, customUrl);
-            activeDownload.join();
-
-            if (Thread.currentThread().isInterrupted()) return;
-
-            update("Loading AI brain...", 0.70);
-            if (brainService != null) brainService.close();
-            brainService = new LocalBrainService(modelManager.getBrainModelPath(profile, customUrl));
-
-            if (Thread.currentThread().isInterrupted()) return;
-
-            update("Warming up AI...", 0.90);
-            warmUpBrain(language);
+            if (isInterrupted()) return;
+            initBrainService(profile, customUrl, language);
 
             update("Ready", 1.0);
             ready.get().complete(null);
         } catch (Exception e) {
-            if (Thread.currentThread().isInterrupted() || e instanceof InterruptedException || e.getCause() instanceof InterruptedException) {
-                log.info("Provisioning task aborted cleanly.");
-                return;
-            }
-            log.log(Level.SEVERE, "Provisioning failed", e);
-            update("Setup Error: " + e.getMessage(), progress.get());
-            ready.get().completeExceptionally(e);
+            handleProvisioningError(e);
         } finally {
-            synchronized (this) {
-                if (Thread.currentThread() == activeProvisioner) {
-                    activeProvisioner = null;
-                }
+            cleanupActiveProvisioner();
+        }
+    }
+
+    private boolean isInterrupted() {
+        return Thread.currentThread().isInterrupted();
+    }
+
+    private void provisionSTT(String language) throws Exception {
+        if (!modelManager.isVoskModelReady(language)) {
+            update("Downloading speech model...", 0.10);
+            activeDownload = modelManager.downloadVoskModel(language);
+            activeDownload.join();
+        }
+
+        if (isInterrupted()) return;
+
+        update("Loading speech recognition...", 0.30);
+        if (sttService != null) sttService.shutdown();
+        sttService = new VoskSTTService(modelManager.getVoskModelPath(language));
+    }
+
+    private void provisionBrainModel(SystemCapability.AIModelProfile profile, String customUrl) throws Exception {
+        String modelDisplay = (customUrl != null && !customUrl.isBlank()) ? "Custom" : profile.getDisplayName();
+        update("Downloading AI brain (" + modelDisplay + ")...", 0.40);
+        activeDownload = modelManager.downloadBrainModel(profile, customUrl);
+        activeDownload.join();
+    }
+
+    private void provisionKnowledgeBase() throws Exception {
+        update("Downloading semantic search engine...", 0.60);
+        activeDownload = modelManager.downloadEmbeddingModel();
+        activeDownload.join();
+
+        if (isInterrupted()) return;
+
+        update("Optimizing search engine...", 0.65);
+        knowledgeBase.initializeSemanticIndex(modelManager.getEmbeddingModelPath());
+    }
+
+    private void initBrainService(SystemCapability.AIModelProfile profile, String customUrl, String language) throws Exception {
+        update("Loading AI brain...", 0.70);
+        if (brainService != null) brainService.close();
+        brainService = new LocalBrainService(modelManager.getBrainModelPath(profile, customUrl), capability);
+
+        if (isInterrupted()) return;
+
+        update("Warming up AI...", 0.90);
+        warmUpBrain(language);
+    }
+
+    private void handleProvisioningError(Exception e) {
+        if (isInterrupted() || e instanceof InterruptedException || e.getCause() instanceof InterruptedException) {
+            log.info("Provisioning task aborted cleanly.");
+            return;
+        }
+        log.log(Level.SEVERE, "Provisioning failed", e);
+        update("Setup Error: " + e.getMessage(), progress.get());
+        ready.get().completeExceptionally(e);
+    }
+
+    private void cleanupActiveProvisioner() {
+        synchronized (this) {
+            if (Thread.currentThread() == activeProvisioner) {
+                activeProvisioner = null;
             }
         }
     }
@@ -171,8 +208,13 @@ public class BootstrapService {
      */
     private void warmUpBrain(String language) {
         try {
-            List<ChatMessage> primer = List.of(ChatMessage.user("ping"));
-            brainService.generateResponse(primer, "Warmup — no real protocol needed.", language);
+            List<ChatMessage> primer = List.of(ChatMessage.user("SYSTEM_TEST_START_WARMUP"));
+            brainService.generateResponse(primer, "Warmup — no real protocol needed.", language, null, new com.soteria.infrastructure.intelligence.InferenceListener() {
+                @Override public void onToken(String t) { /* Silent warmup — tokens are not used */ }
+                @Override public void onAnalysisComplete(String id, String s) { /* Silent warmup — analysis is not used */ }
+                @Override public void onComplete(String f) { /* Silent warmup completion */ }
+                @Override public void onError(Throwable e) { /* Warmup errors are non-fatal */ }
+            });
         } catch (Exception e) {
             log.log(Level.WARNING, "Warmup turn failed (non-fatal)", e);
         }
@@ -211,15 +253,40 @@ public class BootstrapService {
     public LocalBrainService brainService()    { return brainService; }
 
     public void shutdown() {
+        log.info("System shutdown initiated. Cleaning up resources...");
+        
+        // 1. Stop the provisioner thread if alive
+        if (activeProvisioner != null && activeProvisioner.isAlive()) {
+            activeProvisioner.interrupt();
+        }
+
+        // 2. Cancel any active model download
+        if (activeDownload != null && !activeDownload.isDone()) {
+            activeDownload.cancel(true);
+        }
+
+        // 3. Close native engines and STT
         try {
             if (sttService != null) sttService.shutdown();
         } catch (Exception ignored) {
-            // Ignored during shutdown
+            // Native STT resource cleanup is best-effort during shutdown
         }
+        
         try {
             if (brainService != null) brainService.close();
         } catch (Exception ignored) {
-            // Ignored during shutdown
+            // Llama engine cleanup failures are common during forced shutdown
         }
+
+        try {
+            if (knowledgeBase != null) knowledgeBase.close();
+        } catch (Exception ignored) {
+            // Persistent Lucene index locks are cleared by OS after process exit
+        }
+        
+        log.info("Cleanup complete.");
+        // Final "scorched earth" shutdown to ensure no zombie threads keep the JVM alive
+        System.exit(0);
     }
+
 }
