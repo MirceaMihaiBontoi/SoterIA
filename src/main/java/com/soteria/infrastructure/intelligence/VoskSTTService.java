@@ -18,10 +18,10 @@ import java.util.logging.Logger;
 /**
  * High-performance, offline Speech-to-Text service using Vosk.
  */
-public class VoskSTTService {
+public class VoskSTTService implements AutoCloseable {
     private static final Logger logger = Logger.getLogger(VoskSTTService.class.getName());
     private static final ObjectMapper mapper = new ObjectMapper();
-    
+
     private Model model;
     private Recognizer recognizer;
     private TargetDataLine line;
@@ -38,13 +38,14 @@ public class VoskSTTService {
     }
 
     public void startListening(STTListener listener) {
-        if (listening) return;
-        
+        if (listening)
+            return;
+
         listening = true;
         executor.submit(() -> {
             AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-            
+
             if (!AudioSystem.isLineSupported(info)) {
                 listener.onError(new RuntimeException("Microphone or requested format not supported"));
                 return;
@@ -57,12 +58,13 @@ public class VoskSTTService {
 
                 byte[] buffer = new byte[4096];
                 int bytesRead;
-                
+
                 logger.info("STT Service: Listening...");
-                
+
                 while (listening) {
                     bytesRead = line.read(buffer, 0, buffer.length);
-                    if (bytesRead < 0) break;
+                    if (bytesRead < 0)
+                        break;
 
                     if (recognizer.acceptWaveForm(buffer, bytesRead)) {
                         String rawResult = recognizer.getResult();
@@ -72,11 +74,11 @@ public class VoskSTTService {
                         listener.onPartialResult(extractPartial(rawPartial));
                     }
                 }
-                
+
                 line.stop();
                 line.close();
                 logger.info("STT Service: Stopped.");
-                
+
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error in STT audio loop", e);
                 listener.onError(e);
@@ -98,7 +100,7 @@ public class VoskSTTService {
         try {
             JsonNode node = mapper.readTree(json);
             return node.has("text") ? node.get("text").asText() : "";
-        } catch (Exception e) {
+        } catch (Exception _) {
             return "";
         }
     }
@@ -107,11 +109,11 @@ public class VoskSTTService {
         try {
             JsonNode node = mapper.readTree(json);
             return node.has("partial") ? node.get("partial").asText() : "";
-        } catch (Exception e) {
+        } catch (Exception _) {
             return "";
         }
     }
-    
+
     public void shutdown() {
         stopListening();
         executor.shutdownNow();
@@ -120,15 +122,22 @@ public class VoskSTTService {
             if (!shutdownLatch.await(2, java.util.concurrent.TimeUnit.SECONDS)) {
                 logger.warning("Vosk listener background thread did not terminate within timeout.");
             }
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
         }
         try {
-            if (recognizer != null) recognizer.close();
-            if (model != null) model.close();
-        } catch (Throwable t) {
+            if (recognizer != null)
+                recognizer.close();
+            if (model != null)
+                model.close();
+        } catch (Exception _) {
             // Silently swallow native memory access errors during shutdown
-            logger.log(Level.FINE, "Silent failure during Vosk memory cleanup", t);
+            logger.log(Level.FINE, "Silent failure during Vosk memory cleanup");
         }
+    }
+
+    @Override
+    public void close() {
+        shutdown();
     }
 }

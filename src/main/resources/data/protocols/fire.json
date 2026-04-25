@@ -1,46 +1,85 @@
 [
   {
-    "id": "FIRE_001",
-    "title": "Structural Fire (Building)",
+    "id": "FIRE_001_VIC",
+    "title": "Structural Fire (Victim / Inside)",
     "category": "Fire",
-    "keywords": ["fire", "smoke", "building", "building fire", "evacuation", "fuego", "humo", "incendio", "edificio", "evacuación"],
+    "keywords": ["I am in a fire", "smoke in my house", "building is burning", "I am trapped in a fire", "apartment fire me", "I smell smoke inside", "room filling with smoke", "my kitchen is on fire", "fire in my bedroom", "evacuating building", "massive kitchen fire", "uncontrolled building fire"],
     "steps": [
-      "Get out, stay out, and call emergency services.",
-      "If you see smoke, stay low to the floor where the air is cleaner.",
-      "Before opening any door, touch the door handle or door with the back of your hand; if it is hot, do NOT open it.",
-      "If your clothes catch fire: Stop, Drop, and Roll.",
-      "Do NOT use elevators during a fire.",
-      "If you are trapped, close all doors between you and the fire, and use cloth to seal cracks around doors."
+      "Get out immediately and stay out. Do not stop for belongings.",
+      "If there is smoke, stay low to the floor and crawl to the nearest exit.",
+      "Touch doors with the back of your hand before opening; if hot, find another way.",
+      "If trapped: Close all doors, seal cracks with cloth/tape, and signal from a window.",
+      "Call 112/911 once you are outside or if trapped inside."
     ],
     "priority": 1
   },
   {
-    "id": "FIRE_002",
-    "title": "Electrical Fire",
+    "id": "FIRE_001_WIT",
+    "title": "Structural Fire (Witness / Outside)",
     "category": "Fire",
-    "keywords": ["fire", "electricity", "spark", "wire", "short circuit", "appliance", "fuego", "electricidad", "chispa", "cable", "cortocircuito"],
+    "keywords": ["I see a fire", "building on fire witness", "smoke coming from a house", "neighbor's house burning", "reporting a fire", "flames visible from street", "there is a fire at", "smoke plume from building"],
     "steps": [
-      "Do NOT attempt to use water on an electrical fire (risk of electrocution).",
-      "Identify the source and, if safe, turn off the main power supply.",
-      "Use a Class C (or CO2/Dry Powder) fire extinguisher if available.",
-      "Do not touch any wires or appliances involved in the fire.",
-      "If the fire is inside a wall or appliance, evacuate immediately and call emergency services.",
-      "Do not turn the power back on until a certified electrician has inspected the damage."
+      "Call 112/911 immediately. Provide the exact address.",
+      "Keep a safe distance from the building.",
+      "Inform emergency services if you believe people are trapped inside.",
+      "Do NOT enter the building under any circumstances.",
+      "Wait for firefighters and direct them to the fire source if known."
     ],
     "priority": 1
   },
   {
-    "id": "FIRE_003",
-    "title": "Wildfire / Forest Fire",
+    "id": "FIRE_002_VIC",
+    "title": "Electrical Fire (Victim / Inside)",
     "category": "Fire",
-    "keywords": ["wildfire", "forest", "bush", "smoke", "evacuation", "trees", "incendio", "bosque", "monte", "humo", "evacuación"],
+    "keywords": ["I smell burning plastic", "fishy smell from outlet", "sparks from my wall", "electrical fire in my house", "my computer is sparking", "outlet caught fire", "smoke from circuit breaker", "electric smell home"],
     "steps": [
-      "Monitor local news and emergency alerts for evacuation orders.",
-      "If ordered to evacuate, leave immediately. Do NOT wait.",
-      "Close all windows and doors to prevent embers from entering the structure.",
-      "If trapped outdoors, find an area clear of vegetation (like a rocky area or a body of water).",
-      "Stay low to the ground and cover your mouth with a damp cloth to filter smoke.",
-      "Wear long-sleeved clothing made of natural fibers (cotton/wool) to protect against heat."
+      "Do NOT use water. Turn off the main power switch immediately if safe to reach.",
+      "Use a Class C or CO2 fire extinguisher if the fire is small.",
+      "If the fire is inside walls or spreading, evacuate the building immediately.",
+      "Call 112/911 and specify it is an electrical fire.",
+      "Do not re-enter or turn power back on until an electrician inspects the damage."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_002_WIT",
+    "title": "Electrical Fire (Witness / Outside)",
+    "category": "Fire",
+    "keywords": ["I see sparks on power line", "transformer fire witness", "electric pole on fire", "sparks from public building", "electrical hazard on street", "reporting electrical fire"],
+    "steps": [
+      "Call 112/911 and the electric utility company.",
+      "Keep at least 10 meters (33 feet) away from the sparks or downed lines.",
+      "Warn others to stay back.",
+      "Do NOT touch any metal fences or objects near the electrical source.",
+      "Wait for professionals to arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_003_VIC",
+    "title": "Wildfire / Forest Fire (Victim / Exposed)",
+    "category": "Fire",
+    "keywords": ["wildfire near my home", "forest fire approaching", "I am trapped by a bushfire", "smoke everywhere outdoors", "evacuating wildfire", "embers on my roof", "fire in the mountains near me"],
+    "steps": [
+      "Evacuate immediately if ordered. Do not wait for a second warning.",
+      "Close all windows/doors and turn off AC to prevent embers from entering.",
+      "Wear long-sleeved natural fibers (cotton/wool) to protect from heat.",
+      "If trapped, find a clear area (rocky ground or water) and stay low.",
+      "Call 112/911 with your exact location if you cannot evacuate."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_003_WIT",
+    "title": "Wildfire / Forest Fire (Witness / Reporting)",
+    "category": "Fire",
+    "keywords": ["I see smoke in the forest", "mountain is on fire", "reporting a wildfire", "smoke plume from distance", "brush fire witness", "seeing a forest fire", "fire in the woods"],
+    "steps": [
+      "Call 112/911. Describe the location and size of the smoke column.",
+      "Move away from the direction of the wind (upwind).",
+      "Stay informed via local radio or emergency apps.",
+      "Do NOT fly drones near the area (interferes with firefighting aircraft).",
+      "Alert neighbors if you are in a rural area."
     ],
     "priority": 1
   },
@@ -48,7 +87,7 @@
     "id": "FIRE_004",
     "title": "Chimney Fire",
     "category": "Fire",
-    "keywords": ["chimney", "flue", "fireplace", "soot", "roof", "chimenea", "fuego", "tejado", "hollín"],
+    "keywords": ["chimney", "flue", "fireplace", "soot", "roof", "creosote", "flue liner", "spark arrestor", "masonry", "bricks", "vent", "smoke backup", "roaring sound", "chimney cap"],
     "steps": [
       "Evacuate everyone from the house immediately.",
       "Call emergency services.",
@@ -63,7 +102,7 @@
     "id": "FIRE_005",
     "title": "Wildfire Survival in Vehicle",
     "category": "Fire",
-    "keywords": ["wildfire", "car", "trapped", "smoke", "heat", "incendio", "coche", "atrapado", "humo", "calor"],
+    "keywords": ["wildfire", "car", "trapped", "smoke", "heat", "asphalt", "cabin", "recirculation", "exhaust", "tires", "hazard lights", "dashboard", "steering wheel", "undercarriage", "trapped in car", "roadside", "highway", "natural fibers"],
     "steps": [
       "If you cannot escape, park the car away from heavy vegetation.",
       "Turn on the headlights and hazard lights to stay visible.",
@@ -75,17 +114,30 @@
     "priority": 1
   },
   {
-    "id": "FIRE_006",
-    "title": "Kitchen Grease Fire",
+    "id": "FIRE_006_VIC",
+    "title": "Kitchen Grease Fire (Victim / Inside)",
     "category": "Fire",
-    "keywords": ["cooking", "grease", "oil", "pan", "kitchen", "cocina", "grasa", "aceite", "sartén"],
+    "keywords": ["pan is on fire", "grease fire in my kitchen", "oil caught fire", "stove is burning", "my pan is flaming", "flames on the stove", "kitchen fire active", "frying pan fire"],
     "steps": [
-      "Do NOT throw water on a grease fire (it will cause an explosion of flames).",
+      "Do NOT throw water on a grease fire. It will cause an explosion.",
       "If safe, turn off the heat source immediately.",
-      "Smother the flames by sliding a metal lid or cookie sheet over the pan.",
-      "Leave the pan covered until it has cooled completely.",
-      "Do NOT attempt to move the pan or carry it outside.",
-      "If the fire spreads beyond the pan, evacuate and call emergency services."
+      "Cover the pan with a metal lid or cookie sheet to smother the flames.",
+      "Leave it covered until completely cool. Do not move the pan.",
+      "If the fire spreads to cabinets, evacuate and call 112/911."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_006_WIT",
+    "title": "Kitchen Grease Fire (Witness / Responder)",
+    "category": "Fire",
+    "keywords": ["someone's kitchen is on fire", "reporting kitchen fire", "I see fire in a restaurant kitchen", "grease fire witness", "smoke from a kitchen window"],
+    "steps": [
+      "Call 112/911 immediately.",
+      "Do NOT enter a smoke-filled kitchen.",
+      "If you are with the victim, ensure they do not throw water on the fire.",
+      "Have everyone evacuate the area.",
+      "Inform arriving firefighters of the fire's exact location."
     ],
     "priority": 1
   },
@@ -93,7 +145,7 @@
     "id": "FIRE_007",
     "title": "Clothing Fire (Stop, Drop, Roll)",
     "category": "Fire",
-    "keywords": ["clothes", "skin", "burning", "fire", "rescue", "ropa", "piel", "quemando", "rescate"],
+    "keywords": ["clothes", "skin", "burning", "fire", "rescue", "fabric", "ignite", "maneuver", "cotton", "polyester", "wool", "burning skin", "flames on body", "stop drop and roll", "blanket", "coat", "heavy fabric"],
     "steps": [
       "STOP immediately. Do not run, as running fans the flames and makes the fire grow.",
       "DROP to the ground and cover your face with your hands.",
@@ -108,7 +160,7 @@
     "id": "FIRE_008",
     "title": "Office / Workplace Fire",
     "category": "Fire",
-    "keywords": ["office", "computer", "workplace", "server", "desk", "oficina", "trabajo", "ordenador"],
+    "keywords": ["office", "computer", "workplace", "server", "desk", "cubicle", "copier", "meeting room", "corporate", "server room", "data center", "shredder", "breakroom", "coffee machine", "printer", "water cooler", "filing cabinet"],
     "steps": [
       "Activate the nearest fire alarm pull station immediately.",
       "Evacuate using the nearest safe exit or stairs. Never use elevators.",
@@ -123,7 +175,7 @@
     "id": "FIRE_009",
     "title": "Boat / Vessel Fire",
     "category": "Fire",
-    "keywords": ["boat", "water", "sea", "engine", "sinking", "vessel", "barco", "agua", "mar", "motor", "hundiendo", "barco"],
+    "keywords": ["boat", "water", "sea", "engine", "sinking", "vessel", "deck", "hull", "maritime", "portside", "starboard", "engine room", "galley", "cabin", "stern", "bow", "life jacket", "mayday", "coast guard", "flares", "bilge"],
     "steps": [
       "Alert everyone on board and ensure all passengers have life jackets on.",
       "Stop the boat or position it so the wind blows the fire away from the vessel.",
@@ -135,17 +187,30 @@
     "priority": 1
   },
   {
-    "id": "FIRE_010",
-    "title": "Vehicle Battery Fire (EV / Hybrid)",
+    "id": "FIRE_010_VIC",
+    "title": "Vehicle Battery Fire - EV (Victim / Driver)",
     "category": "Fire",
-    "keywords": ["electric", "lithium", "battery", "car", "explosive", "thermal", "eléctrico", "litio", "batería", "coche", "explosivo"],
+    "keywords": ["my electric car is smoking", "EV battery fire me", "I smell chemicals in my Tesla", "my electric vehicle is on fire", "toxic smoke in my car", "battery venting help"],
     "steps": [
-      "Immediately pull over and evacuate all passengers to a safe distance (at least 50 meters).",
-      "Call emergency services and specify that an Electric Vehicle (EV) is on fire.",
-      "BEWARE: EV fires can release highly toxic gases (fluorides) and can experience 'thermal runaway'.",
-      "Do NOT attempt to extinguish a large battery fire with a standard fire extinguisher.",
-      "Expect the fire to be extremely intense and difficult to put out; it may bridge/re-ignite hours later.",
-      "Stay upwind to avoid inhalation of toxic smoke."
+      "Pull over immediately and turn off the vehicle.",
+      "Evacuate all passengers and move at least 50 meters (165 feet) upwind.",
+      "Do NOT inhale the smoke; EV battery smoke is highly toxic (fluorides).",
+      "Call 112/911 and specify: 'Electric Vehicle battery fire'.",
+      "Do not attempt to use a standard extinguisher on the battery."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_010_WIT",
+    "title": "Vehicle Battery Fire - EV (Witness / Responder)",
+    "category": "Fire",
+    "keywords": ["I see an electric car on fire", "reporting EV fire", "Tesla burning witness", "smoke from under an electric car", "EV battery explosion witness"],
+    "steps": [
+      "Call 112/911 immediately. Specify it is an Electric Vehicle.",
+      "Stay at least 50 meters away. EV batteries can explode or vent violently.",
+      "Warn others to stay upwind to avoid toxic fumes.",
+      "Do NOT approach the vehicle; 'thermal runaway' can cause re-ignition.",
+      "Inform responders if you saw the fire start in the battery/underbody."
     ],
     "priority": 1
   },
@@ -153,7 +218,7 @@
     "id": "FIRE_011",
     "title": "High-Rise Building Fire",
     "category": "Fire",
-    "keywords": ["high-rise", "skyscraper", "floor", "stairwell", "rascacielos", "piso", "escalera"],
+    "keywords": ["high-rise", "skyscraper", "floor", "stairwell", "floor level", "external signage", "elevator bank", "mechanical floor", "penthouse", "fire escape", "pressurized stairwell", "standpipe"],
     "steps": [
       "Check the stairwell for smoke before entering; if it is smoke-filled, return to your room.",
       "Never use elevators. They can become traps and may open on the fire floor.",
@@ -165,17 +230,159 @@
     "priority": 1
   },
   {
-    "id": "FIRE_012",
-    "title": "Gas Station / Fuel Fire",
+    "id": "FIRE_012_VIC",
+    "title": "Gas Station Fire (Victim / Refueling)",
     "category": "Fire",
-    "keywords": ["gas", "station", "fuel", "petrol", "pump", "flammable", "gasolinera", "combustible", "gasolina", "bomba", "inflamable"],
+    "keywords": ["I am refueling and there is a fire", "pump is on fire", "fire at the gas nozzle", "I am at a gas station fire", "spilled fuel on fire me"],
     "steps": [
-      "If a fire starts while you are fueling, do NOT remove the nozzle from the car (this will spray fire).",
-      "Immediately hit the emergency shut-off button at the pump or station office.",
-      "Evacuate everyone from the vehicle and the immediate area of the fire.",
-      "Call emergency services and warn others to stay away.",
-      "Do NOT start your engine or use any electronic devices near the fuel spill or fire.",
-      "Wait at a safe distance (at least 100 meters) for the fire department to arrive."
+      "Do NOT remove the nozzle from the car if it is on fire. This sprays flames.",
+      "Immediately hit the emergency shut-off button at the pump or station.",
+      "Evacuate everyone from the vehicle and move at least 100 meters away.",
+      "Call 112/911 once you are at a safe distance.",
+      "Warn other drivers near the pumps to evacuate immediately."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_012_WIT",
+    "title": "Gas Station Fire (Witness / Observer)",
+    "category": "Fire",
+    "keywords": ["I see a fire at a gas station", "reporting petrol station fire", "pump fire witness", "gas station explosion risk", "smoke from a fuel station"],
+    "steps": [
+      "Call 112/911 immediately.",
+      "Do NOT drive toward or enter the gas station area.",
+      "Stay at least 100 meters (330 feet) away from the facility.",
+      "Warn others to stay back; fuel fires can spread to underground tanks.",
+      "Wait for professional firefighters."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_013_VIC",
+    "title": "Chemical / Industrial Fire (Victim / Exposed)",
+    "category": "Fire",
+    "keywords": ["I am exposed to a chemical fire", "toxic smoke making me sick", "I am in a HAZMAT fire", "chemical spill burning near me", "eyes burning from smoke"],
+    "steps": [
+      "Evacuate immediately in an upwind direction (wind at your back).",
+      "Call 112/911. State: 'Chemical fire exposure'.",
+      "If chemicals touched your skin, rinse with water for 20 minutes.",
+      "Move to higher ground if the gas is heavier than air.",
+      "Stay away from the area until cleared by HAZMAT teams."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_013_WIT",
+    "title": "Chemical / Industrial Fire (Witness / Reporting)",
+    "category": "Fire",
+    "keywords": ["I see a chemical fire", "toxic cloud from factory", "reporting HAZMAT fire", "warehouse burning with chemicals", "smoke from a chemical plant witness"],
+    "steps": [
+      "Call 112/911 immediately. Mention it is an industrial/chemical site.",
+      "Stay at least 500 meters (1,600 feet) away from the site.",
+      "Warn others to stay upwind to avoid toxic inhalation.",
+      "Do NOT attempt to help victims inside without specialized gear.",
+      "Report any placards or UN numbers visible on the building/trucks."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_014_VIC",
+    "title": "Vehicle Fire - ICE (Victim / Driver)",
+    "category": "Fire",
+    "keywords": ["my engine is on fire", "smoke from my hood", "car burning me", "I am in a burning vehicle", "my car caught fire"],
+    "steps": [
+      "Pull over and turn off the engine immediately.",
+      "Get everyone out and move 30 meters (100 feet) away.",
+      "Do NOT open the hood. Air will fuel the fire.",
+      "Call 112/911.",
+      "Do not return to the vehicle for any items."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_014_WIT",
+    "title": "Vehicle Fire - ICE (Witness / Responder)",
+    "category": "Fire",
+    "keywords": ["I see a car on fire", "reporting vehicle fire on highway", "burning car witness", "smoke from a vehicle on the road"],
+    "steps": [
+      "Call 112/911 immediately.",
+      "Pull over at a safe distance and turn on your hazards.",
+      "Do NOT approach the burning vehicle; fuel tanks can explode.",
+      "Warn other drivers and keep traffic moving away from the fire.",
+      "Inform responders if people are still inside the vehicle."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_015_VIC",
+    "title": "Tunnel / Underground Fire (Victim / Trapped)",
+    "category": "Fire",
+    "keywords": ["I am trapped in a tunnel fire", "smoke in the tunnel me", "my car is on fire in a tunnel", "fire in the underground parking", "stuck in a smoky tunnel"],
+    "steps": [
+      "Stop your vehicle, turn off the engine, and leave the keys in the ignition.",
+      "Evacuate immediately via the nearest emergency exit. Do NOT stay in your car.",
+      "Stay low to the ground to avoid smoke inhalation.",
+      "Follow floor-level lighting or exit signs.",
+      "Use an emergency alcove phone if you cannot find an exit."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_015_WIT",
+    "title": "Tunnel / Underground Fire (Witness / Reporting)",
+    "category": "Fire",
+    "keywords": ["smoke coming out of tunnel", "fire at the tunnel entrance", "reporting underground fire", "smoke from a metro station witness"],
+    "steps": [
+      "Call 112/911 immediately.",
+      "Do NOT enter the tunnel if you see smoke.",
+      "Stop before the entrance and warn other drivers to stop.",
+      "Listen for emergency broadcasts on your radio.",
+      "Wait for emergency services to arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_016",
+    "title": "Metal Fire (Class D)",
+    "category": "Fire",
+    "keywords": ["metal fire", "magnesium", "aluminum", "titanium", "lithium metal", "class D", "explosive reaction", "foundry", "machine shop", "metal shavings", "dry powder", "sand", "bright white light"],
+    "steps": [
+      "NEVER use water, CO2, or standard foam on a metal fire; it will cause a violent explosion or release hydrogen gas.",
+      "Identify the metal involved if possible (e.g., magnesium, titanium, sodium).",
+      "Use only a specialized Class D fire extinguisher or cover with dry sand/salt to smother the fire.",
+      "Evacuate the immediate area and call emergency services, specifying it is a METAL fire.",
+      "Expect extremely high temperatures and intense, blinding white light.",
+      "Do NOT attempt to move the burning metal."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_017_EXTREME",
+    "title": "Fire Entrapment / Cannot Escape",
+    "category": "Fire",
+    "keywords": ["trapped in fire", "cannot escape burning building", "fire blocking exit", "blocked by flames", "no way out fire", "trapped room fire", "surrounded by fire", "extreme entrapment", "burning building trap"],
+    "steps": [
+      "Stay calm. Close all doors between you and the fire to slow the spread.",
+      "Use wet towels, clothing, or tape to seal all cracks around the door and vents.",
+      "If smoke enters, open a window slightly for fresh air, but DO NOT break the glass. If smoke comes in from the outside, close it immediately.",
+      "Stay low to the floor where the air is cleaner.",
+      "Call 112/911, state exactly where you are (floor, room number).",
+      "Signal for help from the window using a brightly colored cloth or flashlight."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "FIRE_018_EXTREME",
+    "title": "Severe Smoke Inhalation",
+    "category": "Fire",
+    "keywords": ["choking on smoke", "breathing smoke", "cannot breathe fire", "inhalation", "coughing smoke", "toxic smoke poisoning", "lungs burning smoke", "unconscious from smoke", "smoke asphyxiation"],
+    "steps": [
+      "Move the person to fresh air immediately. Do NOT become a victim yourself.",
+      "Call 112/911 and report 'Smoke inhalation, need medical immediately'.",
+      "If the person is unconscious and not breathing, begin CPR (Chest compressions and rescue breaths) if trained.",
+      "If conscious, sit them up to help with breathing and loosen tight clothing around their neck or chest.",
+      "Do NOT give them anything to eat or drink.",
+      "Monitor their breathing continuously until emergency responders arrive."
     ],
     "priority": 1
   }

@@ -3,5 +3,6 @@
   "fire.json",
   "security.json",
   "environmental.json",
-  "traffic.json"
+  "traffic.json",
+  "fire_principles.json"
 ]

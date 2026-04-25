@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.IOException;
 
 import com.soteria.infrastructure.intelligence.SystemCapability;
 
@@ -47,15 +48,14 @@ public class MainApp extends Application {
         // Register global listener for system readiness.
         // It will trigger navigation to chat if the profile is complete.
         bootstrap.readyProperty().addListener((obs, wasReady, isReady) -> {
-            if (isReady) {
+            if (Boolean.TRUE.equals(isReady)) {
                 tryNavigateToChat();
             }
         });
 
         profiles.load().ifPresentOrElse(
-            this::initializeSession,
-            this::launchOnboardingQuietly
-        );
+                this::initializeSession,
+                this::launchOnboardingQuietly);
 
         primaryStage.setTitle("SoterIA");
         primaryStage.setWidth(MOBILE_WIDTH);
@@ -93,7 +93,7 @@ public class MainApp extends Application {
         }
         try {
             return SystemCapability.AIModelProfile.valueOf(modelName);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException _) {
             return capabilities.getRecommendedProfile();
         }
     }
@@ -106,7 +106,7 @@ public class MainApp extends Application {
         }
     }
 
-    private void showOnboarding() throws Exception {
+    private void showOnboarding() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/onboarding-view.fxml"));
         Parent root = loader.load();
         OnboardingController controller = loader.getController();
@@ -115,35 +115,56 @@ public class MainApp extends Application {
         Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
         primaryStage.setScene(scene);
-        
+
         // Navigation is now handled by the global readyProperty listener in start()
     }
 
     /**
      * Transition to chat. Called by controller once profile is fully saved.
      */
-    public void completeOnboarding(UserData profile) {
+    public void completeOnboarding() {
         // Just a hint to check if we can navigate now
         tryNavigateToChat();
     }
 
     private synchronized void tryNavigateToChat() {
+        log.info("Attempting navigation to chat...");
         if (bootstrap.readyProperty().get()) {
-            profiles.load().filter(UserData::isComplete).ifPresent(p -> Platform.runLater(() -> {
-                try {
-                    // Check if we are already in the chat screen to avoid redundant swaps
-                    if (primaryStage.getTitle() != null && primaryStage.getTitle().startsWith("SoterIA — ")) {
-                        return;
-                    }
-                    showChatScreen(p);
-                } catch (Exception e) {
-                    log.log(Level.SEVERE, "Failed to transition to chat", e);
-                }
-            }));
+            profiles.load().ifPresentOrElse(
+                this::navigateToChatIfRequired,
+                () -> log.warning("Bootstrap is ready but NO PROFILE found. Cannot navigate yet.")
+            );
+        } else {
+            log.info("Bootstrap is not ready yet. Navigation deferred.");
         }
     }
 
-    public void showChatScreen(UserData profile) throws Exception {
+    private void navigateToChatIfRequired(UserData p) {
+        if (!p.isComplete()) {
+            log.warning("Bootstrap is ready but profile is INCOMPLETE. Cannot navigate yet.");
+            return;
+        }
+
+        log.info(() -> "Profile is complete for user: " + p.fullName() + ". Swapping to chat screen.");
+        Platform.runLater(() -> {
+            try {
+                if (isAlreadyInChat()) {
+                    log.info("Already in chat screen, skipping.");
+                    return;
+                }
+                showChatScreen(p);
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Failed to transition to chat", e);
+            }
+        });
+    }
+
+    private boolean isAlreadyInChat() {
+        String title = primaryStage.getTitle();
+        return title != null && title.startsWith("SoterIA — ");
+    }
+
+    void showChatScreen(UserData profile) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/chat-view.fxml"));
         Parent root = loader.load();
         ChatController controller = loader.getController();

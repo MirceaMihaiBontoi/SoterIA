@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public class SystemCapability {
     private static final Logger logger = Logger.getLogger(SystemCapability.class.getName());
-    
+
     // Thresholds for choosing between models (GB)
     private static final long T1_THRESHOLD_GB = 3;
     private static final long T2_THRESHOLD_GB = 4;
@@ -54,13 +54,13 @@ public class SystemCapability {
         try {
             // 1. Try standard OperatingSystemMXBean (available on most OpenJDKs)
             java.lang.management.OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
-            
+
             // On desktop Oracle/OpenJDK, we can cast to get physical memory
             // But we use reflection or optional cast to be Android-safe
             if (osBean.getClass().getName().contains("OperatingSystemMXBean")) {
                 return tryGetMemory(osBean, "getTotalPhysicalMemorySize");
             }
-        } catch (Exception ignored) {
+        } catch (Exception _) {
             // Standard OS bean method failed, fall through to alternatives
         }
 
@@ -71,7 +71,7 @@ public class SystemCapability {
                 String[] parts = line.split("\\s+");
                 return Long.parseLong(parts[1]) * 1024L;
             }
-        } catch (IOException ignored) {
+        } catch (IOException _) {
             // /proc/meminfo not available or unreadable
         }
 
@@ -83,11 +83,11 @@ public class SystemCapability {
         try {
             var method = osBean.getClass().getMethod(methodName);
             return (Long) method.invoke(osBean);
-        } catch (Exception e1) {
+        } catch (Exception _) {
             try {
                 var fallbackMethod = osBean.getClass().getMethod("getTotalMemorySize");
                 return (Long) fallbackMethod.invoke(osBean);
-            } catch (Exception e2) {
+            } catch (Exception _) {
                 return -1L;
             }
         }
@@ -99,7 +99,7 @@ public class SystemCapability {
     SystemCapability(long totalMemory) {
         this.totalMemory = totalMemory;
         this.availableProcessors = Runtime.getRuntime().availableProcessors();
-        
+
         long ramInGB = totalMemory / BYTES_IN_GB;
 
         if (ramInGB < T1_THRESHOLD_GB) {
@@ -111,7 +111,7 @@ public class SystemCapability {
         } else {
             this.recommendedProfile = AIModelProfile.ULTRA; // Back to trusting RAM for ULTRA
         }
-        
+
         logger.info("====================================================");
         logger.info("HARDWARE TELEMETRY REPORT:");
         logger.log(Level.INFO, () -> "- Detected CPU Cores (Logical): " + availableProcessors);
@@ -130,9 +130,9 @@ public class SystemCapability {
     public int getIdealThreadCount() {
         if (isLowPowerDevice()) {
             // Android/Tablet logic: big.LITTLE architecture and thermal constraints
-            return Math.min(4, Math.max(1, availableProcessors / 2));
+            return Math.clamp(availableProcessors / 2, 1, 4);
         }
-        // Desktop logic: USAR SOLO NÚCLEOS FÍSICOS. 
+        // Desktop logic: USAR SOLO NÚCLEOS FÍSICOS.
         // Llama.cpp en CPU rinde MUCHO mejor sin Hyperthreading/SMT.
         // En una CPU de 12 hilos (Ryzen 5500), 6 hilos es el punto dulce.
         return Math.max(1, availableProcessors / 2);
@@ -149,7 +149,7 @@ public class SystemCapability {
     public AIModelProfile getRecommendedProfile() {
         return recommendedProfile;
     }
-    
+
     public boolean isLowPowerDevice() {
         return recommendedProfile == AIModelProfile.ULTRA_LITE || recommendedProfile == AIModelProfile.LITE;
     }

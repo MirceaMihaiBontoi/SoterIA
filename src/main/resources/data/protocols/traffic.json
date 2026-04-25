@@ -1,46 +1,91 @@
 [
   {
-    "id": "TRAF_001",
-    "title": "Vehicle Accident (Multi-Vehicle)",
+    "id": "TRAF_001_VIC",
+    "title": "Vehicle Accident (Involved/Victim)",
     "category": "Traffic",
-    "keywords": ["car", "crash", "road", "accident", "emergency", "coche", "choque", "carretera", "accidente", "emergencia"],
+    "keywords": ["I was in a car accident", "my car crashed", "I am trapped in my car", "injured in vehicle collision", "I just hit another car", "car wreck involved", "pinned inside vehicle", "airbag deployment", "steering wheel impact", "trapped under dashboard", "unconscious passenger in my car", "engine smoke after crash", "car rolled over", "t-boned in intersection"],
     "steps": [
-      "Ensure your own safety first; do not enter a dangerous traffic zone.",
-      "Call emergency services with exact location and number of victims.",
-      "If safe, turn off the ignition of involved vehicles to prevent fire.",
-      "Apply the parking brake or block wheels of unstable vehicles.",
-      "Do NOT move injured persons unless there is an immediate threat of fire or explosion.",
-      "Use hazard lights, flares, or warning triangles to alert other drivers."
+      "Check yourself and passengers for injuries. Do NOT move if you suspect a spinal injury.",
+      "If possible, turn off the engine and turn on hazard lights.",
+      "If safe to do so, exit the vehicle and move away from traffic to a sidewalk or shoulder.",
+      "If trapped, stay calm and wait for the 'jaws of life' or emergency rescue.",
+      "Call emergency services and provide your exact location and vehicle description.",
+      "Do NOT attempt to move your vehicle if it is badly damaged or in a dangerous position."
     ],
     "priority": 1
   },
   {
-    "id": "TRAF_002",
-    "title": "Pedestrian Struck by Vehicle",
+    "id": "TRAF_001_WIT",
+    "title": "Vehicle Accident (Witness/Bystander)",
     "category": "Traffic",
-    "keywords": ["pedestrian", "hit", "struck", "car", "accident", "road", "atropello", "golpeado", "coche", "accidente", "carretera"],
+    "keywords": ["I just saw a car crash", "witnessing a pileup", "reporting an accident on the highway", "there is a car wreck ahead", "debris from a crash on the road", "saw a car spin out", "multiple cars involved in pileup", "debris blocking all lanes", "reporting smoke from wreckage", "bystander calling for crash rescue", "car hit the guardrail", "emergency services needed for pileup"],
     "steps": [
-      "Ensure traffic is stopped or diverted to protect the victim and yourself.",
-      "Call emergency services immediately with the location and victim's condition.",
-      "Do NOT move the person unless there is an immediate threat to life (e.g., fire).",
-      "Keep the victim's head and neck still to prevent spinal injury.",
-      "Check for consciousness and breathing; provide basic first aid (bleeding control) if safe.",
-      "Calm the victim and prevent them from trying to stand up until paramedics arrive."
+      "Pull over in a safe location away from the accident. Do NOT block emergency access.",
+      "Call 911/112 immediately. Provide the highway mile marker or nearest intersection.",
+      "Describe the number of vehicles involved and if you see smoke or fire.",
+      "Approach the scene only if it is safe. Do NOT become a second victim in traffic.",
+      "If victims are conscious, talk to them and keep them calm until help arrives.",
+      "Provide your contact information to the police as a witness."
     ],
     "priority": 1
   },
   {
-    "id": "TRAF_003",
-    "title": "Vehicle Fire",
+    "id": "TRAF_002_VIC",
+    "title": "Pedestrian Struck (Victim/Driver Involved)",
     "category": "Traffic",
-    "keywords": ["car", "fire", "smoke", "engine", "burning", "vehicle", "coche", "fuego", "humo", "motor", "quemando", "vehículo"],
+    "keywords": ["I was hit by a car", "I just struck a pedestrian", "injured pedestrian calling for help", "vehicle hit me on the crosswalk", "pedestrian collision involved", "driver hit me and kept going", "knocked down in crosswalk", "car ran over my foot", "hit by side mirror", "pedestrian pinned against wall", "hit at high speed", "I am bleeding in the street"],
     "steps": [
-      "Pull over as quickly and safely as possible. Turn off the engine.",
-      "Get all passengers out of the vehicle and move at least 100 feet (30 meters) away.",
-      "Do NOT open the hood if smoke or flames are coming from it (air will feed the fire).",
-      "Call emergency services immediately.",
-      "If the fire is small and in the interior, use a fire extinguisher. Do NOT put yourself at risk.",
-      "Stay away from the vehicle to avoid toxic fumes or potential explosions."
+      "For the pedestrian: Do NOT try to get up. Stay still to avoid further injury.",
+      "For the driver: Stop immediately. Do NOT move the vehicle unless it is a direct hazard.",
+      "Call emergency services and specify that a pedestrian was struck.",
+      "Check for breathing and pulse. If you are trained and the victim is bleeding, apply pressure.",
+      "Keep the victim warm and talking. Do NOT move their head or neck.",
+      "Wait for paramedics and provide an honest account of the event."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_002_WIT",
+    "title": "Pedestrian Struck (Witness)",
+    "category": "Traffic",
+    "keywords": ["I saw a pedestrian get hit", "witnessing hit and run", "person struck by car reporting", "pedestrian down in the street", "hit and run witness", "pedestrian launched by car", "saw person get struck", "calling for ambulance for pedestrian", "man down after being hit", "reporting vehicle that fled scene", "witnessing child struck by car"],
+    "steps": [
+      "Protect the scene. Use your vehicle or other objects to block traffic from hitting the victim again.",
+      "Call 911/112. Provide the location and a description of the striking vehicle (if it fled).",
+      "Stay with the victim. Do NOT move them unless there is an immediate fire risk.",
+      "Direct traffic or ask other bystanders to help clear the area for the ambulance.",
+      "Note the time of the incident and any details about the driver's behavior.",
+      "Stay until the police arrive to provide your statement."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_003_VIC",
+    "title": "Vehicle Fire (Driver/Passenger)",
+    "category": "Traffic",
+    "keywords": ["my car is on fire", "engine compartment fire driver", "smoke coming from my dashboard", "smell of burning plastic in car", "car burning trapped", "flames from under the car", "my electric car is venting smoke", "fire in the trunk", "trapped in burning vehicle", "can't open door fire", "engine fire dashboard smoke", "toxic fumes in cabin"],
+    "steps": [
+      "PULL OVER safely and turn off the engine immediately.",
+      "GET OUT and move at least 100 feet (30 meters) away from the vehicle.",
+      "DO NOT open the hood if smoke is coming out; oxygen will cause a flare-up.",
+      "STAY AWAY from the rear of the car (fuel tank area).",
+      "CALL emergency services once you are in a safe location.",
+      "Do NOT return to the vehicle to retrieve personal items."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_003_WIT",
+    "title": "Vehicle Fire (Witness)",
+    "category": "Traffic",
+    "keywords": ["I see a car on fire", "reporting vehicle fire on highway", "smoke from a parked car sighting", "truck on fire reporting", "car engulfed in flames", "reporting a truck on fire", "black smoke from vehicle", "witnessing roadside fire", "parked car igniting", "gas leak catching fire on road", "reporting vehicle fire on bridge"],
+    "steps": [
+      "Call 911/112. Provide the location, vehicle description, and if it's blocking traffic.",
+      "Maintain a safe distance; vehicle fires produce toxic smoke and can explode.",
+      "Warn other drivers to stay back using your hazard lights.",
+      "If the driver is still inside, signal them to get out from a safe distance.",
+      "Do NOT attempt to put out a large engine fire with a portable extinguisher.",
+      "Stay on the line to update dispatch if the fire spreads to nearby vegetation or structures."
     ],
     "priority": 1
   },
@@ -48,7 +93,7 @@
     "id": "TRAF_004",
     "title": "Bicycle Accident",
     "category": "Traffic",
-    "keywords": ["bicycle", "bike", "cyclist", "helmet", "accident", "crash", "bicicleta", "bici", "ciclista", "casco", "accidente", "choque"],
+    "keywords": ["bicycle crash", "cyclist down", "dooring incident", "bike lane accident", "road rash", "helmet impact", "bicycle-vehicle collision", "mountain bike crash", "cycling injury", "hit by car while biking", "cyclist hit by open door", "bicycle frame snapped crash", "over the handlebars accident"],
     "steps": [
       "Ensure the cyclist is in a safe location away from moving traffic.",
       "Do NOT remove the helmet unless it is obstructing the airway.",
@@ -63,7 +108,7 @@
     "id": "TRAF_005",
     "title": "Public Transit Incident (Train/Bus)",
     "category": "Traffic",
-    "keywords": ["train", "bus", "metro", "transit", "accident", "derailment", "tren", "autobús", "metro", "transporte", "accidente", "descarrilamiento"],
+    "keywords": ["train derailment", "bus crash", "metro emergency", "transit police", "third rail hazard", "high voltage tracks", "public transport accident", "subway evacuation", "mass transit incident", "bus collision with passengers", "platform emergency train", "trapped in subway car"],
     "steps": [
       "If on a train, stay away from doors and windows during impact.",
       "Be aware of high-voltage 'Third Rails' or overhead lines; do NOT touch the tracks.",
@@ -75,32 +120,62 @@
     "priority": 1
   },
   {
-    "id": "TRAF_006",
-    "title": "Submerged Vehicle (Car in Water)",
+    "id": "TRAF_006_VIC",
+    "title": "Submerged Vehicle (Trapped Inside)",
     "category": "Traffic",
-    "keywords": ["water", "sinking", "drowning", "car", "lake", "river", "agua", "hundiendo", "ahogo", "coche", "lago", "río"],
+    "keywords": ["my car is sinking in a lake", "trapped in a submerged vehicle", "car went into the river", "I am underwater in my car", "sinking car emergency", "water above dashboard", "car floating in canal", "doors won't open water pressure", "sinking fast help", "car filling with water", "trapped in flash flood vehicle", "bridge collapse into river me"],
     "steps": [
-      "Do NOT use your cell phone until you are out of the vehicle. Every second counts.",
-      "UNBUCKLE your seatbelt immediately. Help children unbuckle theirs.",
-      "Open or BREAK the side window. Doors may be impossible to open due to water pressure.",
-      "Get out through the window. Children should go first.",
-      "If you cannot open the window, wait until the car is nearly full of water; the pressure will equalize, allowing the door to open.",
-      "Once out, swim to the surface and move away from any currents or the vehicle."
+      "SEATBELTS: Unbuckle yourself and any children immediately.",
+      "WINDOWS: Open or break the side windows. Do NOT try to open the doors.",
+      "OUT: Exit through the windows. Push children out first.",
+      "SURFACE: If you cannot open the window, wait until the car is full of water, then the door will open.",
+      "SWIM: Follow the air bubbles to reach the surface.",
+      "SIGNAL: Once on shore, signal for help and check for hypothermia."
     ],
     "priority": 1
   },
   {
-    "id": "TRAF_007",
-    "title": "Brake Failure",
+    "id": "TRAF_006_WIT",
+    "title": "Submerged Vehicle (Witness)",
     "category": "Traffic",
-    "keywords": ["brakes", "stopping", "speed", "emergency", "control", "safety", "frenos", "parada", "velocidad", "emergencia", "control", "seguridad"],
+    "keywords": ["I saw a car drive into the water", "reporting a vehicle sinking", "witnessing a car go off a bridge", "car submerged in canal sighting", "saw car go into reservoir", "reporting vehicle in pond", "witnessing person trapped in sinking car", "car swept away by current witness", "vehicle submerged in flooded underpass", "reporting car in water sightings"],
     "steps": [
-      "Pump the brake pedal fast and hard. You may be able to build up enough pressure to stop.",
-      "Shift into a lower gear (downshift) to let the engine slow the car down.",
-      "Use the parking brake (emergency brake) gradually. Do NOT pull it up all the way at once (risk of skidding).",
-      "Look for an escape route, such as a grassy area, an open field, or an upgrade.",
-      "If you must hit something, look for something soft like bushes or a guardrail.",
-      "Use your horn and lights to warn other drivers that your car is out of control."
+      "Call 911/112 immediately. Provide the exact location and if you see people inside.",
+      "Note the spot where the car went down; use landmarks (trees, poles).",
+      "Do NOT jump in unless you are a trained water rescuer; the current or suction may pull you down.",
+      "If the victims surface, throw them anything that floats (ropes, coolers, tires).",
+      "Keep a visual on the area to help divers find the vehicle later.",
+      "Wait for emergency services and describe the number of passengers you saw."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_007_VIC",
+    "title": "Brake Failure (Driver)",
+    "category": "Traffic",
+    "keywords": ["my brakes are not working", "I can't stop my car", "brake pedal went to the floor", "runaway car driver emergency", "brakes failed on highway", "pedal is soft", "no resistance on brakes", "emergency brake not stopping me", "runaway vehicle emergency", "speeding up and can't stop", "brake line rupture", "losing air pressure brakes truck"],
+    "steps": [
+      "PUMP the brake pedal hard and fast to build up any remaining pressure.",
+      "DOWNSHIFT: Move the gear selector to a lower gear to let the engine slow you down.",
+      "PARKING BRAKE: Apply it gradually and steadily. Do NOT jerk it (prevents skidding).",
+      "ALERT: Turn on hazards and honk the horn to warn other drivers.",
+      "ESCAPE: Look for an open field, uphill slope, or runaway truck ramp.",
+      "IMPACT: If you must hit something, aim for the softest object (bushes, guardrail) at an angle."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_007_WIT",
+    "title": "Brake Failure (Reporting Sighting)",
+    "category": "Traffic",
+    "keywords": ["I see a car out of control", "reporting a runaway vehicle", "car speeding with no brake lights", "vehicle swerving uncontrollably sighting", "runaway truck reporting", "car speeding through red lights uncontrolled", "vehicle smoking brakes", "reporting car with no brake lights speeding", "out of control car sighting", "reporting runaway vehicle path"],
+    "steps": [
+      "Maintain a safe distance from the out-of-control vehicle.",
+      "Call 911/112 and provide the car's description, license plate, and direction of travel.",
+      "Warn other drivers by using your own hazard lights or flashing high beams.",
+      "Do NOT attempt to block or stop the runaway vehicle with your own car.",
+      "If the vehicle crashes, pull over safely and provide assistance as per 'Vehicle Accident Witness' protocol.",
+      "Stay on the line with dispatch to provide live updates on the vehicle's location."
     ],
     "priority": 1
   },
@@ -108,7 +183,7 @@
     "id": "TRAF_008",
     "title": "Tire Blowout at High Speed",
     "category": "Traffic",
-    "keywords": ["tire", "blowout", "rubber", "steering", "wheel", "highway", "neumático", "reventón", "rueda", "directiön", "autopista"],
+    "keywords": ["tire blowout", "highway reventon", "wheel failure", "steering instability", "shredded tire", "rim driving", "speed wobble", "steering lock recovery", "tire delamination", "loud pop and loss of control", "rear tire failure highway"],
     "steps": [
       "Grip the steering wheel firmly with both hands to maintain control.",
       "Do NOT slam on the brakes. Hard braking will cause you to lose control of the vehicle.",
@@ -123,7 +198,7 @@
     "id": "TRAF_009",
     "title": "Stuck Throttle / Unintended Acceleration",
     "category": "Traffic",
-    "keywords": ["gas", "pedal", "throttle", "unintended", "acceleration", "speed", "acelerador", "pedal", "involuntario", "aceleración", "velocidad"],
+    "keywords": ["stuck throttle", "unintended acceleration", "gas pedal stuck", "floor mat interference", "neutral shift recovery", "ignition cut vehicle", "runaway engine", "car accelerating on its own", "cruise control malfunction emergency", "engine racing uncontrolled"],
     "steps": [
       "Shift the vehicle into NEUTRAL (N). This will disconnect the engine from the wheels.",
       "Apply the brakes firmly and steadily. Do NOT pump them (loses vacuum assist).",
@@ -135,17 +210,32 @@
     "priority": 1
   },
   {
-    "id": "TRAF_010",
-    "title": "Wrong-Way Driver Response",
+    "id": "TRAF_010_VIC",
+    "title": "Wrong-Way Driver (Avoidance)",
     "category": "Traffic",
-    "keywords": ["wrong", "way", "head-on", "collision", "highway", "lane", "sentido", "contrario", "choque", "autopista", "carril"],
+    "keywords": ["a car is coming at me in my lane", "wrong way driver head-on avoidance", "evading a wrong way vehicle", "car driving opposite direction toward me", "evading head on collision", "swerving into ditch for safety", "wrong way car in my lane", "car coming at me fast wrong direction", "almost hit by wrong way driver", "escaped head on impact"],
     "steps": [
-      "Slow down and move as far to the right as possible immediately.",
-      "Flash your headlights and honk your horn to get the other driver's attention.",
-      "Do NOT pull onto the left shoulder; that is where the wrong-way driver is most likely to go.",
-      "If a collision is imminent, aim for the 'least dangerous' object (bush, fence) rather than the vehicle.",
-      "Once the vehicle has passed, safely pull over and call 112/911 to report the incident.",
-      "Stay alert for other drivers who may be swerving to avoid the wrong-way vehicle."
+      "Slow down and move to the RIGHT immediately. Do NOT pull to the left shoulder.",
+      "Flash your lights and honk your horn to alert the wrong-way driver.",
+      "If a collision is unavoidable, steer toward a ditch or soft shoulder.",
+      "Stay in your vehicle once stopped; the wrong-way driver may have caused secondary crashes.",
+      "Call 911/112 once you are in a safe position.",
+      "Do NOT attempt to turn around and chase the wrong-way driver."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_010_WIT",
+    "title": "Wrong-Way Driver (Sighting/Reporting)",
+    "category": "Traffic",
+    "keywords": ["I just saw a wrong way driver", "reporting a car going the wrong way", "wrong direction highway sighting", "vehicle entered the exit ramp", "reporting car on wrong side of highway", "wrong way driver at exit ramp", "witnessing car against traffic", "high speed wrong way driver sighting", "reporting dangerous driving direction", "saw car enter highway the wrong way"],
+    "steps": [
+      "Safely pull onto the right shoulder immediately.",
+      "Call 911/112. Provide the exact location (mile marker, exit) and vehicle description.",
+      "Warn other drivers using your hazard lights and flashing high beams.",
+      "Note the license plate only if it can be done without putting yourself at risk.",
+      "Stay on the shoulder until you are sure the danger has passed.",
+      "Do NOT follow the wrong-way driver to get more information."
     ],
     "priority": 1
   },
@@ -153,7 +243,7 @@
     "id": "TRAF_011",
     "title": "Stuck in Traffic / Gridlock Emergency",
     "category": "Traffic",
-    "keywords": ["traffic", "jam", "gridlock", "stuck", "road", "heat", "atasco", "tráfico", "atrapado", "calor"],
+    "keywords": ["traffic jam emergency", "gridlock survival", "road block", "civil unrest highway", "exhaust fumes inhalation", "road rage congestion", "stuck in tunnel traffic", "highway blockage medical emergency", "protest blocking traffic trapped", "locked in gridlock no exit"],
     "steps": [
       "If you are stuck for a long period in extreme heat, turn off the engine to prevent overheating, but stay inside if it is safer.",
       "Stay hydrated. Keep emergency water in your car for these situations.",
@@ -166,16 +256,237 @@
   },
   {
     "id": "TRAF_012",
-    "title": "Wildlife on Road (Collision Avoidance)",
+    "title": "Wildlife/Animal on Road (Hazard Reporting)",
     "category": "Traffic",
-    "keywords": ["animal", "deer", "collision", "road", "safety", "moose", "animal", "ciervo", "choque", "carretera", "seguridad"],
+    "keywords": ["animal on the road sighting", "deer near highway reporting", "stray dog in traffic sighting", "cows on the road sighting", "moose sighting on highway", "reporting wildlife hazard sighting", "animal blocking lanes sighting", "escaped livestock on road sighting", "hazard: animal on roadway", "reporting a bear on the road"],
     "steps": [
-      "If an animal (like a deer) jumps in front of you, BRAKE firmly and stay in your lane. Do NOT swerve.",
-      "Swerving to avoid an animal can lead to a much more dangerous head-on collision or rollover.",
-      "Use your high beams at night in wildlife areas to spot eyes reflected in the distance.",
-      "If you hit a large animal, pull over safely and stay away from it; injured animals can be very dangerous.",
-      "Report the collision to local authorities, especially if the animal is obstructing the roadway.",
-      "Check your vehicle for fluid leaks or damage before attempting to drive again."
+      "Slow down and use hazard lights to warn drivers behind you.",
+      "Maintain a safe distance. Do NOT approach or try to shoo the animal yourself.",
+      "Call the non-emergency traffic line or 112/911 if the animal is a major hazard to high-speed traffic.",
+      "Provide the exact location (highway, mile marker, or intersection) and direction.",
+      "If the animal moves off the road, continue with caution as others may follow."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "TRAF_020",
+    "title": "Wildlife / Livestock Collision (Post-Impact)",
+    "category": "Traffic",
+    "keywords": ["I just hit a deer", "collided with a large animal", "moose strike", "hit a cow with my car", "animal collision damage", "struck a horse on the road", "car damaged after hitting animal", "injured animal blocking road", "deer strike accident reporting", "hit a wild boar", "bleeding animal in the street after crash", "animal struck by vehicle", "wildlife collision", "impact with animal", "animal on road accident", "reporting animal strike", "roadkill hazard"],
+    "steps": [
+      "Pull over safely to the shoulder or a safe area.",
+      "Turn on your hazard lights and stay in the vehicle if traffic is heavy.",
+      "Do NOT approach the animal. Injured animals are unpredictable and dangerous.",
+      "Call 112/911. Report the collision, vehicle damage, and if the animal is blocking lanes.",
+      "Check your vehicle for fluid leaks or safety hazards (broken lights, dragging parts).",
+      "Document the scene for insurance once it is safe to do so."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_013",
+    "title": "Autonomous Vehicle System Failure",
+    "category": "Traffic",
+    "keywords": ["autopilot failure", "autonomous system malfunction", "phantom braking", "lane assist error", "system disengagement", "self-driving car error", "sensor blockage", "software glitch vehicle", "AI driving error collision risk", "lidar failure autonomous car"],
+    "steps": [
+      "Grip the steering wheel immediately and prepare to take manual control.",
+      "Apply the brakes steadily to override any automated acceleration or erratic movement.",
+      "Disengage the autonomous system (via button or brake pedal) and steer to a safe location.",
+      "Check for sensor obstructions (dirt, ice, or damage) that may have caused the failure.",
+      "Report the system failure to the vehicle manufacturer and local traffic authorities.",
+      "Do NOT re-engage the autonomous mode until the system has been professionally inspected."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_014_VIC",
+    "title": "Road Rage (Victim/Targeted)",
+    "category": "Traffic",
+    "keywords": ["a driver is attacking me", "someone is following my car", "angry driver trying to run me off road", "targeted by aggressive driver", "harassed by another motorist", "tailgating me aggressively", "driver brandishing weapon", "trying to pit maneuver me", "hitting my bumper intentionally", "followed by angry motorist", "road rage targeted attack", "being forced off the road"],
+    "steps": [
+      "DO NOT GO HOME. Drive to a police station, fire house, or busy public area.",
+      "KEEP WINDOWS UP and doors locked at all times.",
+      "AVOID EYE CONTACT and do not respond with gestures or shouting.",
+      "IF BLOCKED, honk your horn continuously to attract attention and call 911.",
+      "RECORD: If safe, use a dashcam or phone to record the license plate and driver.",
+      "GIVE SPACE: If they try to cut you off, slow down and let them pass."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_014_WIT",
+    "title": "Road Rage (Witness)",
+    "category": "Traffic",
+    "keywords": ["I see two drivers fighting", "aggressive driver harassment witness", "reporting a road rage incident", "cars swerving at each other reporting", "witnessing violent road rage", "drivers fighting in traffic", "car chasing another car", "reporting weapon in traffic dispute", "aggressive driving altercation", "witnessing intimidation on highway", "reporting road rage assault"],
+    "steps": [
+      "Maintain a safe distance from the aggressive vehicles.",
+      "Call 911/112. Provide descriptions of both vehicles and their license plates.",
+      "Report if you see any weapons or if the drivers have exited their vehicles.",
+      "Do NOT intervene or try to mediate the conflict yourself.",
+      "Note the direction of travel and the nearest exit or landmark.",
+      "Provide your contact information as a witness to the authorities."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_015_VIC",
+    "title": "Medical Emergency (Driver)",
+    "category": "Traffic",
+    "keywords": ["I am feeling faint while driving", "sudden chest pain at the wheel", "I can't breathe while driving", "diabetic crisis driver", "vision blurring while driving", "feeling numb while driving", "sudden paralysis driver", "diabetic shock at wheel", "I'm having a stroke while driving", "can't see the road medical", "passing out behind the wheel"],
+    "steps": [
+      "PULL OVER IMMEDIATELY to the shoulder or nearest safe spot.",
+      "PARK: Put the car in Park (P) and turn on hazard lights.",
+      "UNLOCk: Unlock the doors so responders can reach you.",
+      "CALL: Dial 911/112 or use your SoterIA SOS button immediately.",
+      "LEAN BACK: Recline the seat if you feel you might lose consciousness.",
+      "STAY PUT: Do NOT try to drive yourself to the hospital."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_015_WIT",
+    "title": "Medical Emergency (Passenger/Witness)",
+    "category": "Traffic",
+    "keywords": ["my driver passed out", "passenger having a seizure", "driver is slumped over the wheel", "car swerving driver incapacitated sighting", "my driver is having a heart attack", "driver slumped over steering wheel", "passenger medical emergency", "reporting incapacitated driver in motion", "witnessing car swerving and driver unconscious", "calling for aid for driver in distress"],
+    "steps": [
+      "FOR PASSENGERS: Grab the steering wheel and guide the car to the shoulder. Shift to Neutral (N) and apply the parking brake gradually.",
+      "FOR WITNESSES: Call 911/112. Report a 'driver in distress' or 'incapacitated driver'.",
+      "Describe the vehicle and its behavior (swerving, stopped in lane).",
+      "If the car is stopped, check for a pulse and breathing. Perform CPR if trained and necessary.",
+      "Look for medical ID bracelets or signs of diabetic shock (insulin, glucose).",
+      "Keep the victim's airway clear until paramedics arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_016_VIC",
+    "title": "Level Crossing Emergency (Stalled on Tracks)",
+    "category": "Traffic",
+    "keywords": ["car stalled on train tracks", "trapped on level crossing", "train coming car stuck", "railroad crossing emergency", "stuck on tracks", "engine died on rails", "barrier closed on my car", "wheels caught in tracks"],
+    "steps": [
+      "GET OUT IMMEDIATELY. Move everyone out of the vehicle even if you don't see a train.",
+      "MOVE TOWARD THE TRAIN: Run at a 45-degree angle AWAY from the tracks but TOWARD the direction the train is coming from (to avoid flying debris).",
+      "LOCATE ENS: Look for the Blue Sign (Emergency Notification System) and call the number provided.",
+      "GIVE USDOT NUMBER: Provide the 6-digit number and 1 letter on the sign to identify the crossing.",
+      "CALL 911: If no ENS sign is visible, call 911 and specify you are on railroad tracks.",
+      "DO NOT attempt to push the car unless you have a clear view of miles of track and a second person to watch."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_016_WIT",
+    "title": "Level Crossing Emergency (Witness)",
+    "category": "Traffic",
+    "keywords": ["saw car stalled on tracks", "reporting car on railroad crossing", "witnessing train approach vehicle on rails", "bystander calling for train emergency", "reporting blocked level crossing witness"],
+    "steps": [
+      "DO NOT go onto the tracks. Stay at a safe distance from the crossing.",
+      "Call the emergency number on the blue ENS sign at the crossing immediately.",
+      "Provide the USDOT crossing number from the sign to the operator.",
+      "If you see a train approaching, signal the driver by waving your arms low (if safe) and move far away from the potential impact zone.",
+      "Call 911/112 to report the obstruction and any victims who may still be near the tracks.",
+      "Do NOT attempt to tow or push the vehicle yourself if a train is potentially inbound."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_017_VIC",
+    "title": "Downed Power Lines on Vehicle (Inside)",
+    "category": "Traffic",
+    "keywords": ["live wires on my car", "downed power lines vehicle", "electrical hazard road", "trapped in car with wires", "arcing power line on car", "sparks hitting my roof power line", "electrocution risk vehicle"],
+    "steps": [
+      "STAY INSIDE. The car is insulated by the tires. You are safe as long as you don't touch the ground and the car at the same time.",
+      "CALL 911 and the utility company immediately. Warn others to stay back at least 35 feet (10 meters).",
+      "IF FIRE STARTS: Jump clear of the car. Do NOT touch the car and the ground simultaneously.",
+      "LAND WITH BOTH FEET together. Do NOT take steps (voltage difference between feet can kill).",
+      "SHUFFLE AWAY: Keep both feet on the ground and shuffle or hop away with feet together until you are 35 feet away.",
+      "DO NOT return to the vehicle for any reason."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_017_WIT",
+    "title": "Downed Power Lines on Vehicle (Witness)",
+    "category": "Traffic",
+    "keywords": ["saw power line fall on car", "reporting downed wires on road vehicle", "witnessing electrical arcing on car", "bystander reporting trapped driver live wires", "dangerous electrical line crossing road witness"],
+    "steps": [
+      "STAY BACK at least 35 feet (10 meters) from the vehicle and the lines.",
+      "CALL 911 and the utility company. Specify that there is a person trapped inside the vehicle.",
+      "DO NOT approach the car to help the victim; you could be electrocuted by the ground current.",
+      "YELL to the victim to stay inside the car until the power is confirmed cut by the utility company.",
+      "Keep other bystanders away from the area.",
+      "Note the utility pole number if visible from a safe distance."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_018_VIC",
+    "title": "Tunnel Fire/Emergency (Trapped Inside)",
+    "category": "Traffic",
+    "keywords": ["fire in the tunnel", "stuck in tunnel smoke", "tunnel evacuation", "car burning inside tunnel", "trapped in road tunnel", "trapped in tunnel smoke", "fire in tunnel exit blocked", "car on fire underground", "tunnel evacuation alarm active", "toxic fumes in road tunnel", "running for emergency exit tunnel"],
+    "steps": [
+      "STOP: Pull to the side. Turn off the engine but leave the KEY in the ignition (for rescue crews).",
+      "EVACUATE: Exit the vehicle immediately. Do NOT try to retrieve belongings.",
+      "EMERGENCY DOORS: Look for illuminated green running man signs and enter the emergency exit or cross-passage.",
+      "STAY LOW: If there is smoke, stay close to the floor where the air is cleaner.",
+      "HELP: Use the emergency SOS phones inside the tunnel (they provide exact location to operators).",
+      "WALK AWAY from the smoke/fire toward the nearest exit."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_018_WIT",
+    "title": "Tunnel Fire/Emergency (Witness/Reporting)",
+    "category": "Traffic",
+    "keywords": ["smoke coming out of tunnel", "reporting tunnel fire", "accident at tunnel entrance sighting", "tunnel closed emergency", "black smoke from tunnel mouth", "reporting tunnel fire witness", "traffic stopped at tunnel entrance fire", "witnessing explosion in tunnel", "reporting underground fire sighting", "tunnel closure for fire reporting"],
+    "steps": [
+      "DO NOT ENTER the tunnel if you see smoke, red lights, or a closure sign.",
+      "CALL 911/112. Report the specific tunnel name and direction of travel.",
+      "PULL OVER outside the tunnel entrance to clear the path for emergency vehicles.",
+      "Listen to emergency radio broadcasts (usually on specific FM frequencies for the tunnel).",
+      "Warn other drivers behind you to stop or turn around safely.",
+      "Provide information on how many vehicles you saw entering before the smoke started."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_019_VIC",
+    "title": "Child / Pet Locked in Hot Vehicle",
+    "category": "Traffic",
+    "keywords": ["child locked in car", "baby trapped in car", "hot car child", "pet trapped in car", "locked keys in car with baby", "overheating car child", "locked car emergency", "child alone in vehicle"],
+    "steps": [
+      "Call 112/911 immediately. State: 'Child trapped in hot vehicle'.",
+      "If the child is unresponsive or in distress, you may be legally protected to break a window away from the child.",
+      "Shade the vehicle if possible.",
+      "Stay with the vehicle until responders arrive."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "TRAF_021",
+    "title": "Road Obstruction / Debris Reporting",
+    "category": "Traffic",
+    "keywords": ["tree blocking the road", "boulder on highway", "debris in lanes", "fallen branch road", "object on motorway", "reporting road hazard obstruction", "cargo fell off truck", "furniture in the middle of the road", "rockfall on mountain road sighting", "blocking traffic with debris", "fallen tree on road", "roadway obstruction", "blocking both lanes", "hazard in middle of highway"],
+    "steps": [
+      "Slow down and turn on hazard lights as you approach the obstruction.",
+      "If you can safely pass, do so and then pull over to a safe location.",
+      "Call 112/911. Provide the exact location and describe the size/type of obstruction.",
+      "Do NOT attempt to move large or heavy objects yourself if there is high-speed traffic.",
+      "Warn other drivers if you have road flares or a warning triangle (place at least 50m before)."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "TRAF_022",
+    "title": "Vehicle Breakdown / Stalled on Roadway",
+    "category": "Traffic",
+    "keywords": ["car stalled on highway", "broken down in middle of road", "engine died in traffic", "stuck in lane no lights", "dead battery on motorway", "transmission failure in tunnel", "out of gas blocking road", "car breakdown", "disabled vehicle", "mechanical failure highway", "stalled in live lane"],
+    "steps": [
+      "Turn on hazard lights immediately.",
+      "If the vehicle is still moving, try to coast to the shoulder or nearest exit.",
+      "If stuck in a live lane, do NOT exit the vehicle if traffic is high speed. Stay buckled.",
+      "Call 112/911 and state: 'Stalled vehicle in live lane of traffic'.",
+      "If you can safely exit to the shoulder, move away from the vehicle and stand behind a guardrail.",
+      "Call a towing service once emergency responders have secured the scene."
     ],
     "priority": 1
   }

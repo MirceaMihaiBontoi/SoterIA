@@ -1,0 +1,65 @@
+[
+  {
+    "id": "PRIN_FIRE_001",
+    "title": "Smoke and Oxygen Physics",
+    "category": "Principle",
+    "keywords": ["smoke", "oxygen", "breathing", "toxic", "crawling", "carbon monoxide", "air quality"],
+    "steps": [
+      "In a fire, heat and toxic gases rise. The highest concentration of carbon monoxide and superheated air is near the ceiling.",
+      "To survive, you must stay as low to the ground as possible, ideally crawling below 60cm (2 feet).",
+      "If you must breathe through smoke, use a cloth (preferably wet) over your nose and mouth to filter out large particulate matter, though be aware it will not stop carbon monoxide."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "PRIN_FIRE_002",
+    "title": "Airflow and Backdrafts",
+    "category": "Principle",
+    "keywords": ["airflow", "backdraft", "window", "door", "explosion", "oxygen supply", "ventilation"],
+    "steps": [
+      "Fire requires oxygen to survive. Opening a door or breaking a window can create a sudden influx of oxygen.",
+      "This influx can lead to an explosive fire growth known as a backdraft.",
+      "Never break a window unless you are immediately escaping through it.",
+      "Always feel a door with the back of your hand before opening; if it is hot, fire is on the other side. Do not open it."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "PRIN_FIRE_003",
+    "title": "Compartmentalization and Isolation",
+    "category": "Principle",
+    "keywords": ["isolation", "trapped", "sealed", "doors", "cracks", "vents", "barriers", "smoke protection"],
+    "steps": [
+      "A closed solid door can hold back a raging fire for 15-20 minutes or more.",
+      "If trapped, your goal is to isolate yourself. Close all doors between you and the fire.",
+      "Seal the bottom cracks with wet towels, duct tape, or heavy clothing to prevent smoke from seeping in.",
+      "Cover air vents if smoke is coming through them."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "PRIN_FIRE_004",
+    "title": "Heat Radiation and Conduction",
+    "category": "Principle",
+    "keywords": ["radiation", "heat", "burns", "clothing", "synthetic", "melting", "protection"],
+    "steps": [
+      "Radiant heat can ignite materials from a distance.",
+      "If you are near a large fire, protect your skin by covering it with heavy, natural fibers like wool or thick cotton.",
+      "Synthetic fibers (like polyester or nylon) will melt onto your skin and cause severe burns.",
+      "If trapped in a room, stay away from the walls nearest the fire."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "PRIN_FIRE_005",
+    "title": "Flashover Awareness",
+    "category": "Principle",
+    "keywords": ["flashover", "spontaneous ignition", "heat wave", "smoke layer", "extreme heat"],
+    "steps": [
+      "A flashover occurs when all combustible materials in a room simultaneously ignite due to extreme radiant heat (usually around 500-600°C at the ceiling).",
+      "If you notice the smoke layer banking down quickly, or if the heat becomes suddenly unbearable, a flashover is imminent.",
+      "You have seconds to evacuate the room or close the door."
+    ],
+    "priority": 1
+  }
+]

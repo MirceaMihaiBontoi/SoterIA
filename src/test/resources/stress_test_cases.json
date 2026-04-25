@@ -1,0 +1,177 @@
+[
+  {
+    "input": "Tengo un dolor muy fuerte en el pecho que me sube hasta el cuello",
+    "expectedId": "MED_009_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Mi mujer ha roto aguas y tiene contracciones cada dos minutos",
+    "expectedId": "MED_011_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Me he tomado demasiadas pastillas de golpe y no me encuentro bien",
+    "expectedId": "MED_008",
+    "language": "es"
+  },
+  {
+    "input": "Mi padre tiene Parkinson y se ha quedado totalmente bloqueado",
+    "expectedId": "MED_012",
+    "language": "es"
+  },
+  {
+    "input": "Me he quemado con el aceite de la sartén y me han salido ampollas",
+    "expectedId": "TRAUMA_002",
+    "language": "es"
+  },
+  {
+    "input": "Un hombre está tirado en el suelo de la plaza, no se mueve nada",
+    "expectedId": "VITAL_001",
+    "language": "es"
+  },
+  {
+    "input": "Siento que me falta el aire de repente y me hormiguean las manos",
+    "expectedId": "MED_007_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Hay un perro atropellado en la carretera, me da mucha pena",
+    "expectedId": "TRAF_020",
+    "language": "es"
+  },
+  {
+    "input": "Se me ha parado el coche en mitad de la autopista y sin luces",
+    "expectedId": "TRAF_022",
+    "language": "es"
+  },
+  {
+    "input": "Hay un árbol caído bloqueando los dos carriles de la carretera",
+    "expectedId": "TRAF_021",
+    "language": "es"
+  },
+  {
+    "input": "Mi bebé se ha quedado encerrado dentro del coche y hace mucho sol",
+    "expectedId": "TRAF_019_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Hay una inundación en el garaje, el agua ya me llega por la rodilla",
+    "expectedId": "ENV_003_VIC",
+    "language": "es"
+  },
+  {
+    "input": "He oído un estallido muy fuerte y ahora no hay luz en toda la calle",
+    "expectedId": "ENV_019",
+    "language": "es"
+  },
+  {
+    "input": "Hay un enjambre de abejas gigante en el parque de los niños",
+    "expectedId": "ENV_020_VIC",
+    "language": "es"
+  },
+  {
+    "input": "El ascensor se ha quedado pillado y estamos 4 personas dentro",
+    "expectedId": "ENV_021_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Unos tíos están pintando grafitis en el portal",
+    "expectedId": "SEC_020",
+    "language": "es"
+  },
+  {
+    "input": "Me están siguiendo tres personas por un callejón oscuro",
+    "expectedId": "SEC_010",
+    "language": "es"
+  },
+  {
+    "input": "He visto un dron volando muy bajo y grabando cerca de mi ventana",
+    "expectedId": "SEC_019_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Oigo gritos horribles arriba, parece una pelea doméstica fuerte",
+    "expectedId": "SEC_014_WIT",
+    "language": "es"
+  },
+  {
+    "input": "Me han dado un tirón y se han llevado el bolso con todo",
+    "expectedId": "SEC_013_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Hay un tipo merodeando por mi jardín y mira por las ventanas",
+    "expectedId": "SEC_019_VIC",
+    "language": "es"
+  },
+  {
+    "input": "I have a crushing chest pain and I can't breathe, help me",
+    "expectedId": "MED_009_VIC",
+    "language": "en"
+  },
+  {
+    "input": "There is a massive fire in the kitchen, the grease caught fire",
+    "expectedId": "FIRE_001_VIC",
+    "language": "en"
+  },
+  {
+    "input": "Mon épouse a perdu les eaux et les contractions sont très proches",
+    "expectedId": "MED_011_VIC",
+    "language": "fr"
+  },
+  {
+    "input": "Il y a un accident grave sur l'autoroute avec several injured",
+    "expectedId": "TRAF_001_WIT",
+    "language": "fr"
+  },
+  {
+    "input": "Hier ist ein Mann zusammengebrochen und er ist völlig bewusstlos",
+    "expectedId": "VITAL_001",
+    "language": "de"
+  },
+  {
+    "input": "Mein Keller ist komplett überflutet, das Wasser steigt schnell",
+    "expectedId": "ENV_003_VIC",
+    "language": "de"
+  },
+  {
+    "input": "Sto avendo un attacco di panico fortissimo, sento formicolio ovunque",
+    "expectedId": "MED_007_VIC",
+    "language": "it"
+  },
+  {
+    "input": "C'è un estraneo nel mio giardino che cerca di entrare in casa",
+    "expectedId": "SEC_019_VIC",
+    "language": "it"
+  },
+  {
+    "input": "Sunt blocat în lift la etajul 4 și nu mai este aer",
+    "expectedId": "ENV_021_VIC",
+    "language": "ro"
+  },
+  {
+    "input": "Cineva se îneacă cu mâncare și nu mai puede respira",
+    "expectedId": "VITAL_002_WIT",
+    "language": "ro"
+  },
+  {
+    "input": "Meu marido está me agredindo, por favor me ajude agora",
+    "expectedId": "SEC_014",
+    "language": "pt"
+  },
+  {
+    "input": "Houve um derramamento de óleo químico na estrada principal",
+    "expectedId": "ENV_004_WIT",
+    "language": "pt"
+  },
+  {
+    "input": "I just saw someone snatch a woman's bag and run away",
+    "expectedId": "SEC_013_WIT",
+    "language": "en"
+  },
+  {
+    "input": "Help, my baby is locked inside the car and it's burning hot outside",
+    "expectedId": "TRAF_019_VIC",
+    "language": "en"
+  }
+]

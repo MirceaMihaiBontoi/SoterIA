@@ -20,7 +20,7 @@ class LocalBrainServiceTest {
         history.add(ChatMessage.model("Yes"));
         history.add(ChatMessage.user("Bleeding"));
 
-        String result = LocalBrainService.buildGemmaPrompt(system, history);
+        String result = LocalBrainService.buildGemmaPrompt(system, "Protocol: NONE", history);
 
         // Verify role markers
         assertTrue(result.contains("<start_of_turn>user\nAnswer in Spanish.\n\nHelp me<end_of_turn>"));

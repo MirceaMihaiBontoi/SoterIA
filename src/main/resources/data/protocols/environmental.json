@@ -1,16 +1,31 @@
 [
   {
-    "id": "ENV_001",
-    "title": "Natural Gas Leak",
+    "id": "ENV_001_VIC",
+    "title": "Natural Gas Leak (Indoor Exposure)",
     "category": "Environmental",
-    "keywords": ["gas", "leak", "smell", "rotten eggs", "explosion", "fuga", "gas", "olor", "huevos podridos", "explosión"],
+    "keywords": ["I smell gas in my house", "gas leak inside", "smell of rotten eggs in kitchen", "hissing sound from stove", "dizzy from gas smell", "nausea gas leak", "my apartment smells like gas", "gas detector alarm", "methane leak inside"],
     "steps": [
-      "If you smell gas, do NOT turn on or off any lights or electrical appliances.",
-      "Do NOT use cell phones or landlines inside the building.",
-      "Open all windows and doors to ventilate the area.",
-      "Evacuate everyone from the building immediately.",
-      "Call emergency services and your gas utility provider from a safe distance outside.",
-      "Do not re-enter the building until it is declared safe by professionals."
+      "Do NOT touch any electrical switches, light bulbs, or appliances (even the doorbell).",
+      "Do NOT use phones or lighters inside the building.",
+      "Open all windows and doors immediately to ventilate.",
+      "Evacuate all occupants and pets immediately.",
+      "Call the gas utility company and emergency services from OUTSIDE the building.",
+      "Do not re-enter until officially cleared by the fire department or utility workers."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_001_WIT",
+    "title": "Natural Gas Leak (Outdoor/Neighbor)",
+    "category": "Environmental",
+    "keywords": ["I smell gas in the street", "neighbor's house smells like gas", "utility gas leak outside", "pipeline rupture in street", "gas main break outdoor", "smell of gas near building", "reporting gas leak for someone else"],
+    "steps": [
+      "Do NOT enter the area where the smell is strongest.",
+      "Warn others in the immediate vicinity to keep away.",
+      "Do NOT smoke or use any ignition sources near the suspected leak.",
+      "Call emergency services and provide the exact location or nearest cross-street.",
+      "If you suspect a neighbor is inside, knock loudly but do NOT use the doorbell.",
+      "Wait for emergency services at a safe distance (at least 100 meters)."
     ],
     "priority": 1
   },
@@ -18,7 +33,7 @@
     "id": "ENV_002",
     "title": "Earthquake",
     "category": "Environmental",
-    "keywords": ["earthquake", "shaking", "ground", "building safety", "terremoto", "temblor", "suelo", "seguridad"],
+    "keywords": ["earthquake", "seismic activity", "tremor", "ground shaking", "tectonic shift", "aftershocks", "epicenter", "Richter scale", "magnitude", "structural collapse risk", "fault line", "hypocenter"],
     "steps": [
       "DROP to the ground before the earthquake drops you.",
       "COVER your head and neck with your arms and seek shelter under a sturdy table.",
@@ -30,32 +45,62 @@
     "priority": 1
   },
   {
-    "id": "ENV_003",
-    "title": "Flash Flood Response",
+    "id": "ENV_003_VIC",
+    "title": "Flash Flood (Trapped/Submerged)",
     "category": "Environmental",
-    "keywords": ["flood", "water", "rain", "storm", "river", "inundación", "inundacion", "agua", "lluvia", "tormenta", "rio"],
+    "keywords": ["I am trapped by water", "water is entering my house", "my car is flooded", "stalled in high water", "water rising around me", "stuck in a flash flood", "surrounded by floodwater", "swept away by current"],
     "steps": [
-      "Move to higher ground immediately. Do NOT wait for instructions.",
-      "Avoid walking or driving through floodwaters. Just 6 inches (15 cm) of moving water can knock you down.",
-      "If your vehicle stalls in rapidly rising water, abandon it immediately and move to higher ground.",
-      "Stay away from bridges over fast-moving water, as the ground underneath can be unstable.",
-      "Turn off utilities at the main switches if safe to do so.",
-      "Avoid contact with floodwater, as it may be contaminated or contain dangerous debris."
+      "Move to the highest level of the building. If in a car that stalls, exit immediately and move to higher ground.",
+      "If you cannot reach high ground, climb onto the roof. Do NOT climb into a closed attic.",
+      "Avoid contact with moving water; even shallow water can sweep you away.",
+      "Stay away from electrical appliances and the main power box.",
+      "Signal for help using a flashlight or bright cloth.",
+      "Do NOT attempt to swim through floodwaters unless absolutely necessary for survival."
     ],
     "priority": 1
   },
   {
-    "id": "ENV_004",
-    "title": "Hazardous Chemical Spill",
+    "id": "ENV_003_WIT",
+    "title": "Flash Flood (Roadway/Sighting)",
     "category": "Environmental",
-    "keywords": ["chemical", "spill", "toxic", "acid", "gas", "leak", "químico", "derrame", "tóxico", "ácido", "gas", "fuga"],
+    "keywords": ["I see a flood on the road", "reporting flooded street", "river is overflowing", "bridge washed out", "water covering the highway", "flash flood warning sighting", "reporting rising water levels"],
     "steps": [
-      "Evacuate the area immediately and move upwind (direction the wind is blowing away from).",
-      "Do NOT attempt to clean up the spill unless you are specifically trained.",
-      "Seal the area to prevent others from entering.",
-      "If the chemical is on skin or eyes, flush with large amounts of water for at least 15 minutes.",
-      "Turn off ventilation systems if outdoors. If indoors, open windows away from the spill site.",
-      "Identify the substance (via label or SDS) only if safe to do so."
+      "Turn Around, Don't Drown! Do NOT attempt to drive or walk through the water.",
+      "Report the location of the flooding to local emergency services.",
+      "Warn other drivers and pedestrians to stay away from the area.",
+      "Move to high ground and monitor the situation from a safe distance.",
+      "Do NOT approach the water's edge; banks can be unstable and collapse.",
+      "If you see someone trapped, call 911 immediately. Do NOT attempt a water rescue yourself."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_004_VIC",
+    "title": "Chemical Spill (Direct Exposure)",
+    "category": "Environmental",
+    "keywords": ["I have chemicals on me", "my eyes are burning from a spill", "I inhaled toxic fumes", "spilled acid on my skin", "exposed to hazardous substance", "chemical burn treatment", "irritation from chemical cloud"],
+    "steps": [
+      "Move upwind and away from the source of the chemical immediately.",
+      "If the chemical is on your skin or clothes, remove contaminated clothing and flush skin with cool water for 15-20 mins.",
+      "If in eyes, flush with water continuously while holding eyelids open.",
+      "Do NOT use neutralizing agents (like vinegar or baking soda) on skin.",
+      "Seek immediate medical attention and tell them exactly what substance you were exposed to.",
+      "Seal contaminated clothing in a plastic bag to prevent further exposure."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_004_WIT",
+    "title": "Chemical Spill (Sighting/Reporting)",
+    "category": "Environmental",
+    "keywords": ["I see a HAZMAT spill", "truck leaking chemical", "industrial leak sighting", "reporting a dangerous spill", "yellow cloud in the air", "chemical smell in industrial park", "un-number sighting", "oil spill on road", "petroleum leak", "highway slick", "chemical spill on street"],
+    "steps": [
+      "Maintain a safe distance (at least 500 meters) and move upwind.",
+      "Call emergency services and report the location and type of spill.",
+      "If safe, identify the UN number or hazard label from a distance using binoculars.",
+      "Prevent others from entering the danger zone.",
+      "Do NOT touch, walk through, or inhale the substance.",
+      "Provide details on the size of the spill and if it is entering drains or waterways."
     ],
     "priority": 1
   },
@@ -63,7 +108,7 @@
     "id": "ENV_005",
     "title": "Landslide / Mudslide",
     "category": "Environmental",
-    "keywords": ["landslide", "mudslide", "mountain", "earth", "slope", "debris", "desprendimiento", "deslave", "montaña", "tierra", "pendiente", "escombros"],
+    "keywords": ["landslide", "mudslide", "debris flow", "slope failure", "earth movement", "mountain slide", "geological hazard", "rockfall", "ground instability", "boulder crash", "erosion control"],
     "steps": [
       "If you are inside, stay inside. Move to the part of the building furthest from the slope.",
       "If you are outside, run to the nearest high ground away from the path of the slide.",
@@ -78,7 +123,7 @@
     "id": "ENV_006",
     "title": "Tornado / High Wind Shelter",
     "category": "Environmental",
-    "keywords": ["tornado", "wind", "storm", "shelter", "warning", "siren", "tornado", "viento", "tormenta", "refugio", "alerta", "sirena"],
+    "keywords": ["tornado", "cyclone", "twister", "funnel cloud", "high wind", "storm shelter", " Fujita scale", "wind shear", "debris impact", "safe room", "basement shelter", "tornado approaching", "destructive winds", "twister sighting"],
     "steps": [
       "Go to a pre-designated 'safe room', basement, or the lowest level of the building.",
       "Inner hallways and closets are the safest spots if no basement is available.",
@@ -90,93 +135,299 @@
     "priority": 1
   },
   {
-    "id": "ENV_007",
-    "title": "Nuclear / Radiological Hazard",
+    "id": "ENV_007_VIC",
+    "title": "Radiological Hazard (In Fallout Zone)",
     "category": "Environmental",
-    "keywords": ["nuclear", "radiation", "radiological", "hazard", "fallout", "nuclear", "radiación", "radiación", "peligro", "radiológico"],
+    "keywords": ["I am in the radiation zone", "I was exposed to fallout", "nuclear explosion near me", "radioactive dust on my clothes", "trapped in radiation alert area", "fallout cloud approaching my location"],
     "steps": [
-      "GET INSIDE: Go to the center of a sturdy building or a basement.",
-      "STAY INSIDE: Close all windows and doors. Turn off fans and AC units.",
-      "STAY TUNED: Listen to emergency broadcasts for official instructions.",
-      "If you were outside, remove your outer layer of clothing and seal it in a plastic bag.",
-      "Shower gently with soap and water to wash away contamination (do not scrub or use hair conditioner).",
-      "Only consume sealed bottled water and food from sealed containers."
+      "GET INSIDE immediately. Use the center of the building or a basement.",
+      "STAY INSIDE. Close and seal all windows and doors. Turn off AC/Heating systems.",
+      "Remove your outer layer of clothing and seal it in a plastic bag to discard contamination.",
+      "Wash your skin and hair gently with soap and water; do NOT use hair conditioner.",
+      "Cover any open wounds to prevent radioactive particles from entering.",
+      "Do NOT eat or drink anything that was uncovered during the event."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_007_WIT",
+    "title": "Radiological Hazard (Incident Reporting)",
+    "category": "Environmental",
+    "keywords": ["I see a nuclear accident", "reporting radiological incident", "radiation alert in the city", "radioactive plume sighting", "nuclear power plant emergency", "dirty bomb sighting"],
+    "steps": [
+      "Seek shelter in the nearest sturdy building immediately.",
+      "Warn others to seek indoor shelter and avoid the direction of the plume.",
+      "Monitor official emergency broadcasts for evacuation routes or shelter-in-place orders.",
+      "Do NOT travel toward the incident site to help; you will become a victim.",
+      "Notify emergency services of the time and location of the initial sighting.",
+      "Stay calm and wait for further instructions from radiological experts."
     ],
     "priority": 1
   },
   {
     "id": "ENV_008",
-    "title": "Extreme Heat (Heatstroke Prevention)",
+    "title": "Extreme Heat / Heatwave",
     "category": "Environmental",
-    "keywords": ["heat", "sun", "hot", "dehydration", "summer", "calor", "sol", "deshidratación", "verano", "golpe de calor"],
+    "keywords": ["extreme heat", "heatwave", "hyperthermia", "heat exhaustion", "sunstroke", "thermal stress", "wet bulb temperature", "dehydration risk", "urban heat island", "heat cramps", "shade seeking"],
     "steps": [
-      "Drink plenty of fluids (water, electrolytes) even if you don't feel thirsty. Avoid alcohol and caffeine.",
-      "Stay in air-conditioned buildings as much as possible. If home is hot, go to a library or mall.",
-      "Wear lightweight, light-colored, loose-fitting clothing.",
-      "Limit outdoor activity to when it's coolest, like morning and evening.",
-      "Check on neighbors, especially seniors and those living alone, twice a day.",
-      "NEVER leave children or pets in a parked car, even with windows cracked."
+      "Stay in air-conditioned buildings as much as possible.",
+      "Drink more water than usual and avoid alcohol or high-sugar drinks.",
+      "Wear lightweight, light-colored, and loose-fitting clothing.",
+      "Limit outdoor activity, especially during the middle of the day.",
+      "Never leave children or pets in a parked car, even with windows cracked.",
+      "Check on neighbors, especially the elderly or those with chronic conditions."
     ],
-    "priority": 1
+    "priority": 2
   },
   {
     "id": "ENV_009",
     "title": "Extreme Cold / Winter Storm",
     "category": "Environmental",
-    "keywords": ["cold", "ice", "snow", "winter", "freeze", "frío", "hielo", "nieve", "invierno", "helada", "hipotermia"],
+    "keywords": ["extreme cold", "hypothermia", "frostbite", "winter storm", "blizzard", "wind chill", "freezing rain", "ice accumulation", "black ice", "snow drift", "insulation failure"],
     "steps": [
-      "Stay indoors during the storm. If you must go out, wear several layers of loose-fitting, lightweight, warm clothing.",
-      "Keep dry. Change out of wet clothes immediately to prevent loss of body heat.",
-      "Watch for signs of frostbite: numbness, white or grayish-yellow skin, firm or waxy skin.",
-      "Watch for signs of hypothermia: shivering, exhaustion, confusion, fumbling hands, slurred speech.",
-      "If you lose power, close off unneeded rooms, stuff towels in cracks under doors, and wear layers.",
-      "Ensure space heaters are kept at least 3 feet away from anything that can burn."
+      "Stay indoors and dress in warm layers.",
+      "If you must go outside, cover all exposed skin to prevent frostbite.",
+      "Keep the heat at a consistent temperature to prevent pipes from freezing.",
+      "Avoid traveling. If stranded in a car, stay inside and run the engine only 10 minutes every hour for heat.",
+      "Ensure your emergency kit has extra blankets and high-energy food.",
+      "Watch for signs of hypothermia: shivering, exhaustion, confusion, or fumbling hands."
     ],
-    "priority": 1
+    "priority": 2
   },
   {
     "id": "ENV_010",
-    "title": "Thunderstorm / Lightning Safety",
+    "title": "Thunderstorm / Lightning",
     "category": "Environmental",
-    "keywords": ["storm", "lightning", "thunder", "rain", "electric", "tormenta", "rayo", "trueno", "lluvia", "eléctrico"],
+    "keywords": ["thunderstorm", "lightning strike", "severe weather", "cloud-to-ground", "thunder clap", "electrical surge", "hailstorm", "microburst", "downburst", "outdoor safety"],
     "steps": [
-      "When thunder roars, go indoors. A sturdy building is the safest place.",
-      "If no building is available, a hard-topped metal vehicle with windows rolled up is a safe second choice.",
-      "Stay away from windows and doors, and stay off porches.",
-      "Do NOT use corded phones, computers, or other electrical equipment that puts you in contact with electricity.",
-      "Avoid plumbing, including sinks, baths, and faucets.",
-      "If caught outdoors, get to a low spot. Stay away from tall trees, poles, or metal objects."
+      "When thunder roars, go indoors. Seek shelter in a substantial building or hard-topped vehicle.",
+      "Avoid using corded phones, computers, or other electrical equipment that puts you in contact with electricity.",
+      "Stay away from plumbing, including sinks, baths, and faucets.",
+      "If caught outdoors with no shelter, move away from tall objects like trees and poles.",
+      "Do NOT lie flat on the ground. Squat low on the balls of your feet to minimize ground contact.",
+      "Wait at least 30 minutes after the last clap of thunder before heading back outside."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_011_VIC",
+    "title": "Sandstorm (In Zero Visibility)",
+    "category": "Environmental",
+    "keywords": ["I am driving in a sandstorm", "I can't see anything on the road", "sand is entering my car", "trapped in zero visibility dust", "dust storm hitting my vehicle", "eyes burning from sand", "cannot breathe in dust storm"],
+    "steps": [
+      "Pull off the road as far as possible. Stop and turn OFF all vehicle lights.",
+      "Take your foot off the brake. You want your car to be invisible to drivers behind you.",
+      "Stay inside your vehicle with windows and vents tightly closed.",
+      "Cover your face with a damp cloth if dust is entering the cabin.",
+      "Wait until visibility improves before attempting to drive again.",
+      "If on foot, seek shelter behind a solid structure and protect your eyes and lungs."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_011_WIT",
+    "title": "Sandstorm (Wall of Dust Sighting)",
+    "category": "Environmental",
+    "keywords": ["I see a giant wall of dust", "haboob approaching the city", "sandstorm coming our way", "reporting a massive dust storm", "sky is turning orange with dust"],
+    "steps": [
+      "Seek shelter in a sturdy building immediately.",
+      "Close all windows, doors, and air intake vents.",
+      "Bring pets and livestock into protected areas.",
+      "Warn others who may be outdoors or driving in the path of the storm.",
+      "Avoid traveling if you see a dust storm approaching.",
+      "Ensure you have enough water and lighting in case of power or utility failure."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_012_VIC",
+    "title": "Volcanic Eruption (In Danger Zone)",
+    "category": "Environmental",
+    "keywords": ["I am near a volcano eruption", "ash is falling on me", "lava approaching my home", "trapped in volcanic ashfall", "pyroclastic flow alert", "lahar heading toward my town"],
+    "steps": [
+      "EVACUATE IMMEDIATELY if in a designated danger zone. Do not wait.",
+      "PROTECT LUNGS: Wear an N95 mask or a damp cloth over your nose and mouth.",
+      "STAY INDOORS if not evacuating. Close windows and seal vents with tape.",
+      "STAY CLEAR of valleys and low-lying areas (lahars/mudslides follow these paths).",
+      "WEAR goggles and long clothing to protect from abrasive ash.",
+      "DO NOT DRIVE in heavy ash; it will stall your engine and visibility is zero."
     ],
     "priority": 1
   },
   {
-    "id": "ENV_011",
-    "title": "Sandstorm / Dust Storm",
+    "id": "ENV_012_WIT",
+    "title": "Volcanic Eruption (Distance Witness)",
     "category": "Environmental",
-    "keywords": ["sand", "dust", "storm", "visibility", "breathing", "tormenta", "arena", "polvo", "visibilidad", "respiración"],
+    "keywords": ["I see a volcano erupting", "reporting ash cloud in the distance", "volcanic plume sighting", "witnessing lava flow from afar"],
     "steps": [
-      "If driving, pull off the road as far as possible, turn off all lights (otherwise others might follow you into the shoulder), and set the emergency brake.",
-      "If you are outside, wear an N95 mask or wrap a damp cloth around your nose and mouth.",
-      "Stay indoors with all windows and doors closed. Turn off AC/ventilation systems to prevent dust entry.",
-      "Protect your eyes with goggles or glasses; avoid wearing contact lenses.",
-      "Stay in place until visibility improves. Do NOT attempt to walk through the storm.",
-      "Clean any dust from your skin and hair once the storm passes to avoid irritation."
+      "STAY AWAY from the volcano. Do not travel toward it to take photos.",
+      "MONITOR local authorities for evacuation updates and ashfall advisories.",
+      "HELP neighbors who may be vulnerable to air quality changes.",
+      "PREPARE for potential flight cancellations or road closures in the region.",
+      "Keep a battery-powered radio for emergency updates if power fails.",
+      "Report the height and color of the ash plume to local geological services."
     ],
     "priority": 1
   },
   {
-    "id": "ENV_012",
-    "title": "Volcanic Ash Fall",
+    "id": "ENV_013_VIC",
+    "title": "Tsunami (Immediate Impact/Coast)",
     "category": "Environmental",
-    "keywords": ["volcano", "ash", "eruption", "air", "quality", "shelter", "volcán", "ceniza", "erupción", "aire", "refugio"],
+    "keywords": ["the ocean is receding", "a massive wave is coming", "I am trapped in a tsunami", "tsunami hitting the beach", "coastal inundation emergency", "swept away by tidal wave"],
     "steps": [
-      "Stay indoors and away from 'downwind' areas of the volcano.",
-      "Close all windows, doors, and fireplace dampers. Turn off all fans and heating/cooling systems.",
-      "If you must go outside, use a mask (N95) and wear goggles to protect your eyes from abrasive ash.",
-      "Wear long-sleeved clothing and pants to minimize ash contact with skin.",
-      "Do NOT drive in heavy ash fall; ash is abrasive and can damage car engines and clog filters.",
-      "Remove heavy ash from your roof if safe to do so, as ash is heavy and can cause structural collapse when wet."
+      "MOVE INLAND and to HIGH GROUND immediately. Do not wait for a siren.",
+      "VERTICAL EVACUATION: If you cannot reach high ground, climb to the 3rd floor or higher of a reinforced concrete building.",
+      "IF IN WATER: Grab onto something that floats (tree, door, roof) and hold on.",
+      "STAY AWAY: Do not go to the coast for at least 24 hours; more waves will come.",
+      "SIGNAL: Once on high ground, signal your location for rescue.",
+      "DO NOT enter your car if the wave is close; it will become a trap."
     ],
     "priority": 1
+  },
+  {
+    "id": "ENV_013_WIT",
+    "title": "Tsunami (Warning/Reporting)",
+    "category": "Environmental",
+    "keywords": ["reporting a tsunami warning", "I felt a massive quake near the sea", "witnessing receding shoreline", "tsunami alert for the region"],
+    "steps": [
+      "Warn anyone on the beach or in low-lying coastal areas to move inland immediately.",
+      "Call emergency services to report observations of receding water or unusual surges.",
+      "Move yourself to a safe elevation before the first wave arrives.",
+      "Monitor official tsunami warning center broadcasts for the 'all clear'.",
+      "Do NOT return to the coast to 'check' on property until cleared.",
+      "Alert local maritime traffic via radio if possible."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_014",
+    "title": "Sinkhole / Ground Collapse",
+    "category": "Environmental",
+    "keywords": ["sinkhole", "ground collapse", "karst topography", "subsidence", "structural foundation failure", "underground void", "pavement cracking", "sudden depression", "geological instability"],
+    "steps": [
+      "Evacuate the building or area immediately if you notice sudden large cracks or the ground sinking.",
+      "Stay away from the edges of the sinkhole; the ground may continue to collapse.",
+      "Cordon off the area with tape or cones to prevent others from falling in.",
+      "Do NOT attempt to fill the hole or investigate the bottom.",
+      "Check for utility leaks (gas, water, sewer) that may have been caused by the collapse.",
+      "Contact emergency services and a structural engineer to assess the safety of nearby structures."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_015",
+    "title": "Hazardous Air Quality",
+    "category": "Environmental",
+    "keywords": ["hazardous air quality", "AQI", "PM2.5", "wildfire smoke", "industrial smog", "particulate pollution", "respiratory alert", "unhealthy air", "smoke inhalation", "thermal inversion"],
+    "steps": [
+      "Stay indoors as much as possible with windows and doors closed.",
+      "Use high-efficiency (HEPA) air purifiers if available.",
+      "Avoid strenuous outdoor activity or exercise until the air quality improves.",
+      "If you must go outside, wear a well-fitted N95 or P100 respirator mask.",
+      "Keep indoor air clean by avoiding smoking, vacuuming, or using candles.",
+      "Monitor air quality indices (AQI) regularly through official weather apps."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_016",
+    "title": "Avalanche",
+    "category": "Environmental",
+    "keywords": ["avalanche", "snow slide", "trapped in snow", "mountain collapse snow", "buried in avalanche", "slab failure", "backcountry emergency", "transceiver rescue", "avalanche probe"],
+    "steps": [
+      "IF CAUGHT: Try to stay on the surface by 'swimming' through the snow. Push toward the side of the slide.",
+      "AIR POCKET: Before the snow stops, cup your hands in front of your face to create an air pocket.",
+      "STAY CALM: Conserve oxygen. Do NOT shout unless you hear rescuers above you.",
+      "FOR WITNESSES: Mark the spot where you last saw the victim. Call for help immediately.",
+      "SEARCH: Use beacons, probes, and shovels if you are trained and equipped.",
+      "AVOID: Stay away from similar slopes; a second avalanche often follows."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_017",
+    "title": "Solar Flare / Geomagnetic Storm (EMP)",
+    "category": "Environmental",
+    "keywords": ["solar flare", "geomagnetic storm", "EMP", "grid failure solar", "satellite outage", "X-class flare", "coronal mass ejection", "CME", "aurora alert", "electronics failure"],
+    "steps": [
+      "Disconnect sensitive electronics from power outlets during extreme solar events.",
+      "Be prepared for prolonged power outages and communication failures (GPS, Internet).",
+      "Ensure you have a battery-powered or hand-crank radio for news.",
+      "Keep a paper map of your area in case GPS/Navigation systems fail.",
+      "Avoid using elevators if a geomagnetic storm alert is active.",
+      "Check backup generators and fuel supplies for critical infrastructure."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_018",
+    "title": "Hurricane / Tropical Cyclone",
+    "category": "Environmental",
+    "keywords": ["hurricane", "cyclone", "typhoon", "storm surge", "eye of the storm", "Saffir-Simpson scale", "tropical storm", "landfall", "boarding up windows", "evacuation order"],
+    "steps": [
+      "Board up windows and secure all outdoor objects (furniture, trash cans).",
+      "Fill bathtubs and containers with clean water in case of utility failure.",
+      "Evacuate immediately if you are in a designated storm surge zone.",
+      "Do NOT go outside during the 'eye' of the storm; the winds will return from the opposite direction suddenly.",
+      "Stay away from windows and take shelter in an interior room on the lowest floor.",
+      "Turn off propane tanks and main power if flooding is imminent."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_020_VIC",
+    "title": "Dangerous Animals / Insects (Attack/Swarm)",
+    "category": "Environmental",
+    "keywords": ["I am being attacked by a dog", "swarm of bees", "wasp nest near kids", "alligator sighting near house", "snake bite emergency", "aggressive animal attacking", "stung by many bees", "hornet nest emergency"],
+    "steps": [
+      "If attacked by an animal, try to place an object (bag, jacket) between you and the animal.",
+      "If stung by bees, move to a safe indoor area immediately. Do NOT swat at them.",
+      "For snake bites: Keep the limb still and below heart level. Do NOT attempt to suck out venom.",
+      "Call emergency services and specify the type of animal or insect involved.",
+      "Remove yourself from the immediate danger zone without running if possible (running can trigger chase instinct)."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_020_WIT",
+    "title": "Dangerous Animal / Insect (Sighting)",
+    "category": "Environmental",
+    "keywords": ["I see a large predator", "reporting a bear in the neighborhood", "massive beehive on a tree", "reporting aggressive stray dogs", "wildlife sighting in urban area"],
+    "steps": [
+      "Maintain a safe distance and do NOT approach the animal.",
+      "Warn others in the vicinity to keep away and bring pets indoors.",
+      "Report the location, type of animal, and its behavior to emergency services.",
+      "Monitor the animal from a safe, enclosed location (like a house or car).",
+      "Do NOT attempt to capture or feed the animal."
+    ],
+    "priority": 2
+  },
+  {
+    "id": "ENV_021_VIC",
+    "title": "Elevator Entrapment (Victim / Inside)",
+    "category": "Environmental",
+    "keywords": ["stuck in elevator", "lift trapped", "stuck between floors", "elevator failure", "elevator stopped", "emergency button lift", "trapped in elevator alone", "lift doors won't open", "I am stuck in the lift"],
+    "steps": [
+      "Stay calm. Press the 'Alarm' or 'Phone' button inside the elevator.",
+      "Do NOT attempt to pry the doors open or exit if it is between floors.",
+      "Call emergency services and provide the building address and elevator number if known.",
+      "Sit on the floor and wait for professional help. The elevator is safe and has enough air."
+    ],
+    "priority": 1
+  },
+  {
+    "id": "ENV_019",
+    "title": "Utility Failure / Power Outage",
+    "category": "Environmental",
+    "keywords": ["power outage", "electricity is out", "blackout", "transformer exploded", "neighborhood dark", "street lights off", "electrical grid failure", "no power in area", "power line down sparking", "transformer burst", "grid failure emergency", "widespread power failure", "electrical blackout reporting"],
+    "steps": [
+      "Check your circuit breakers to see if it is a local issue.",
+      "Unplug sensitive electronics to protect them from power surges when electricity returns.",
+      "Keep refrigerator and freezer doors closed to preserve food.",
+      "Use flashlights instead of candles to prevent fire hazards.",
+      "If you see downed power lines, stay at least 35 feet away and call emergency services.",
+      "Listen to a battery-powered radio for updates from the utility company."
+    ],
+    "priority": 2
   }
 ]

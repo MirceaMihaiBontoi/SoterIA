@@ -27,9 +27,14 @@ public class ChatSessionRepository {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .enable(SerializationFeature.INDENT_OUTPUT);
 
+    private static final ChatSessionRepository INSTANCE = new ChatSessionRepository();
     private final Path sessionsDir;
 
-    public ChatSessionRepository() {
+    public static ChatSessionRepository getInstance() {
+        return INSTANCE;
+    }
+
+    private ChatSessionRepository() {
         this(Paths.get(System.getProperty("user.home"), ".soteria", "sessions"));
     }
 
@@ -41,12 +46,12 @@ public class ChatSessionRepository {
     private void ensureDirectory() {
         try {
             Files.createDirectories(sessionsDir);
-        } catch (IOException e) {
-            log.log(Level.SEVERE, e, () -> "Could not create sessions directory: " + sessionsDir);
+        } catch (IOException _) {
+            log.log(Level.SEVERE, "Could not create sessions directory: {0}", sessionsDir);
         }
     }
 
-    public List<ChatSession> listSessions() {
+    public List<ChatSession> getAllSessions() {
         List<ChatSession> sessions = new ArrayList<>();
         File dir = sessionsDir.toFile();
         File[] files = dir.listFiles((d, name) -> name.endsWith(JSON_EXTENSION));
@@ -55,8 +60,8 @@ public class ChatSessionRepository {
             for (File file : files) {
                 try {
                     sessions.add(MAPPER.readValue(file, ChatSession.class));
-                } catch (IOException e) {
-                    log.log(Level.WARNING, e, () -> "Failed to load session from: " + file.getName());
+                } catch (IOException _) {
+                    log.log(Level.WARNING, "Failed to load session from: {0}", file.getName());
                 }
             }
         }
@@ -66,17 +71,21 @@ public class ChatSessionRepository {
         return sessions;
     }
 
-    public void save(ChatSession session) throws IOException {
-        Path sessionFile = sessionsDir.resolve(session.getId() + JSON_EXTENSION);
-        MAPPER.writeValue(sessionFile.toFile(), session);
+    public void saveSession(ChatSession session) {
+        try {
+            Path sessionFile = sessionsDir.resolve(session.getId() + JSON_EXTENSION);
+            MAPPER.writeValue(sessionFile.toFile(), session);
+        } catch (IOException _) {
+            log.log(Level.SEVERE, "Failed to save session: {0}", session.getId());
+        }
     }
 
     public void delete(String sessionId) {
         Path sessionFile = sessionsDir.resolve(sessionId + JSON_EXTENSION);
         try {
             Files.deleteIfExists(sessionFile);
-        } catch (IOException e) {
-            log.log(Level.WARNING, e, () -> "Failed to delete session: " + sessionId);
+        } catch (IOException _) {
+            log.log(Level.WARNING, "Failed to delete session: {0}", sessionId);
         }
     }
 }

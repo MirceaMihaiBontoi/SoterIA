@@ -3,7 +3,6 @@ package com.soteria.core.model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +21,7 @@ class EmergencyEventTest {
 
         assertEquals(TYPE, event.emergencyType());
         assertNotNull(event.timestamp());
-        
+
         // Check if timestamp is within range
         assertFalse(event.timestamp().isBefore(before));
         assertFalse(event.timestamp().isAfter(after));
@@ -38,7 +37,7 @@ class EmergencyEventTest {
         assertTrue(out.contains(LOCATION));
         assertTrue(out.contains("8"));
     }
-    
+
     @Test
     @DisplayName("Records are immutable - components cannot be changed")
     void immutability() {

@@ -47,29 +47,46 @@ public class OnboardingController {
     private static final Duration PROBE_CONNECT_TIMEOUT = Duration.ofSeconds(5);
     private static final Duration PROBE_REQUEST_TIMEOUT = Duration.ofSeconds(8);
 
-    @FXML private VBox step1Container;
-    @FXML private VBox step2Container;
-    @FXML private VBox installationOverlay;
+    @FXML
+    private VBox step1Container;
+    @FXML
+    private VBox step2Container;
+    @FXML
+    private VBox installationOverlay;
 
     // Step 1
-    @FXML private ComboBox<SystemCapability.AIModelProfile> modelComboBox;
-    @FXML private TextField customModelField;
-    @FXML private ComboBox<String> languageComboBox;
-    @FXML private Label locationLabel;
-    @FXML private Label step1ErrorLabel;
-    @FXML private Button continueButton;
+    @FXML
+    private ComboBox<SystemCapability.AIModelProfile> modelComboBox;
+    @FXML
+    private TextField customModelField;
+    @FXML
+    private ComboBox<String> languageComboBox;
+    @FXML
+    private Label locationLabel;
+    @FXML
+    private Label step1ErrorLabel;
+    @FXML
+    private Button continueButton;
 
     // Step 2
-    @FXML private TextField nameField;
-    @FXML private ComboBox<String> genderComboBox;
-    @FXML private DatePicker birthDatePicker;
-    @FXML private TextField contactField;
-    @FXML private TextArea medicalField;
-    @FXML private Label errorLabel;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private ComboBox<String> genderComboBox;
+    @FXML
+    private DatePicker birthDatePicker;
+    @FXML
+    private TextField contactField;
+    @FXML
+    private TextArea medicalField;
+    @FXML
+    private Label errorLabel;
 
     // Setup feedback
-    @FXML private Label bootStatusLabel;
-    @FXML private ProgressBar bootProgress;
+    @FXML
+    private Label bootStatusLabel;
+    @FXML
+    private ProgressBar bootProgress;
 
     private BootstrapService bootstrap;
     private ProfileRepository profiles;
@@ -103,8 +120,7 @@ public class OnboardingController {
         modelComboBox.setItems(FXCollections.observableArrayList(SystemCapability.AIModelProfile.values()));
         modelComboBox.setValue(bootstrap.capability().getRecommendedProfile());
 
-        Callback<ListView<SystemCapability.AIModelProfile>, ListCell<SystemCapability.AIModelProfile>> cellFactory =
-                lv -> new ModelCell();
+        Callback<ListView<SystemCapability.AIModelProfile>, ListCell<SystemCapability.AIModelProfile>> cellFactory = lv -> new ModelCell();
         modelComboBox.setCellFactory(cellFactory);
         modelComboBox.setButtonCell(cellFactory.call(null));
     }
@@ -156,7 +172,8 @@ public class OnboardingController {
                 if (profile.preferredModel() != null) {
                     try {
                         modelComboBox.setValue(SystemCapability.AIModelProfile.valueOf(profile.preferredModel()));
-                    } catch (IllegalArgumentException ignore) { /* fall back to recommended */ }
+                    } catch (IllegalArgumentException _) {
+                        /* fall back to recommended */ }
                 }
                 if (profile.preferredLanguage() != null) {
                     selectLanguageSafely(profile.preferredLanguage());
@@ -263,6 +280,7 @@ public class OnboardingController {
             log.log(Level.WARNING, "Failed to save draft profile", e);
         }
 
+        log.info(() -> "Triggering provisioning for profile: " + selectedProfile + ", lang: " + selectedLang);
         bootstrap.startProvisioning(selectedProfile, selectedLang, finalUrl);
     }
 
@@ -297,12 +315,15 @@ public class OnboardingController {
                     selectedProfile.name(),
                     selectedLang,
                     isCustom ? customUrl : null);
+            log.info("User clicked Finish. Saving complete profile...");
             profiles.save(profile);
 
+            log.info("Transitioning to installation overlay...");
             step2Container.setVisible(false);
             installationOverlay.setVisible(true);
 
-            mainApp.completeOnboarding(profile);
+            log.info("Notifying MainApp to complete onboarding...");
+            mainApp.completeOnboarding();
 
         } catch (Exception e) {
             log.log(Level.SEVERE, "Failed to finish onboarding", e);
@@ -310,7 +331,10 @@ public class OnboardingController {
         }
     }
 
-    /** Cheap syntactic check; reject obviously-wrong inputs before hitting the network. */
+    /**
+     * Cheap syntactic check; reject obviously-wrong inputs before hitting the
+     * network.
+     */
     private String validateCustomUrlSyntax(String url) {
         if (url.length() > CUSTOM_URL_MAX_LEN) {
             return "Custom URL is too long.";
@@ -324,7 +348,7 @@ public class OnboardingController {
         }
         try {
             URI.create(url).toURL();
-        } catch (IllegalArgumentException | java.net.MalformedURLException e) {
+        } catch (IllegalArgumentException | java.net.MalformedURLException _) {
             return "Custom URL is malformed.";
         }
         return null;
@@ -353,16 +377,18 @@ public class OnboardingController {
                     .build();
             HttpResponse<Void> resp = client.send(head, HttpResponse.BodyHandlers.discarding());
             int code = resp.statusCode();
-            if (code >= 200 && code < 300) return null;
-            if (code == 405) return probeWithRange(client, url);
+            if (code >= 200 && code < 300)
+                return null;
+            if (code == 405)
+                return probeWithRange(client, url);
             return "Server responded with HTTP " + code + " — check the URL.";
-        } catch (HttpTimeoutException e) {
+        } catch (HttpTimeoutException _) {
             return "The server took too long to respond. Try again.";
-        } catch (java.net.ConnectException e) {
+        } catch (java.net.ConnectException _) {
             return "Could not reach the server. Check your internet connection.";
-        } catch (java.net.UnknownHostException e) {
+        } catch (java.net.UnknownHostException _) {
             return "Unknown host. Check the URL spelling.";
-        } catch (InterruptedException e) {
+        } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
             return "URL verification was interrupted.";
         } catch (Exception e) {
@@ -380,7 +406,8 @@ public class OnboardingController {
                 .build();
         HttpResponse<Void> resp = client.send(get, HttpResponse.BodyHandlers.discarding());
         int code = resp.statusCode();
-        if (code == 200 || code == 206) return null;
+        if (code == 200 || code == 206)
+            return null;
         return "Server responded with HTTP " + code + " — check the URL.";
     }
 }

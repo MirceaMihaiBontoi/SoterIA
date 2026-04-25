@@ -1,22 +1,29 @@
 package com.soteria.infrastructure.intelligence;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
  * Manages AI assets on disk:
- *  - Vosk STT models (distributed as .zip, extracted on download).
- *  - LLM GGUF files (single-file format for llama.cpp).
+ * - Vosk STT models (distributed as .zip, extracted on download).
+ * - LLM GGUF files (single-file format for llama.cpp).
  *
  * The brain backend is llama.cpp; models are GGUFs, which means **one file per
  * model** — no external data, no tokenizer side-files, no manifest juggling.
@@ -33,16 +40,17 @@ public class ModelManager {
     private static final String VOSK_EN_PERF_URL = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip";
 
     // Brain (LLM) — GGUFs published by unsloth on HuggingFace.
-    // TODO (SOTERIA-22): Migrate to Gemma 4 (gemma-4-E2B/E4B-it-GGUF) when kherud:llama >= 4.3.0
-    //                    includes soporte for gemma4 architecture.
-    private static final String LLM_ULTRA_LITE_URL  = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf";
-    private static final String LLM_LITE_URL        = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q8_0.gguf";
-    private static final String LLM_BALANCED_URL    = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
-    private static final String LLM_ULTRA_URL       = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
+    // kherud:llama >= 4.3.0
+    // includes soporte for gemma4 architecture.
+    private static final String LLM_ULTRA_LITE_URL = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf";
+    private static final String LLM_LITE_URL = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q8_0.gguf";
+    private static final String LLM_BALANCED_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
+    private static final String LLM_ULTRA_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
 
-    // Embedding (Vector) Model — Compact multilingual model for semantic search
-    private static final String EMBEDDING_MODEL_URL = "https://huggingface.co/mykor/paraphrase-multilingual-MiniLM-L12-v2.gguf/resolve/main/paraphrase-multilingual-MiniLM-L12-118M-v2-F16.gguf";
-    private static final String EMBEDDING_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-118M-v2-F16.gguf";
+    // Triage (Intent) Model — Specialized crisis/emergency classifier (CT-XLMR-SE)
+    // V1: Fine-tuned with local protocols and stress tests
+    private static final String TRIAGE_MODEL_URL = "https://huggingface.co/mradermacher/CT-XLMR-SE-GGUF/resolve/main/CT-XLMR-SE.Q4_K_M.gguf";
+    private static final String TRIAGE_MODEL_NAME = "soteria-triage-v1.gguf";
 
     private final SystemCapability capability;
     private final Path modelBasePath;
@@ -70,7 +78,8 @@ public class ModelManager {
     }
 
     /**
-     * Returns the on-disk path for a brain model (GGUF file), whether it exists or not.
+     * Returns the on-disk path for a brain model (GGUF file), whether it exists or
+     * not.
      */
     public Path getBrainModelPath() {
         return getBrainModelPath(capability.getRecommendedProfile(), null);
@@ -87,11 +96,12 @@ public class ModelManager {
      * Returns the on-disk path for the embedding model.
      */
     public Path getEmbeddingModelPath() {
-        return modelBasePath.resolve(EMBEDDING_MODEL_NAME);
+        return getTriageModelPath();
     }
 
     /**
-     * Returns the on-disk path for a Vosk model directory, whether it exists or not.
+     * Returns the on-disk path for a Vosk model directory, whether it exists or
+     * not.
      */
     public Path getVoskModelPath(String language) {
         return modelBasePath.resolve(getVoskModelName(language));
@@ -126,6 +136,14 @@ public class ModelManager {
         return Files.exists(getEmbeddingModelPath());
     }
 
+    public boolean isTriageModelReady() {
+        return Files.exists(getTriageModelPath());
+    }
+
+    public Path getTriageModelPath() {
+        return modelBasePath.resolve(TRIAGE_MODEL_NAME);
+    }
+
     /**
      * Downloads a specific GGUF model profile.
      */
@@ -148,7 +166,7 @@ public class ModelManager {
         String url = getBrainModelUrl(profile);
         String fileName = getBrainModelFileName(profile);
         Path target = modelBasePath.resolve(fileName);
-        
+
         if (Files.exists(target)) {
             return CompletableFuture.completedFuture(target);
         }
@@ -163,11 +181,23 @@ public class ModelManager {
         if (Files.exists(target)) {
             return CompletableFuture.completedFuture(target);
         }
-        return downloadFile(EMBEDDING_MODEL_URL, target);
+        return downloadFile(TRIAGE_MODEL_URL, target);
     }
 
     /**
-     * Downloads and extracts the Vosk bundle for the given language. No-op if present.
+     * Downloads the specialized triage classifier model.
+     */
+    public CompletableFuture<Path> downloadTriageModel() {
+        Path target = getTriageModelPath();
+        if (Files.exists(target)) {
+            return CompletableFuture.completedFuture(target);
+        }
+        return downloadFile(TRIAGE_MODEL_URL, target);
+    }
+
+    /**
+     * Downloads and extracts the Vosk bundle for the given language. No-op if
+     * present.
      */
     public CompletableFuture<Path> downloadVoskModel(String language) {
         Path target = getVoskModelPath(language);
@@ -189,7 +219,7 @@ public class ModelManager {
 
     private CompletableFuture<Path> downloadFile(String url, Path finalTarget) {
         Path partFile = Paths.get(finalTarget.toString() + ".part");
-        logger.log(Level.INFO, "Downloading {0} -> {1}", new Object[]{url, partFile});
+        logger.log(Level.INFO, "Downloading {0} -> {1}", new Object[] { url, partFile });
 
         try {
             Files.createDirectories(partFile.getParent());
@@ -202,7 +232,7 @@ public class ModelManager {
             if (Files.exists(partFile)) {
                 existingSize = Files.size(partFile);
             }
-        } catch (IOException ignored) {
+        } catch (IOException _) {
             // Safe to ignore: if we can't read the size, we'll just start fresh (0 bytes)
         }
 
@@ -226,7 +256,8 @@ public class ModelManager {
                 .thenCompose(response -> {
                     int status = response.statusCode();
                     if (status != 200 && status != 206) {
-                        return CompletableFuture.failedFuture(new IOException("Download failed. HTTP " + status + " for " + url));
+                        return CompletableFuture
+                                .failedFuture(new IOException("Download failed. HTTP " + status + " for " + url));
                     }
 
                     boolean append = (status == 206);
@@ -241,8 +272,8 @@ public class ModelManager {
     }
 
     private void writeStreamToFile(InputStream is, Path target, boolean append) throws IOException {
-        try (OutputStream os = Files.newOutputStream(target, 
-                append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE, 
+        try (OutputStream os = Files.newOutputStream(target,
+                append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE,
                 StandardOpenOption.WRITE)) {
             byte[] buffer = new byte[16384];
             int read;

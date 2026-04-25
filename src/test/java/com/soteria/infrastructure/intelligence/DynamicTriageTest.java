@@ -1,0 +1,78 @@
+package com.soteria.infrastructure.intelligence;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+
+class DynamicTriageTest {
+    private TriageService triageService;
+    private EmergencyKnowledgeBase knowledgeBase;
+    private final String userHome = System.getProperty("user.home");
+    private final Path modelPath = Paths.get(userHome, ".soteria", "models", "CT-XLMR-SE.Q4_K_M.gguf");
+
+    @BeforeEach
+    void setUp() {
+        // We use the same model for both to ensure consistency, as per ChatController
+        // logic
+        triageService = new TriageService(modelPath);
+        knowledgeBase = new EmergencyKnowledgeBase();
+        knowledgeBase.setEmbedder(triageService.getModel());
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (triageService != null)
+            triageService.close();
+        if (knowledgeBase != null)
+            knowledgeBase.close();
+    }
+
+    @Test
+    void testDynamicTriageGasLeak() {
+        String query = "I smell gas in my kitchen and I feel dizzy";
+
+        // Step 1: RAG retrieval
+        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        assertFalse(candidates.isEmpty(), "RAG should find candidates for a gas leak");
+
+        // Step 2: Dynamic Classification
+        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
+        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+
+        // Assertions
+        assertTrue(result.isEmergency(), "Should be detected as emergency");
+        assertEquals("ENV_001_VIC", result.protocol().getId(),
+                "Should match the INDOOR gas leak protocol specifically");
+        assertEquals(TriageService.Intent.ENVIRONMENTAL_EMERGENCY, result.intent());
+        System.out.println("Match: " + result.protocol().getTitle() + " | Score: " + result.score());
+    }
+
+    @Test
+    void testDynamicTriageTornado() {
+        String query = "Hay un tornado acercándose a mi pueblo, hay mucho viento";
+
+        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
+        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+
+        assertTrue(result.isEmergency(), "Should detect tornado emergency even in Spanish");
+        assertEquals("ENV_006", result.protocol().getId());
+        System.out.println("Match: " + result.protocol().getTitle() + " | Score: " + result.score());
+    }
+
+    @Test
+    void testInactiveIntent() {
+        String query = "Hola, ¿cómo estás hoy? Qué buen tiempo hace.";
+
+        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
+        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+
+        assertFalse(result.isEmergency(), "Casual talk should NOT be an emergency");
+        assertEquals(TriageService.Intent.INACTIVE, result.intent());
+    }
+}
