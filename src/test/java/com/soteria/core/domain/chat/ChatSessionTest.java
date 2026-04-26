@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.domain.chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

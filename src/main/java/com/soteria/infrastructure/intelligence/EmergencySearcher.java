@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.emergency.Protocol;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;

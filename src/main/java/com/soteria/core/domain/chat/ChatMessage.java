@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.domain.chat;
 
 /**
  * A single turn in a conversation with the local brain.

@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.domain.chat;
 
 import java.util.ArrayList;
 import java.util.HashSet;

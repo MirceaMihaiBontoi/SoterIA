@@ -1,6 +1,9 @@
 package com.soteria.ui.logic;
 
 import com.soteria.infrastructure.intelligence.*;
+import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.domain.chat.ChatMessage;
+import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.core.model.UserData;
 import javafx.application.Platform;
 

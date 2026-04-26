@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.emergency.Protocol;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;

@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.domain.emergency;
 
 import java.util.List;
 

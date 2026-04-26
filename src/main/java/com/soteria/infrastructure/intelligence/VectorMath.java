@@ -1,5 +1,7 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.emergency.Protocol;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.soteria.infrastructure.bootstrap;
 
-import com.soteria.infrastructure.intelligence.ChatMessage;
+import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.infrastructure.intelligence.SystemCapability;
 import com.soteria.infrastructure.intelligence.VoskSTTService;
 import com.soteria.infrastructure.intelligence.TriageService;

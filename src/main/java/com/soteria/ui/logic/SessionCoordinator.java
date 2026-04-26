@@ -1,6 +1,6 @@
 package com.soteria.ui.logic;
 
-import com.soteria.infrastructure.intelligence.ChatSession;
+import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.persistence.ChatSessionRepository;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;

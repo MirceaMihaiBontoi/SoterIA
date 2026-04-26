@@ -1,7 +1,7 @@
 package com.soteria.infrastructure.persistence;
 
-import com.soteria.infrastructure.intelligence.ChatMessage;
-import com.soteria.infrastructure.intelligence.ChatSession;
+import com.soteria.core.domain.chat.ChatMessage;
+import com.soteria.core.domain.chat.ChatSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

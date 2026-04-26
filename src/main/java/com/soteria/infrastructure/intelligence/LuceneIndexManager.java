@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.emergency.Protocol;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -119,7 +120,12 @@ public class LuceneIndexManager implements AutoCloseable {
     }
 
     private String buildIndexContent(Protocol p) {
-        String role = p.getId().endsWith("_VIC") ? "[VIC]" : p.getId().endsWith("_WIT") ? "[WIT]" : "";
+        String role = "";
+        if (p.getId().endsWith("_VIC")) {
+            role = "[VIC]";
+        } else if (p.getId().endsWith("_WIT")) {
+            role = "[WIT]";
+        }
         String keywordsStr = p.getKeywords() == null ? "" : String.join(" ", p.getKeywords());
         return String.format("%s %s %s", role, p.getTitle(), keywordsStr).trim();
     }

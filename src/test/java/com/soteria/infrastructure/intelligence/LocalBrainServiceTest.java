@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.chat.ChatMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

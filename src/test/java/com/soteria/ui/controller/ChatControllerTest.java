@@ -1,7 +1,7 @@
 package com.soteria.ui.controller;
 
 import com.soteria.infrastructure.intelligence.EmergencyKnowledgeBase;
-import com.soteria.infrastructure.intelligence.Protocol;
+import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.ui.logic.InferenceEngine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

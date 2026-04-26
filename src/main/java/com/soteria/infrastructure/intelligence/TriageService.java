@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.domain.emergency.Protocol;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
 import java.io.IOException;
@@ -156,7 +157,12 @@ public class TriageService implements AutoCloseable {
 
     private float[] getOrCacheVector(Protocol protocol) {
         return protocolVectorCache.computeIfAbsent(protocol.getId(), id -> {
-            String role = id.endsWith("_VIC") ? "[VIC]" : id.endsWith("_WIT") ? "[WIT]" : "";
+            String role = "";
+            if (id.endsWith("_VIC")) {
+                role = "[VIC]";
+            } else if (id.endsWith("_WIT")) {
+                role = "[WIT]";
+            }
             String keywordsStr = protocol.getKeywords() == null ? "" : String.join(" ", protocol.getKeywords());
             String anchorText = String.format("%s %s %s", role, protocol.getTitle(), keywordsStr).trim();
             
