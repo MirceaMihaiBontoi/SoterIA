@@ -1,16 +1,21 @@
 package com.soteria.ui.controller;
 
-import com.soteria.core.interfaces.AlertService;
-import com.soteria.core.interfaces.LocationProvider;
+import com.soteria.core.port.AlertService;
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.LocationProvider;
+import com.soteria.core.port.STT;
+import com.soteria.core.port.STTListener;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
-import com.soteria.infrastructure.intelligence.*;
+import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.domain.chat.ChatMessage;
+import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
-import com.soteria.ui.component.SoterIAFace;
+import com.soteria.ui.view.SoterIAFace;
 import com.soteria.core.model.UserData;
-import com.soteria.ui.logic.ChatViewManager;
-import com.soteria.ui.logic.InferenceEngine;
-import com.soteria.ui.logic.SessionCoordinator;
+import com.soteria.ui.view.ChatViewManager;
+import com.soteria.application.chat.InferenceEngine;
+import com.soteria.ui.view.SessionCoordinator;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -54,8 +59,8 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     private ChatSession activeSession;
 
     // Services
-    private VoskSTTService sttService;
-    private EmergencyKnowledgeBase knowledgeBase;
+    private STT sttService;
+    private KnowledgeBase knowledgeBase;
     private final LocationProvider locationProvider = new SystemGPSLocation();
     private final AlertService alertService = new NotificationAlertService();
 
@@ -188,10 +193,6 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     }
 
     private void processMessage(String message) {
-        if (inferenceEngine != null && inferenceEngine.isEmergencyCommand(message)) {
-            handleEmergencyAlert("Palabra clave de emergencia: " + message);
-            return;
-        }
         if (!aiAvailable) return;
 
         activeSession.addMessage(ChatMessage.user(message));
@@ -315,10 +316,6 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
                 });
             }
         }, "soteria-alert").start();
-    }
-
-    public boolean isEmergencyCommand(String message) {
-        return inferenceEngine != null && inferenceEngine.isEmergencyCommand(message);
     }
 
     // --- UI Delegation ---

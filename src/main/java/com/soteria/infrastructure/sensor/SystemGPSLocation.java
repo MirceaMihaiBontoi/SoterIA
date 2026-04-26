@@ -1,6 +1,6 @@
 package com.soteria.infrastructure.sensor;
 
-import com.soteria.core.interfaces.LocationProvider;
+import com.soteria.core.port.LocationProvider;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

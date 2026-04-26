@@ -1,10 +1,10 @@
 package com.soteria.infrastructure.bootstrap;
 
-import com.soteria.infrastructure.intelligence.ChatMessage;
-import com.soteria.infrastructure.intelligence.SystemCapability;
-import com.soteria.infrastructure.intelligence.VoskSTTService;
-import com.soteria.infrastructure.intelligence.TriageService;
-import com.soteria.infrastructure.intelligence.LocalBrainService;
+import com.soteria.core.domain.chat.ChatMessage;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
+import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.triage.TriageService;
+import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
 
 import java.io.IOException;
 import java.util.List;
@@ -111,8 +111,8 @@ public class ProvisioningManager {
         if (isInterrupted()) return;
 
         state.update("Loading speech recognition...", 0.30);
-        if (service.sttService() != null) {
-            service.sttService().shutdown();
+        if (service.sttServiceImpl() != null) {
+            service.sttServiceImpl().shutdown();
         }
         VoskSTTService stt = new VoskSTTService(service.modelManager().getVoskModelPath(language));
         service.setSttService(stt);
@@ -128,9 +128,9 @@ public class ProvisioningManager {
 
     private void provisionKnowledgeBase(BootstrapState state, BootstrapService service) {
         state.update("Optimizing search engine...", 0.65);
-        if (service.triageService() != null) {
-            service.knowledgeBase().setEmbedder(service.triageService().getModel());
-            service.triageService().setCentroid(service.knowledgeBase().getCentroid());
+        if (service.triageServiceImpl() != null) {
+            service.knowledgeBaseImpl().setEmbedder(service.triageServiceImpl().getModel());
+            service.triageServiceImpl().setCentroid(service.knowledgeBaseImpl().getCentroid());
         }
     }
 
@@ -143,8 +143,8 @@ public class ProvisioningManager {
 
         if (isInterrupted()) return;
 
-        if (service.triageService() != null) {
-            service.triageService().close();
+        if (service.triageServiceImpl() != null) {
+            service.triageServiceImpl().close();
         }
         TriageService triage = new TriageService(service.modelManager().getTriageModelPath());
         service.setTriageService(triage);
@@ -153,8 +153,8 @@ public class ProvisioningManager {
     private void initBrainService(BootstrapState state, BootstrapService service, 
                                   SystemCapability.AIModelProfile profile, String customUrl, String language) {
         state.update("Loading AI brain...", 0.70);
-        if (service.brainService() != null) {
-            service.brainService().close();
+        if (service.brainServiceImpl() != null) {
+            service.brainServiceImpl().close();
         }
         LocalBrainService brain = new LocalBrainService(service.modelManager().getBrainModelPath(profile, customUrl), service.capability());
         service.setBrainService(brain);
@@ -168,8 +168,8 @@ public class ProvisioningManager {
     private void warmUpBrain(BootstrapService service, String language) {
         try {
             List<ChatMessage> primer = List.of(ChatMessage.user("SYSTEM_TEST_START_WARMUP"));
-            service.brainService().generateResponse(primer, "Warmup — no real protocol needed.", language, null,
-                    new com.soteria.infrastructure.intelligence.InferenceListener() {
+            service.brainServiceImpl().generateResponse(primer, "Warmup — no real protocol needed.", language, null,
+                    new com.soteria.core.port.InferenceListener() {
                         @Override public void onToken(String t) { /* Silent warmup — tokens are not used */ }
                         @Override public void onAnalysisComplete(String id, String s) { /* Silent warmup — analysis is not used */ }
                         @Override public void onComplete(String f) { /* Silent warmup completion */ }

@@ -1,6 +1,6 @@
 package com.soteria.infrastructure.notification;
 
-import com.soteria.core.interfaces.AlertService;
+import com.soteria.core.port.AlertService;
 import com.soteria.core.model.EmergencyEvent;
 import com.soteria.core.model.UserData;
 

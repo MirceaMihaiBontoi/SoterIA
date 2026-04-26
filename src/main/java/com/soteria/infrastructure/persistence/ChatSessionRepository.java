@@ -3,7 +3,7 @@ package com.soteria.infrastructure.persistence;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.soteria.infrastructure.intelligence.ChatSession;
+import com.soteria.core.domain.chat.ChatSession;
 
 import java.io.File;
 import java.io.IOException;

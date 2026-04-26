@@ -2,7 +2,7 @@ package com.soteria.ui.controller;
 
 import com.soteria.core.model.UserData;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
-import com.soteria.infrastructure.intelligence.SystemCapability;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.infrastructure.persistence.ProfileRepository;
 import com.soteria.infrastructure.sensor.DevicePhoneDetector;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;

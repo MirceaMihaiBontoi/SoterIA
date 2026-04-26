@@ -1,11 +1,15 @@
 package com.soteria.infrastructure.bootstrap;
 
-import com.soteria.infrastructure.intelligence.LocalBrainService;
-import com.soteria.infrastructure.intelligence.EmergencyKnowledgeBase;
-import com.soteria.infrastructure.intelligence.ModelManager;
-import com.soteria.infrastructure.intelligence.SystemCapability;
-import com.soteria.infrastructure.intelligence.TriageService;
-import com.soteria.infrastructure.intelligence.VoskSTTService;
+import com.soteria.core.port.Brain;
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.STT;
+import com.soteria.core.port.Triage;
+import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
+import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
+import com.soteria.infrastructure.intelligence.system.ModelManager;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
+import com.soteria.infrastructure.intelligence.triage.TriageService;
+import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -95,19 +99,38 @@ public class BootstrapService {
         return modelManager;
     }
 
-    public EmergencyKnowledgeBase knowledgeBase() {
+    public KnowledgeBase knowledgeBase() {
         return knowledgeBase;
     }
 
-    public VoskSTTService sttService() {
+    public STT sttService() {
         return sttService;
     }
 
-    public TriageService triageService() {
+    public Triage triageService() {
         return triageService;
     }
 
-    public LocalBrainService brainService() {
+    public Brain brainService() {
+        return brainService;
+    }
+
+    // Package-private accessors for ProvisioningManager — exposes infra-only
+    // operations (centroid wiring, embedder injection, lifecycle) without
+    // leaking concrete types past the bootstrap boundary.
+    EmergencyKnowledgeBase knowledgeBaseImpl() {
+        return knowledgeBase;
+    }
+
+    VoskSTTService sttServiceImpl() {
+        return sttService;
+    }
+
+    TriageService triageServiceImpl() {
+        return triageService;
+    }
+
+    LocalBrainService brainServiceImpl() {
         return brainService;
     }
 
