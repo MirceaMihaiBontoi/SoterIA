@@ -1,5 +1,6 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.knowledge;
 
+import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

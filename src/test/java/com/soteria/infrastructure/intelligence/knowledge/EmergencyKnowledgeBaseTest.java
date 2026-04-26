@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.knowledge;
 
 import com.soteria.core.domain.emergency.Protocol;
 import org.junit.jupiter.api.BeforeEach;

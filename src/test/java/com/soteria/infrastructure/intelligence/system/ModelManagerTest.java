@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.system;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

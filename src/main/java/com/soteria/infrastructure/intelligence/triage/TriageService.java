@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence.rag;
+package com.soteria.infrastructure.intelligence.triage;
 
 import com.soteria.core.domain.emergency.Protocol;
 import de.kherud.llama.LlamaModel;

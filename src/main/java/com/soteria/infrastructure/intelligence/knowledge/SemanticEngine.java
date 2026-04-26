@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence.rag;
+package com.soteria.infrastructure.intelligence.knowledge;
 
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.LlamaModel;

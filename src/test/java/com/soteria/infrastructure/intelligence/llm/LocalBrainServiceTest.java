@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.llm;
 
 import com.soteria.core.domain.chat.ChatMessage;
 import org.junit.jupiter.api.DisplayName;

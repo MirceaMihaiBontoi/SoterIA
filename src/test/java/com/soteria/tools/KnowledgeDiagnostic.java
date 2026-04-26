@@ -1,12 +1,13 @@
-package com.soteria.infrastructure.intelligence.rag;
+package com.soteria.tools;
 
+import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class RagDiagnostic {
-    private static final Logger logger = Logger.getLogger(RagDiagnostic.class.getName());
+public class KnowledgeDiagnostic {
+    private static final Logger logger = Logger.getLogger(KnowledgeDiagnostic.class.getName());
 
     public static void main(String[] args) {
         logger.info("--- SoterIA RAG Diagnostic ---");

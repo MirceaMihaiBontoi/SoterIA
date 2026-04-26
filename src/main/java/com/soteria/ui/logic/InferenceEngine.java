@@ -1,6 +1,7 @@
 package com.soteria.ui.logic;
 
-import com.soteria.infrastructure.intelligence.rag.*;
+import com.soteria.infrastructure.intelligence.knowledge.*;
+import com.soteria.infrastructure.intelligence.triage.*;
 import com.soteria.infrastructure.intelligence.llm.*;
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.domain.chat.ChatMessage;

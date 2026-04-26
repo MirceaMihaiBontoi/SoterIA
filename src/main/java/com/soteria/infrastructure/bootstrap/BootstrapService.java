@@ -1,10 +1,10 @@
 package com.soteria.infrastructure.bootstrap;
 
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
-import com.soteria.infrastructure.intelligence.rag.EmergencyKnowledgeBase;
+import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import com.soteria.infrastructure.intelligence.system.ModelManager;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
-import com.soteria.infrastructure.intelligence.rag.TriageService;
+import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;

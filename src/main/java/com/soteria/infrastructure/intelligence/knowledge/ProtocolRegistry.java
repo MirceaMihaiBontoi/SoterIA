@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence.rag;
+package com.soteria.infrastructure.intelligence.knowledge;
 
 import com.soteria.core.domain.emergency.Protocol;
 import com.fasterxml.jackson.core.type.TypeReference;

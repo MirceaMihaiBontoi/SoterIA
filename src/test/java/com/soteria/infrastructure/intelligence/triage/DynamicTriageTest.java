@@ -1,6 +1,7 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.triage;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
