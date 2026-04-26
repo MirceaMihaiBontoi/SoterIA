@@ -1,8 +1,8 @@
 package com.soteria.application.chat;
 
-import com.soteria.infrastructure.intelligence.knowledge.*;
-import com.soteria.infrastructure.intelligence.triage.*;
-import com.soteria.infrastructure.intelligence.llm.*;
+import com.soteria.core.port.Brain;
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.Triage;
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
@@ -22,9 +22,9 @@ public class InferenceEngine {
     private static final Logger logger = Logger.getLogger(InferenceEngine.class.getName());
     private static final String RESPONSE_MARKER = "RESPONSE:";
 
-    private final TriageService triageService;
-    private final LocalBrainService brainService;
-    private final EmergencyKnowledgeBase knowledgeBase;
+    private final Triage triageService;
+    private final Brain brainService;
+    private final KnowledgeBase knowledgeBase;
 
     public interface UIUpdateListener {
         void onSubtitleUpdate(String text);
@@ -33,7 +33,7 @@ public class InferenceEngine {
         void onSafetyBoxUpdate(String protocolId, String status);
     }
 
-    public InferenceEngine(TriageService triage, LocalBrainService brain, EmergencyKnowledgeBase kb) {
+    public InferenceEngine(Triage triage, Brain brain, KnowledgeBase kb) {
         this.triageService = triage;
         this.brainService = brain;
         this.knowledgeBase = kb;
@@ -54,11 +54,11 @@ public class InferenceEngine {
         try {
             // 1. Triage & Classification (using contextual query for better accuracy)
             String contextualQuery = prepareContextualQuery(message, session);
-            List<EmergencyKnowledgeBase.ProtocolMatch> matches = knowledgeBase.findProtocols(contextualQuery,
+            List<KnowledgeBase.ProtocolMatch> matches = knowledgeBase.findProtocols(contextualQuery,
                     session.getRejectedProtocolIds(), false);
-            List<Protocol> candidates = matches.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
+            List<Protocol> candidates = matches.stream().map(KnowledgeBase.ProtocolMatch::protocol).toList();
 
-            TriageService.TriageResult triage = triageService.classifyDynamic(contextualQuery, candidates);
+            Triage.TriageResult triage = triageService.classifyDynamic(contextualQuery, candidates);
 
             // 2. RAG Context Preparation & Optimization
             String context;
@@ -74,9 +74,9 @@ public class InferenceEngine {
                     session.getActiveCategories().add(category);
                 }
 
-                List<EmergencyKnowledgeBase.ProtocolMatch> results = new ArrayList<>();
+                List<KnowledgeBase.ProtocolMatch> results = new ArrayList<>();
                 if (triage.protocol() != null) {
-                    results.add(new EmergencyKnowledgeBase.ProtocolMatch(triage.protocol(), "CLASSIFIER", triage.score()));
+                    results.add(new KnowledgeBase.ProtocolMatch(triage.protocol(), "CLASSIFIER", triage.score()));
                     // Auto-lock the protocol if the classifier is confident
                     if (session.getActiveEmergencyId() == null) {
                         session.setActiveEmergencyId(triage.protocol().getId());
@@ -104,7 +104,7 @@ public class InferenceEngine {
         }
     }
 
-    private LocalBrainService.BrainCallback createBrainCallback(String message, ChatSession session, UserData user,
+    private Brain.BrainCallback createBrainCallback(String message, ChatSession session, UserData user,
             String language, UIUpdateListener listener, int attempt, String activeId) {
         return new BrainCallbackHandler(message, session, user, language, listener, attempt, activeId);
     }
@@ -112,7 +112,7 @@ public class InferenceEngine {
     /**
      * Inner class to handle brain callbacks and reduce cognitive complexity.
      */
-    private class BrainCallbackHandler implements LocalBrainService.BrainCallback {
+    private class BrainCallbackHandler implements Brain.BrainCallback {
         private final String message;
         private final ChatSession session;
         private final UserData user;
@@ -201,7 +201,7 @@ public class InferenceEngine {
         }
     }
 
-    private void applyStickyContext(List<EmergencyKnowledgeBase.ProtocolMatch> results, ChatSession session) {
+    private void applyStickyContext(List<KnowledgeBase.ProtocolMatch> results, ChatSession session) {
         String activeId = session.getActiveEmergencyId();
         if (activeId == null)
             return;
@@ -209,7 +209,7 @@ public class InferenceEngine {
         if (!present) {
             Protocol p = knowledgeBase.getProtocolById(activeId);
             if (p != null)
-                results.add(0, new EmergencyKnowledgeBase.ProtocolMatch(p, "PERSISTENT", 1.0f));
+                results.add(0, new KnowledgeBase.ProtocolMatch(p, "PERSISTENT", 1.0f));
         }
     }
 
@@ -231,7 +231,7 @@ public class InferenceEngine {
                 || msg.contains("ambulance") || msg.contains("ambulancia");
     }
 
-    private String getEmergencyCategory(TriageService.Intent intent) {
+    private String getEmergencyCategory(Triage.Intent intent) {
         if (intent == null) return "GENERAL";
         return switch (intent) {
             case MEDICAL_EMERGENCY -> "MEDICAL";
@@ -283,7 +283,7 @@ public class InferenceEngine {
         return "user".equals(msg.role()) && (msg.content().equals(query) || relevantTurns.contains(msg.content()));
     }
 
-    public String buildProtocolManifest(List<EmergencyKnowledgeBase.ProtocolMatch> results, ChatSession session) {
+    public String buildProtocolManifest(List<KnowledgeBase.ProtocolMatch> results, ChatSession session) {
         if (results.isEmpty())
             return "No specific protocol matched.";
         StringBuilder out = new StringBuilder("PROTOCOL_MANIFEST:\n");
@@ -292,7 +292,7 @@ public class InferenceEngine {
         return out.toString();
     }
 
-    private void appendProtocolInfo(StringBuilder out, EmergencyKnowledgeBase.ProtocolMatch m, ChatSession session) {
+    private void appendProtocolInfo(StringBuilder out, KnowledgeBase.ProtocolMatch m, ChatSession session) {
         Protocol p = m.protocol();
         boolean isLocked = (session != null && session.isProtocolLocked()
                 && p.getId().equals(session.getActiveEmergencyId()));

@@ -1,6 +1,7 @@
 package com.soteria.infrastructure.intelligence.knowledge;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.port.KnowledgeBase;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.LlamaModel;
 
@@ -23,11 +24,8 @@ import java.util.logging.SimpleFormatter;
  *
  * This class acts as a Facade for the underlying modular components.
  */
-public class EmergencyKnowledgeBase implements AutoCloseable {
+public class EmergencyKnowledgeBase implements AutoCloseable, KnowledgeBase {
     private static final Logger logger = Logger.getLogger(EmergencyKnowledgeBase.class.getName());
-
-    public record ProtocolMatch(Protocol protocol, String source, float score) {
-    }
 
     private final ProtocolRegistry registry;
     private final SemanticEngine semanticEngine;

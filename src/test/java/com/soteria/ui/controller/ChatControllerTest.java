@@ -2,7 +2,7 @@ package com.soteria.ui.controller;
 
 import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import com.soteria.core.domain.emergency.Protocol;
-import com.soteria.ui.logic.InferenceEngine;
+import com.soteria.application.chat.InferenceEngine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

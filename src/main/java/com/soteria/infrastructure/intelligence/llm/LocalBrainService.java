@@ -3,6 +3,8 @@ package com.soteria.infrastructure.intelligence.llm;
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.core.exception.AIEngineException;
+import com.soteria.core.port.Brain;
+import com.soteria.core.port.Brain.BrainCallback;
 import com.soteria.core.port.InferenceListener;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.InferenceParameters;
@@ -28,7 +30,7 @@ import java.io.OutputStream;
  * Local LLM inference service powered by llama.cpp (GGUF format).
  * Offline-first, CPU + GPU (Metal/Vulkan) depending on the native build.
  */
-public class LocalBrainService implements AutoCloseable {
+public class LocalBrainService implements AutoCloseable, Brain {
     private static final Logger logger = Logger.getLogger(LocalBrainService.class.getName());
     private static final String DASHBOARD_BORDER = "====================================================";
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -142,16 +144,6 @@ public class LocalBrainService implements AutoCloseable {
      * The listener is notified as tokens arrive and when the analysis header is
      * complete.
      */
-    public interface BrainCallback {
-        void onPartialResponse(String text);
-
-        void onFinalResponse(String text);
-
-        void onStatusUpdate(String protocolId, String status);
-
-        void onCommand(String type, String value);
-    }
-
     public void chat(ChatSession session, String context, com.soteria.core.model.UserData profile, String language,
             BrainCallback callback) {
         chat(session.getMessages(), context, profile, language, callback);

@@ -1,6 +1,9 @@
 package com.soteria.infrastructure.intelligence.triage;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.port.Triage;
+import com.soteria.core.port.Triage.Intent;
+import com.soteria.core.port.Triage.TriageResult;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
 import java.io.IOException;
@@ -22,26 +25,11 @@ import java.util.logging.Logger;
  * protocol candidates.
  * NO HARDCODED LANGUAGE - NO CATEGORY ANCHORS.
  */
-public class TriageService implements AutoCloseable {
+public class TriageService implements AutoCloseable, Triage {
     private static final Logger logger = Logger.getLogger(TriageService.class.getName());
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
     private static final String LOG_INPUT = "classifier_input.log";
     private static final String LOG_OUTPUT = "classifier_output.log";
-
-    public enum Intent {
-        MEDICAL_EMERGENCY,
-        SECURITY_EMERGENCY,
-        ENVIRONMENTAL_EMERGENCY,
-        TRAFFIC_EMERGENCY,
-        UNKNOWN,
-        INACTIVE
-    }
-
-    public record TriageResult(Protocol protocol, float score, Intent intent) {
-        public boolean isEmergency() {
-            return protocol != null && score >= 0.30f;
-        }
-    }
 
     private final Path modelFile;
     private LlamaModel model;
