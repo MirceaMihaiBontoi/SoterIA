@@ -1,8 +1,7 @@
 package com.soteria.ui.controller;
 
-import com.soteria.core.port.AlertService;
-import com.soteria.core.port.LocationProvider;
-import com.soteria.core.port.STTListener;
+import com.soteria.core.interfaces.AlertService;
+import com.soteria.core.interfaces.LocationProvider;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
 import com.soteria.infrastructure.intelligence.*;
 import com.soteria.core.domain.emergency.Protocol;

@@ -1,4 +1,4 @@
-package com.soteria.core.interfaces;
+package com.soteria.core.port;
 
 /**
  * Interface that defines the contract for location/GPS services.

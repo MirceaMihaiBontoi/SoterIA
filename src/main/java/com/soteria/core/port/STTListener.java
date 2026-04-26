@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.port;
 
 /**
  * Interface for receiving STT events.

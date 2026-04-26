@@ -169,7 +169,7 @@ public class ProvisioningManager {
         try {
             List<ChatMessage> primer = List.of(ChatMessage.user("SYSTEM_TEST_START_WARMUP"));
             service.brainService().generateResponse(primer, "Warmup — no real protocol needed.", language, null,
-                    new com.soteria.infrastructure.intelligence.InferenceListener() {
+                    new com.soteria.core.port.InferenceListener() {
                         @Override public void onToken(String t) { /* Silent warmup — tokens are not used */ }
                         @Override public void onAnalysisComplete(String id, String s) { /* Silent warmup — analysis is not used */ }
                         @Override public void onComplete(String f) { /* Silent warmup completion */ }

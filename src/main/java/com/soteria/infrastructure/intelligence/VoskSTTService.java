@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence;
 
+import com.soteria.core.port.STTListener;
 import org.vosk.LibVosk;
 import org.vosk.LogLevel;
 import org.vosk.Model;

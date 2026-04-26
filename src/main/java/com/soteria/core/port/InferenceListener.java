@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.core.port;
 
 /**
  * Listener for streaming AI inference responses.

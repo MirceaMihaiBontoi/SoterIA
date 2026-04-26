@@ -1,4 +1,4 @@
-package com.soteria.core.interfaces;
+package com.soteria.core.port;
 
 import com.soteria.core.model.EmergencyEvent;
 import com.soteria.core.model.UserData;
