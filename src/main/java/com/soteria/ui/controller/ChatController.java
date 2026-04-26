@@ -193,10 +193,6 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     }
 
     private void processMessage(String message) {
-        if (inferenceEngine != null && inferenceEngine.isEmergencyCommand(message)) {
-            handleEmergencyAlert("Palabra clave de emergencia: " + message);
-            return;
-        }
         if (!aiAvailable) return;
 
         activeSession.addMessage(ChatMessage.user(message));
@@ -320,10 +316,6 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
                 });
             }
         }, "soteria-alert").start();
-    }
-
-    public boolean isEmergencyCommand(String message) {
-        return inferenceEngine != null && inferenceEngine.isEmergencyCommand(message);
     }
 
     // --- UI Delegation ---

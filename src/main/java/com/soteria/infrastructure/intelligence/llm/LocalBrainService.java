@@ -243,6 +243,16 @@ public class LocalBrainService implements AutoCloseable, Brain {
                 fullOutput.append(token);
             }
 
+            // Fallback: model emitted a free-form reply without the MANDATORY_FORMAT
+            // header. Salvage the buffer as response so the UI doesn't end up empty.
+            if (!headerDone[0] && headerBuffer.length() > 0) {
+                parseAndNotifyAnalysis(headerBuffer.toString(), listener);
+                String salvaged = headerBuffer.toString()
+                        .replaceFirst("(?is)^.*?\\bANALISIS:[^\\n]*\\n?", "")
+                        .replaceFirst("(?i)^\\s*RESPONSE:\\s*", "");
+                textBuffer.append(salvaged);
+            }
+
             logRaw("llm_output.log", fullOutput.toString());
             listener.onComplete(textBuffer.toString().trim());
             logInferenceFinished(headerBuffer, textBuffer, ttft);

@@ -62,24 +62,12 @@ public class TriageService implements AutoCloseable, Triage {
                 Files.createDirectories(dir);
             }
 
-            // Use APPEND instead of TRUNCATE to preserve logs from multiple runs/instances
-            String sessionStart = String.format("%n--- SESSION START: %s ---%n", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-            
-            if (!Files.exists(dir.resolve(LOG_INPUT))) {
-                Files.writeString(dir.resolve(LOG_INPUT),
-                        "--- SoterIA Raw Classifier Input (Autocleaned) ---\n" + sessionStart,
-                        StandardOpenOption.CREATE);
-            } else {
-                Files.writeString(dir.resolve(LOG_INPUT), sessionStart, StandardOpenOption.APPEND);
-            }
-
-            if (!Files.exists(dir.resolve(LOG_OUTPUT))) {
-                Files.writeString(dir.resolve(LOG_OUTPUT),
-                        "--- SoterIA Raw Classifier Output (Autocleaned) ---\n" + sessionStart,
-                        StandardOpenOption.CREATE);
-            } else {
-                Files.writeString(dir.resolve(LOG_OUTPUT), sessionStart, StandardOpenOption.APPEND);
-            }
+            Files.writeString(dir.resolve(LOG_INPUT),
+                    "--- SoterIA Raw Classifier Input (Autocleaned) ---\n",
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(dir.resolve(LOG_OUTPUT),
+                    "--- SoterIA Raw Classifier Output (Autocleaned) ---\n",
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         } catch (IOException e) {
             logger.log(Level.WARNING, "TriageService: Failed to initialize logging system", e);
@@ -102,7 +90,20 @@ public class TriageService implements AutoCloseable, Triage {
         logRaw(LOG_INPUT, "DYNAMIC_TRIAGE: " + (text == null ? "NULL" : text) 
                 + " | candidates=" + (candidates != null ? candidates.size() : 0));
 
-        if (model == null || text == null || text.isBlank() || candidates == null || candidates.isEmpty()) {
+        if (model == null || text == null || text.isBlank()) {
+            return new TriageResult(null, 0.0f, Intent.UNKNOWN);
+        }
+        // No candidates = RAG found nothing relevant; the input was processable but
+        // doesn't map to any protocol. That's "casual / not an emergency", not an error.
+        if (candidates == null || candidates.isEmpty()) {
+            return new TriageResult(null, 0.0f, Intent.INACTIVE);
+        }
+
+        // Inputs under 3 chars carry no semantic signal; the embedding becomes
+        // noise-dominated and lands on whichever protocol cluster is densest
+        // (typically MEDICAL with ~50 anchors). Reject before embedding.
+        if (text.trim().length() < 3) {
+            logRaw(LOG_OUTPUT, "Result: UNKNOWN (too short to embed: '" + text.trim() + "')");
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);
         }
 
@@ -119,7 +120,11 @@ public class TriageService implements AutoCloseable, Triage {
                 return result;
             }
 
-            return new TriageResult(null, bestMatch.score, Intent.UNKNOWN);
+            // Below threshold = no protocol matched, but the input was processable.
+            // INACTIVE means "casual / not an emergency" (UI can keep chat tone friendly).
+            // UNKNOWN is reserved for errors or unprocessable inputs (early returns above).
+            logRaw(LOG_OUTPUT, String.format("Result: INACTIVE (Score: %.4f, no match above threshold)", bestMatch.score));
+            return new TriageResult(null, bestMatch.score, Intent.INACTIVE);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Dynamic triage failed", e);
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);

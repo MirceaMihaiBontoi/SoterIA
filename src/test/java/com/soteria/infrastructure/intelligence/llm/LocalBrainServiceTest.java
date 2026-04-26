@@ -23,11 +23,13 @@ class LocalBrainServiceTest {
 
         String result = LocalBrainService.buildGemmaPrompt(system, "Protocol: NONE", history);
 
-        // Verify role markers
-        assertTrue(result.contains("<start_of_turn>user\nAnswer in Spanish.\n\nHelp me<end_of_turn>"));
+        // Verify role markers and the structured framing the prompt builder applies:
+        // first user turn carries SYSTEM_INSTRUCTIONS + FIRST_USER_MESSAGE,
+        // last user turn carries SITUATIONAL_CONTEXT + USER_INPUT.
+        assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nAnswer in Spanish.\n\n## FIRST_USER_MESSAGE\nHelp me<end_of_turn>"));
         assertTrue(result.contains("<start_of_turn>model\nYes<end_of_turn>"));
-        assertTrue(result.contains("<start_of_turn>user\nBleeding<end_of_turn>"));
-        
+        assertTrue(result.contains("<start_of_turn>user\n## SITUATIONAL_CONTEXT\nProtocol: NONE\n\n## USER_INPUT\nBleeding<end_of_turn>"));
+
         // Verify final model trigger
         assertTrue(result.endsWith("<start_of_turn>model\n"));
     }

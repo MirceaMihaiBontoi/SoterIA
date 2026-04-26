@@ -1,6 +1,6 @@
 package com.soteria.ui.controller;
 
-import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
+import com.soteria.core.port.KnowledgeBase;
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.application.chat.InferenceEngine;
 import org.junit.jupiter.api.DisplayName;
@@ -14,18 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ChatControllerTest {
 
     @Test
-    @DisplayName("Should detect emergency commands in various languages/formats")
-    void detectEmergencyCommands() {
-        ChatController controller = new ChatController();
-
-        assertTrue(controller.isEmergencyCommand("I need help"));
-        assertTrue(controller.isEmergencyCommand("Llama al 112"));
-        assertTrue(controller.isEmergencyCommand("This is an emergency"));
-        assertTrue(controller.isEmergencyCommand("Necesito una ambulance"));
-        assertFalse(controller.isEmergencyCommand("How are you?"));
-    }
-
-    @Test
     @DisplayName("Should build context from protocol matches")
     void buildContext() {
         Protocol p = new Protocol();
@@ -34,7 +22,7 @@ class ChatControllerTest {
         p.setCategory("Medical");
         p.setSteps(List.of("Step 1"));
 
-        EmergencyKnowledgeBase.ProtocolMatch match = new EmergencyKnowledgeBase.ProtocolMatch(p, "Vector", 0.95f);
+        KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "Vector", 0.95f);
 
         // InferenceEngine.buildProtocolManifest is non-static in current implementation
         InferenceEngine engine = new InferenceEngine(null, null, null);

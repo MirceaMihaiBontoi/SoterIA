@@ -85,10 +85,11 @@ public class EmergencyKnowledgeBase implements AutoCloseable, KnowledgeBase {
         semanticEngine.setEmbedder(embedder);
         logger.info("Shared embedder (CT-XLMR-SE) injected into Knowledge Base.");
 
-        if (indexManager.hasSemanticVectors()) {
-            logger.info("Semantic vectors already exist in persistent index.");
-            semanticEngine.loadCentroid();
+        if (indexManager.hasSemanticVectors() && semanticEngine.loadCentroid()) {
+            logger.info("Semantic vectors and centroid loaded from persistent index.");
         } else {
+            // No vectors, or centroid sidecar missing/corrupt — rebuild both atomically.
+            indexManager.clearIndex();
             indexManager.indexProtocols(registry.getProtocols(), semanticEngine);
         }
     }
@@ -98,6 +99,16 @@ public class EmergencyKnowledgeBase implements AutoCloseable, KnowledgeBase {
             Path logPath = Paths.get("logs/kb_diagnostics.log");
             if (!Files.exists(logPath.getParent())) {
                 Files.createDirectories(logPath.getParent());
+            }
+            // FileHandler rolls to .1/.2/.lck siblings when prior runs leave locks
+            // behind. Sweep them so the directory shows a single fresh log per session.
+            try (var entries = Files.list(logPath.getParent())) {
+                entries.filter(p -> {
+                    String name = p.getFileName().toString();
+                    return name.matches("kb_diagnostics\\.log\\.\\d+") || name.endsWith(".lck");
+                }).forEach(p -> {
+                    try { Files.deleteIfExists(p); } catch (IOException _) { /* best-effort */ }
+                });
             }
             Files.writeString(logPath, "", StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 

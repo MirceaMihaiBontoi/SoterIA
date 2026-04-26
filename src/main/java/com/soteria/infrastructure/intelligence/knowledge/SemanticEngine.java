@@ -90,23 +90,32 @@ public class SemanticEngine implements AutoCloseable {
         }
     }
 
-    public void loadCentroid() {
-        try {
-            Path cPath = indexPath.resolve("centroid.bin");
-            if (!Files.exists(cPath)) {
-                logger.warning("[RAG-CENTROID] sidecar missing, mean-centering disabled for this run");
-                return;
+    public boolean loadCentroid() {
+        Path cPath = indexPath.resolve("centroid.bin");
+        if (!Files.exists(cPath)) {
+            logger.warning("[RAG-CENTROID] sidecar missing, mean-centering disabled for this run");
+            return false;
+        }
+        try (java.io.DataInputStream in = new java.io.DataInputStream(Files.newInputStream(cPath))) {
+            int dims = in.readInt();
+            // Header sanity: prevent NegativeArraySizeException / OOM from a corrupt file.
+            // 8192 covers any embedding model we ship; corrupt headers tend to be huge or negative.
+            if (dims <= 0 || dims > 8192) {
+                logger.log(Level.WARNING, "[RAG-CENTROID] invalid header dims={0}, deleting corrupt sidecar", dims);
+                Files.deleteIfExists(cPath);
+                return false;
             }
-            try (java.io.DataInputStream in = new java.io.DataInputStream(Files.newInputStream(cPath))) {
-                int dims = in.readInt();
-                centroid = new float[dims];
-                for (int i = 0; i < dims; i++) {
-                    centroid[i] = in.readFloat();
-                }
-                logger.log(Level.INFO, "Loaded semantic centroid from: {0} (dims: {1})", new Object[]{cPath, dims});
+            float[] loaded = new float[dims];
+            for (int i = 0; i < dims; i++) {
+                loaded[i] = in.readFloat();
             }
+            centroid = loaded;
+            logger.log(Level.INFO, "Loaded semantic centroid from: {0} (dims: {1})", new Object[]{cPath, dims});
+            return true;
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Could not load centroid: {0}", e.getMessage());
+            logger.log(Level.WARNING, "Could not load centroid (corrupt or truncated): {0}", e.getMessage());
+            try { Files.deleteIfExists(cPath); } catch (IOException _) { /* best-effort cleanup */ }
+            return false;
         }
     }
 

@@ -62,7 +62,7 @@ public class InferenceEngine {
 
             // 2. RAG Context Preparation & Optimization
             String context;
-            if (!triage.isEmergency() && !isEmergencyCommand(message) && attempt <= 1) {
+            if (!triage.isEmergency() && attempt <= 1) {
                 context = "This is a casual conversation or greeting. No medical protocols needed. Be friendly but keep it short.";
             } else {
                 // Update session state with triage findings (Logic restored from ChatController.old.java)
@@ -223,13 +223,6 @@ public class InferenceEngine {
     }
 
 
-
-    public boolean isEmergencyCommand(String message) {
-        String msg = message.toLowerCase();
-        return msg.contains("112") || msg.contains("911") || msg.contains("alert") || msg.contains("emergency")
-                || msg.contains("help") || msg.contains("ayuda") || msg.contains("sos") 
-                || msg.contains("ambulance") || msg.contains("ambulancia");
-    }
 
     private String getEmergencyCategory(Triage.Intent intent) {
         if (intent == null) return "GENERAL";
