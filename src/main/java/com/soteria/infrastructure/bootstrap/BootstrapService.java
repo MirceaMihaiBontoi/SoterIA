@@ -1,5 +1,8 @@
 package com.soteria.infrastructure.bootstrap;
 
+import com.soteria.core.port.Brain;
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.Triage;
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
 import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import com.soteria.infrastructure.intelligence.system.ModelManager;
@@ -95,7 +98,7 @@ public class BootstrapService {
         return modelManager;
     }
 
-    public EmergencyKnowledgeBase knowledgeBase() {
+    public KnowledgeBase knowledgeBase() {
         return knowledgeBase;
     }
 
@@ -103,11 +106,26 @@ public class BootstrapService {
         return sttService;
     }
 
-    public TriageService triageService() {
+    public Triage triageService() {
         return triageService;
     }
 
-    public LocalBrainService brainService() {
+    public Brain brainService() {
+        return brainService;
+    }
+
+    // Package-private accessors for ProvisioningManager — exposes infra-only
+    // operations (centroid wiring, embedder injection, lifecycle) without
+    // leaking concrete types past the bootstrap boundary.
+    EmergencyKnowledgeBase knowledgeBaseImpl() {
+        return knowledgeBase;
+    }
+
+    TriageService triageServiceImpl() {
+        return triageService;
+    }
+
+    LocalBrainService brainServiceImpl() {
         return brainService;
     }
 
