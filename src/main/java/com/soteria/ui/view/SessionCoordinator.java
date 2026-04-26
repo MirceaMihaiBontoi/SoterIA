@@ -1,4 +1,4 @@
-package com.soteria.ui.logic;
+package com.soteria.ui.view;
 
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.persistence.ChatSessionRepository;

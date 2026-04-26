@@ -1,4 +1,4 @@
-package com.soteria.ui.logic;
+package com.soteria.ui.view;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;

@@ -1,4 +1,4 @@
-package com.soteria.ui.component;
+package com.soteria.ui.view;
 
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;

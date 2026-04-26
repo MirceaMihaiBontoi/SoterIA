@@ -1,4 +1,4 @@
-package com.soteria.ui.logic;
+package com.soteria.application.chat;
 
 import com.soteria.infrastructure.intelligence.knowledge.*;
 import com.soteria.infrastructure.intelligence.triage.*;

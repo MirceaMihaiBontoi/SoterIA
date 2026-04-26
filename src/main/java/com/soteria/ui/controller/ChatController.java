@@ -14,11 +14,11 @@ import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
-import com.soteria.ui.component.SoterIAFace;
+import com.soteria.ui.view.SoterIAFace;
 import com.soteria.core.model.UserData;
-import com.soteria.ui.logic.ChatViewManager;
-import com.soteria.ui.logic.InferenceEngine;
-import com.soteria.ui.logic.SessionCoordinator;
+import com.soteria.ui.view.ChatViewManager;
+import com.soteria.application.chat.InferenceEngine;
+import com.soteria.ui.view.SessionCoordinator;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
