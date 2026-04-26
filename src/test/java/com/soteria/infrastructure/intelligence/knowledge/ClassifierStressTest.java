@@ -1,5 +1,7 @@
 package com.soteria.infrastructure.intelligence.knowledge;
 
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.Triage;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,10 +111,10 @@ public class ClassifierStressTest {
                 String input = tc.input;
                 String expectedId = tc.expectedId;
 
-                List<EmergencyKnowledgeBase.ProtocolMatch> matches = kb.findProtocols(input, Collections.emptySet());
+                List<KnowledgeBase.ProtocolMatch> matches = kb.findProtocols(input, Collections.emptySet());
 
-                TriageService.TriageResult result = triage.classifyDynamic(input, matches.stream()
-                        .map(EmergencyKnowledgeBase.ProtocolMatch::protocol)
+                Triage.TriageResult result = triage.classifyDynamic(input, matches.stream()
+                        .map(KnowledgeBase.ProtocolMatch::protocol)
                         .toList());
 
                 String actualId = (result.protocol() != null) ? result.protocol().getId() : "NONE";

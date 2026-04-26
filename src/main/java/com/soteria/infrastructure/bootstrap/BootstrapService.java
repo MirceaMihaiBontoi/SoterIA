@@ -2,6 +2,7 @@ package com.soteria.infrastructure.bootstrap;
 
 import com.soteria.core.port.Brain;
 import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.STT;
 import com.soteria.core.port.Triage;
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
 import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
@@ -102,7 +103,7 @@ public class BootstrapService {
         return knowledgeBase;
     }
 
-    public VoskSTTService sttService() {
+    public STT sttService() {
         return sttService;
     }
 
@@ -119,6 +120,10 @@ public class BootstrapService {
     // leaking concrete types past the bootstrap boundary.
     EmergencyKnowledgeBase knowledgeBaseImpl() {
         return knowledgeBase;
+    }
+
+    VoskSTTService sttServiceImpl() {
+        return sttService;
     }
 
     TriageService triageServiceImpl() {

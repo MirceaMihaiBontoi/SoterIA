@@ -3,9 +3,9 @@ package com.soteria.ui.controller;
 import com.soteria.core.port.AlertService;
 import com.soteria.core.port.KnowledgeBase;
 import com.soteria.core.port.LocationProvider;
+import com.soteria.core.port.STT;
 import com.soteria.core.port.STTListener;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
-import com.soteria.infrastructure.intelligence.stt.*;
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
@@ -59,7 +59,7 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     private ChatSession activeSession;
 
     // Services
-    private VoskSTTService sttService;
+    private STT sttService;
     private KnowledgeBase knowledgeBase;
     private final LocationProvider locationProvider = new SystemGPSLocation();
     private final AlertService alertService = new NotificationAlertService();

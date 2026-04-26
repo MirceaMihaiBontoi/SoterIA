@@ -1,5 +1,6 @@
 package com.soteria.infrastructure.intelligence.stt;
 
+import com.soteria.core.port.STT;
 import com.soteria.core.port.STTListener;
 import org.vosk.LibVosk;
 import org.vosk.LogLevel;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
 /**
  * High-performance, offline Speech-to-Text service using Vosk.
  */
-public class VoskSTTService implements AutoCloseable {
+public class VoskSTTService implements AutoCloseable, STT {
     private static final Logger logger = Logger.getLogger(VoskSTTService.class.getName());
     private static final ObjectMapper mapper = new ObjectMapper();
 

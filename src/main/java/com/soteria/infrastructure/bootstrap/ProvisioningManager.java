@@ -111,8 +111,8 @@ public class ProvisioningManager {
         if (isInterrupted()) return;
 
         state.update("Loading speech recognition...", 0.30);
-        if (service.sttService() != null) {
-            service.sttService().shutdown();
+        if (service.sttServiceImpl() != null) {
+            service.sttServiceImpl().shutdown();
         }
         VoskSTTService stt = new VoskSTTService(service.modelManager().getVoskModelPath(language));
         service.setSttService(stt);

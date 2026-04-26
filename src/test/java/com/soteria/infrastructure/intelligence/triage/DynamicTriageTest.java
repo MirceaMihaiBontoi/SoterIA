@@ -1,6 +1,8 @@
 package com.soteria.infrastructure.intelligence.triage;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.Triage;
 import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,18 +40,18 @@ class DynamicTriageTest {
         String query = "I smell gas in my kitchen and I feel dizzy";
 
         // Step 1: RAG retrieval
-        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<KnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
         assertFalse(candidates.isEmpty(), "RAG should find candidates for a gas leak");
 
         // Step 2: Dynamic Classification
-        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
-        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+        List<Protocol> protocolList = candidates.stream().map(KnowledgeBase.ProtocolMatch::protocol).toList();
+        Triage.TriageResult result = triageService.classifyDynamic(query, protocolList);
 
         // Assertions
         assertTrue(result.isEmergency(), "Should be detected as emergency");
         assertEquals("ENV_001_VIC", result.protocol().getId(),
                 "Should match the INDOOR gas leak protocol specifically");
-        assertEquals(TriageService.Intent.ENVIRONMENTAL_EMERGENCY, result.intent());
+        assertEquals(Triage.Intent.ENVIRONMENTAL_EMERGENCY, result.intent());
         System.out.println("Match: " + result.protocol().getTitle() + " | Score: " + result.score());
     }
 
@@ -57,9 +59,9 @@ class DynamicTriageTest {
     void testDynamicTriageTornado() {
         String query = "Hay un tornado acercándose a mi pueblo, hay mucho viento";
 
-        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
-        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
-        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+        List<KnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<Protocol> protocolList = candidates.stream().map(KnowledgeBase.ProtocolMatch::protocol).toList();
+        Triage.TriageResult result = triageService.classifyDynamic(query, protocolList);
 
         assertTrue(result.isEmergency(), "Should detect tornado emergency even in Spanish");
         assertEquals("ENV_006", result.protocol().getId());
@@ -70,11 +72,11 @@ class DynamicTriageTest {
     void testInactiveIntent() {
         String query = "Hola, ¿cómo estás hoy? Qué buen tiempo hace.";
 
-        List<EmergencyKnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
-        List<Protocol> protocolList = candidates.stream().map(EmergencyKnowledgeBase.ProtocolMatch::protocol).toList();
-        TriageService.TriageResult result = triageService.classifyDynamic(query, protocolList);
+        List<KnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<Protocol> protocolList = candidates.stream().map(KnowledgeBase.ProtocolMatch::protocol).toList();
+        Triage.TriageResult result = triageService.classifyDynamic(query, protocolList);
 
         assertFalse(result.isEmergency(), "Casual talk should NOT be an emergency");
-        assertEquals(TriageService.Intent.INACTIVE, result.intent());
+        assertEquals(Triage.Intent.INACTIVE, result.intent());
     }
 }

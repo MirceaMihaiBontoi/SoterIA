@@ -1,6 +1,7 @@
 package com.soteria.infrastructure.intelligence.knowledge;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.core.port.KnowledgeBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,23 +46,23 @@ class EmergencyKnowledgeBaseTest {
     @DisplayName("Should find protocols across multiple domains (Fire, Security, Gas)")
     void multiDomainSearch() {
         // Medical (English keyword)
-        List<EmergencyKnowledgeBase.ProtocolMatch> medical = knowledgeBase.findProtocols("bleeding");
+        List<KnowledgeBase.ProtocolMatch> medical = knowledgeBase.findProtocols("bleeding");
         assertFalse(medical.isEmpty());
         // Updated to the current ID
         assertEquals("TRAUMA_001", medical.get(0).protocol().getId());
 
         // Fire (English keyword)
-        List<EmergencyKnowledgeBase.ProtocolMatch> fire = knowledgeBase.findProtocols("smoke");
+        List<KnowledgeBase.ProtocolMatch> fire = knowledgeBase.findProtocols("smoke");
         assertFalse(fire.isEmpty());
         assertTrue(fire.get(0).protocol().getTitle().toLowerCase().contains("fire"));
 
         // Security (English keyword)
-        List<EmergencyKnowledgeBase.ProtocolMatch> security = knowledgeBase.findProtocols("home invasion");
+        List<KnowledgeBase.ProtocolMatch> security = knowledgeBase.findProtocols("home invasion");
         assertFalse(security.isEmpty());
         assertEquals("SEC_008", security.get(0).protocol().getId());
 
         // Environmental - Gas (English keyword)
-        List<EmergencyKnowledgeBase.ProtocolMatch> gas = knowledgeBase.findProtocols("gas leak inside");
+        List<KnowledgeBase.ProtocolMatch> gas = knowledgeBase.findProtocols("gas leak inside");
         assertFalse(gas.isEmpty());
         assertEquals("ENV_001_VIC", gas.get(0).protocol().getId());
     }
@@ -71,7 +72,7 @@ class EmergencyKnowledgeBaseTest {
     void crossDomainRelations() {
         // Burning (Thermal Burns) might relate to FIRE
         // Our graph links by Category mostly, but let's check basic retrieval
-        List<EmergencyKnowledgeBase.ProtocolMatch> fireResults = knowledgeBase.findProtocols("fire");
+        List<KnowledgeBase.ProtocolMatch> fireResults = knowledgeBase.findProtocols("fire");
         assertFalse(fireResults.isEmpty());
 
         // Ensure we don't exceed the result limit (10)
