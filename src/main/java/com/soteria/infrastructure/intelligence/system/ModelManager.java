@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.system;
 
 import java.io.FileInputStream;
 import java.io.IOException;

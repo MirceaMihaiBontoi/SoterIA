@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.rag;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

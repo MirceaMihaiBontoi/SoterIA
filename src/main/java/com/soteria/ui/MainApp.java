@@ -18,7 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.IOException;
 
-import com.soteria.infrastructure.intelligence.SystemCapability;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 
 /**
  * JavaFX entry point. Decides between onboarding (first run) and chat

@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.rag;
 
 import com.soteria.core.domain.emergency.Protocol;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;

@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.stt;
 
 import com.soteria.core.port.STTListener;
 import org.vosk.LibVosk;

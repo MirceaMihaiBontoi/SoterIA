@@ -1,9 +1,10 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.llm;
 
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.core.exception.AIEngineException;
 import com.soteria.core.port.InferenceListener;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.LlamaOutput;

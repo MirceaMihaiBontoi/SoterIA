@@ -1,5 +1,6 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.rag;
 
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
 

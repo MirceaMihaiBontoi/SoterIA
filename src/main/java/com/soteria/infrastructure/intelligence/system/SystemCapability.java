@@ -1,4 +1,4 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.system;
 
 import java.lang.management.ManagementFactory;
 import java.util.logging.Level;

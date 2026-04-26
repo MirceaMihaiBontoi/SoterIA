@@ -1,6 +1,7 @@
-package com.soteria.infrastructure.intelligence;
+package com.soteria.infrastructure.intelligence.rag;
 
 import com.soteria.core.domain.emergency.Protocol;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.LlamaModel;
 
 import java.io.IOException;

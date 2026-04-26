@@ -1,11 +1,11 @@
 package com.soteria.infrastructure.bootstrap;
 
-import com.soteria.infrastructure.intelligence.LocalBrainService;
-import com.soteria.infrastructure.intelligence.EmergencyKnowledgeBase;
-import com.soteria.infrastructure.intelligence.ModelManager;
-import com.soteria.infrastructure.intelligence.SystemCapability;
-import com.soteria.infrastructure.intelligence.TriageService;
-import com.soteria.infrastructure.intelligence.VoskSTTService;
+import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
+import com.soteria.infrastructure.intelligence.rag.EmergencyKnowledgeBase;
+import com.soteria.infrastructure.intelligence.system.ModelManager;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
+import com.soteria.infrastructure.intelligence.rag.TriageService;
+import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
