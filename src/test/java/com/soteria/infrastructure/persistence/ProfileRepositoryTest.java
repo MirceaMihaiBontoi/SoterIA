@@ -26,7 +26,7 @@ class ProfileRepositoryTest {
     }
 
     @Test
-    @DisplayName("Identifica correctamente si el archivo existe")
+    @DisplayName("Should correctly identify if the file exists")
     void existsIdentifiesFilePresence() throws IOException {
         assertFalse(repository.exists());
         repository.save(sample());
@@ -34,7 +34,7 @@ class ProfileRepositoryTest {
     }
 
     @Test
-    @DisplayName("Guarda y recupera datos sin pérdida de información")
+    @DisplayName("Should save and retrieve data without information loss")
     void saveAndLoadPreservesData() throws IOException {
         UserData original = sample();
         repository.save(original);
@@ -45,7 +45,7 @@ class ProfileRepositoryTest {
     }
 
     @Test
-    @DisplayName("Carga devuelve Optional.empty si el archivo no existe")
+    @DisplayName("Load should return Optional.empty if the file does not exist")
     void loadReturnsEmptyOnMissingFile() {
         Optional<UserData> loaded = repository.load();
         assertTrue(loaded.isEmpty());

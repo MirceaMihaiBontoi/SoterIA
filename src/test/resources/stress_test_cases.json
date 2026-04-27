@@ -125,7 +125,7 @@
     "language": "fr"
   },
   {
-    "input": "Hier ist ein Mann zusammengebrochen und er ist völlig bewusstlos",
+    "input": "Hier ist ein Mann zusammengecollapsed und er ist völlig bewusstlos",
     "expectedId": "VITAL_001",
     "language": "de"
   },
@@ -150,7 +150,7 @@
     "language": "ro"
   },
   {
-    "input": "Cineva se îneacă cu mâncare și nu mai puede respira",
+    "input": "Cineva se îneacă cu mâncare și nu mai poate respira",
     "expectedId": "VITAL_002_WIT",
     "language": "ro"
   },
@@ -165,13 +165,313 @@
     "language": "pt"
   },
   {
-    "input": "I just saw someone snatch a woman's bag and run away",
-    "expectedId": "SEC_013_WIT",
-    "language": "en"
-  },
-  {
     "input": "Help, my baby is locked inside the car and it's burning hot outside",
     "expectedId": "TRAF_019_VIC",
     "language": "en"
+  },
+  {
+    "input": "Пожар в жилом доме, на пятом этаже видны языки пламени",
+    "expectedId": "FIRE_001_VIC",
+    "language": "ru"
+  },
+  {
+    "input": "Человек лежит без сознания на тротуаре, пульс не прощупывается",
+    "expectedId": "VITAL_001",
+    "language": "ru"
+  },
+  {
+    "input": "这里有人晕倒了，完全没有意识，快来人救命",
+    "expectedId": "VITAL_001",
+    "language": "zh"
+  },
+  {
+    "input": "我的孩子被锁在车里了，现在的天气非常热，我很担心",
+    "expectedId": "TRAF_019_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "急いでください、家が火事です。キッチンから火が出ています",
+    "expectedId": "FIRE_001_VIC",
+    "language": "ja"
+  },
+  {
+    "input": "隣の家から叫び声が聞こえます。激しい喧嘩のようです",
+    "expectedId": "SEC_014_WIT",
+    "language": "ja"
+  },
+  {
+    "input": "심장 통증이 너무 심해요. 숨을 쉬기가 힘듭니다",
+    "expectedId": "MED_009_VIC",
+    "language": "ko"
+  },
+  {
+    "input": "강도가 가방을 낚아채서 도망갔어요. 도와주세요",
+    "expectedId": "SEC_013_VIC",
+    "language": "ko"
+  },
+  {
+    "input": "هناك حريق كبير في المبنى، الدخان يملأ المكان",
+    "expectedId": "FIRE_001_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "أنا عالق في المصعد ولا يوجد هواء، أرجوكم ساعدوني",
+    "expectedId": "ENV_021_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "मुझे सीने में बहुत तेज़ दर्द हो रहा है, सांस लेना मुश्किल है",
+    "expectedId": "MED_009_VIC",
+    "language": "hi"
+  },
+  {
+    "input": "सड़क पर एक बहुत बुरा एक्सीडेंट हुआ है, कई लोग घायल हैं",
+    "expectedId": "TRAF_001_WIT",
+    "language": "hi"
+  },
+  {
+    "input": "আমার খুব বেশি বুকে ব্যথা হচ্ছে, মনে হচ্ছে হার্ট অ্যাটাক হয়েছে",
+    "expectedId": "MED_009_VIC",
+    "language": "bn"
+  },
+  {
+    "input": "Ada kebakaran besar di gudang belakang, api mulai merembet",
+    "expectedId": "FIRE_001_VIC",
+    "language": "id"
+  },
+  {
+    "input": "Seseorang sedang tenggelam di kolam renang, tolong segera",
+    "expectedId": "VITAL_002_WIT",
+    "language": "id"
+  },
+  {
+    "input": "Tolong, anak saya terkunci di dalam kereta dan cuaca sangat panas",
+    "expectedId": "TRAF_019_VIC",
+    "language": "ms"
+  },
+  {
+    "input": "Có một vụ hỏa hoạn lớn tại cửa hàng, khói đen bốc lên dữ dội",
+    "expectedId": "FIRE_001_VIC",
+    "language": "vi"
+  },
+  {
+    "input": "Tôi đang bị đau ngực dữ dội và không thể thở được",
+    "expectedId": "MED_009_VIC",
+    "language": "vi"
+  },
+  {
+    "input": "ช่วยด้วยค่ะ มีไฟไหม้ในห้องครัว เปลวไฟสูงมาก",
+    "expectedId": "FIRE_001_VIC",
+    "language": "th"
+  },
+  {
+    "input": "มีคนถูกรถชนที่สี่แยก นอนสลบอยู่กลางถนน",
+    "expectedId": "VITAL_001",
+    "language": "th"
+  },
+  {
+    "input": "Evde yangın çıktı, her yer duman altında, nefes alamıyoruz",
+    "expectedId": "FIRE_001_VIC",
+    "language": "tr"
+  },
+  {
+    "input": "Yolda zincirleme trafik kazası oldu, ambulans lazım",
+    "expectedId": "TRAF_001_WIT",
+    "language": "tr"
+  },
+  {
+    "input": "Er is een grote brand in de schuur, het vuur slaat over naar het huis",
+    "expectedId": "FIRE_001_VIC",
+    "language": "nl"
+  },
+  {
+    "input": "Mijn vrouw is aan het bevallen en de weeën komen heel snel",
+    "expectedId": "MED_011_VIC",
+    "language": "nl"
+  },
+  {
+    "input": "Pożar w bloku, ogień wydostaje się przez okna na trzecim piętrze",
+    "expectedId": "FIRE_001_VIC",
+    "language": "pl"
+  },
+  {
+    "input": "Ktoś został ugodzony nożem i bardzo krwawi, wezwijcie pomoc",
+    "expectedId": "TRAUMA_001",
+    "language": "pl"
+  },
+  {
+    "input": "Велика пожежа на складі, чути вибухи всередині",
+    "expectedId": "FIRE_001_VIC",
+    "language": "uk"
+  },
+  {
+    "input": "آتش‌سوزی بزرگی در ساختمان رخ داده است، دود همه جا را گرفته",
+    "expectedId": "FIRE_001_VIC",
+    "language": "fa"
+  },
+  {
+    "input": "Kuna moto mkubwa katika soko, watu wanakimbia ovyo",
+    "expectedId": "FIRE_001_VIC",
+    "language": "sw"
+  },
+  {
+    "input": "Tulungan niyo po kami, may sunog sa kapitbahay namin",
+    "expectedId": "FIRE_001_VIC",
+    "language": "tl"
+  },
+  {
+    "input": "எனக்கு நெஞ்சு வலி அதிகமாக இருக்கிறது, என்னால் சுவாசிக்க முடியவில்லை",
+    "expectedId": "MED_009_VIC",
+    "language": "ta"
+  },
+  {
+    "input": "నాకు గుండె నొప్పిగా ఉంది, శ్వాస తీసుకోవడం కష్టమవుతోంది",
+    "expectedId": "MED_009_VIC",
+    "language": "te"
+  },
+  {
+    "input": "माझ्या छातीत खूप दुखत आहे, श्वास घ्यायला त्रास होतोय",
+    "expectedId": "MED_009_VIC",
+    "language": "mr"
+  },
+  {
+    "input": "મને છાતીમાં ખૂબ દુખાવો થાય છે, શ્વાસ લેવામાં તકલીફ છે",
+    "expectedId": "MED_009_VIC",
+    "language": "gu"
+  },
+  {
+    "input": "ನನಗೆ ಎದೆ ನೋವು ತುಂಬಾ ಹೆಚ್ಚಾಗಿದೆ, ಉಸಿರಾಡಲು ಆಗುತ್ತಿಲ್ಲ",
+    "expectedId": "MED_009_VIC",
+    "language": "kn"
+  },
+  {
+    "input": "എനിക്ക് നെഞ്ചുവേദന കഠിനമാണ്, ശ്വാസം എടുക്കാൻ ബുദ്ധിമുട്ടുന്നു",
+    "expectedId": "MED_009_VIC",
+    "language": "ml"
+  },
+  {
+    "input": "ਮੈਨੂੰ ਛਾਤੀ ਵਿੱਚ ਬਹੁਤ ਤੇਜ਼ ਦਰਦ ਹੋ ਰਿਹਾ ਹੈ, ਸਾਹ ਨਹੀਂ ਆ ਰਿਹਾ",
+    "expectedId": "MED_009_VIC",
+    "language": "pa"
+  },
+  {
+    "input": "Έχει ξεσπάσει μεγάλη φωτιά στο δάσος κοντά στα σπίτια",
+    "expectedId": "FIRE_001_VIC",
+    "language": "el"
+  },
+  {
+    "input": "יש שריפה גדולה בבניין, אנשים לכודים בפנים",
+    "expectedId": "FIRE_001_VIC",
+    "language": "he"
+  },
+  {
+    "input": "Det brenner kraftig i nabohuset, flammene står ut av taket",
+    "expectedId": "FIRE_001_VIC",
+    "language": "no"
+  },
+  {
+    "input": "Det brinner i skogen, rökpelaren syns på långt håll",
+    "expectedId": "FIRE_001_VIC",
+    "language": "sv"
+  },
+  {
+    "input": "Det brænder i køkkenet, emhætten har fanget ild",
+    "expectedId": "FIRE_001_VIC",
+    "language": "da"
+  },
+  {
+    "input": "Keittiössä on tulipalo, rasvakeitin syttyi palamaan",
+    "expectedId": "FIRE_001_VIC",
+    "language": "fi"
+  },
+  {
+    "input": "Nagy tűz van a gyárban, sűrű fekete füst száll fel",
+    "expectedId": "FIRE_001_VIC",
+    "language": "hu"
+  },
+  {
+    "input": "V domě hoří, z oken v prvním patře šlehají plameny",
+    "expectedId": "FIRE_001_VIC",
+    "language": "cs"
+  },
+  {
+    "input": "V budove horí, dym sa šíri po chodbách",
+    "expectedId": "FIRE_001_VIC",
+    "language": "sk"
+  },
+  {
+    "input": "Голям пожар в ресторанта, всички трябва да се евакуират",
+    "expectedId": "FIRE_001_VIC",
+    "language": "bg"
+  },
+  {
+    "input": "Избио је велики пожар у гаражи, ватра се шири",
+    "expectedId": "FIRE_001_VIC",
+    "language": "sr"
+  },
+  {
+    "input": "Izbio je veliki požar u skladištu, pozovite vatrogasce",
+    "expectedId": "FIRE_001_VIC",
+    "language": "hr"
+  },
+  {
+    "input": "Pastate kilo gaisras, matomos atviros liepsnos",
+    "expectedId": "FIRE_001_VIC",
+    "language": "lt"
+  },
+  {
+    "input": "Ēkā ir izcēlies ugunsgrēks, dūmi ir visur",
+    "expectedId": "FIRE_001_VIC",
+    "language": "lv"
+  },
+  {
+    "input": "Maja põleb, katusest tulevad leegid välja",
+    "expectedId": "FIRE_001_VIC",
+    "language": "et"
+  },
+  {
+    "input": "Hi ha un incendi forestal molt a prop de la urbanització",
+    "expectedId": "FIRE_001_VIC",
+    "language": "ca"
+  },
+  {
+    "input": "Hai un incendio na cociña, o aceite comezou a arder",
+    "expectedId": "FIRE_001_VIC",
+    "language": "gl"
+  },
+  {
+    "input": "Sutea dago sukaldean, ke asko ateratzen ari da",
+    "expectedId": "FIRE_001_VIC",
+    "language": "eu"
+  },
+  {
+    "input": "ትልቅ እሳት በህንፃው ውስጥ አለ ፣ ጭሱ በየቦታው ነው",
+    "expectedId": "FIRE_001_VIC",
+    "language": "am"
+  },
+  {
+    "input": "Dhismaha waxaa ka kacay dab weyn, qiiq ayaa meel walba qariyay",
+    "expectedId": "FIRE_001_VIC",
+    "language": "so"
+  },
+  {
+    "input": "Iná ń jó ní ilé alápadà, ẹ jọ̀wọ́ ẹ ran wa lọ́wọ́",
+    "expectedId": "FIRE_001_VIC",
+    "language": "yo"
+  },
+  {
+    "input": "Kunomlilo omkhulu endlini, kudingeka usizo ngokushesha",
+    "expectedId": "FIRE_001_VIC",
+    "language": "zu"
+  },
+  {
+    "input": "Nina rawray kashan wasiy ukhupi, yanapay wayku",
+    "expectedId": "FIRE_001_VIC",
+    "language": "qu"
+  },
+  {
+    "input": "Wach'isiykikuwan wasiy ukhupi kashan, phaway amuy",
+    "expectedId": "MED_009_VIC",
+    "language": "qu"
   }
 ]

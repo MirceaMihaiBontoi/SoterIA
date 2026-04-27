@@ -11,7 +11,8 @@ public interface Triage {
         ENVIRONMENTAL_EMERGENCY,
         TRAFFIC_EMERGENCY,
         UNKNOWN,
-        INACTIVE
+        INACTIVE,
+        GREETING_OR_CASUAL
     }
 
     record TriageResult(Protocol protocol, float score, Intent intent) {

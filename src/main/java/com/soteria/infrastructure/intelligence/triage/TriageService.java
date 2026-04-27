@@ -2,10 +2,9 @@ package com.soteria.infrastructure.intelligence.triage;
 
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.port.Triage;
-import com.soteria.core.port.Triage.Intent;
-import com.soteria.core.port.Triage.TriageResult;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.ModelParameters;
+import com.soteria.infrastructure.intelligence.knowledge.VectorMath;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,13 +95,23 @@ public class TriageService implements AutoCloseable, Triage {
         // No candidates = RAG found nothing relevant; the input was processable but
         // doesn't map to any protocol. That's "casual / not an emergency", not an error.
         if (candidates == null || candidates.isEmpty()) {
-            return new TriageResult(null, 0.0f, Intent.INACTIVE);
+            return new TriageResult(null, 0.0f, Intent.GREETING_OR_CASUAL);
         }
 
-        // Inputs under 3 chars carry no semantic signal; the embedding becomes
-        // noise-dominated and lands on whichever protocol cluster is densest
-        // (typically MEDICAL with ~50 anchors). Reject before embedding.
-        if (text.trim().length() < 3) {
+        // High information density script detection (CJK, Arabic, Indic, etc.)
+        boolean isHighDensity = text.codePoints().anyMatch(cp -> {
+            Character.UnicodeBlock block = Character.UnicodeBlock.of(cp);
+            return block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
+                   block == Character.UnicodeBlock.HIRAGANA ||
+                   block == Character.UnicodeBlock.KATAKANA ||
+                   block == Character.UnicodeBlock.HANGUL_SYLLABLES ||
+                   block == Character.UnicodeBlock.ARABIC ||
+                   block == Character.UnicodeBlock.HEBREW ||
+                   block == Character.UnicodeBlock.DEVANAGARI ||
+                   block == Character.UnicodeBlock.THAI;
+        });
+
+        if (text.trim().length() < (isHighDensity ? 1 : 3)) {
             logRaw(LOG_OUTPUT, "Result: UNKNOWN (too short to embed: '" + text.trim() + "')");
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);
         }
@@ -123,8 +132,8 @@ public class TriageService implements AutoCloseable, Triage {
             // Below threshold = no protocol matched, but the input was processable.
             // INACTIVE means "casual / not an emergency" (UI can keep chat tone friendly).
             // UNKNOWN is reserved for errors or unprocessable inputs (early returns above).
-            logRaw(LOG_OUTPUT, String.format("Result: INACTIVE (Score: %.4f, no match above threshold)", bestMatch.score));
-            return new TriageResult(null, bestMatch.score, Intent.INACTIVE);
+            logRaw(LOG_OUTPUT, String.format("Result: GREETING_OR_CASUAL (Score: %.4f, no match above threshold)", bestMatch.score));
+            return new TriageResult(null, bestMatch.score, Intent.GREETING_OR_CASUAL);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Dynamic triage failed", e);
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);
@@ -139,7 +148,7 @@ public class TriageService implements AutoCloseable, Triage {
 
         for (Protocol protocol : candidates) {
             float[] protocolVector = getOrCacheVector(protocol);
-            float similarity = cosineSimilarity(centeredInput, protocolVector);
+            float similarity = VectorMath.cosineSimilarity(centeredInput, protocolVector);
             if (similarity > maxSimilarity) {
                 maxSimilarity = similarity;
                 bestProtocol = protocol;
@@ -167,6 +176,9 @@ public class TriageService implements AutoCloseable, Triage {
     private Intent mapToIntent(String category) {
         if (category == null)
             return Intent.UNKNOWN;
+        
+        
+        // Map based on the original category logic (internal)
         return switch (category.toUpperCase()) {
             case "MEDICAL", "VITAL", "TRAUMA" -> Intent.MEDICAL_EMERGENCY;
             case "SECURITY", "CRIME", "THREAT" -> Intent.SECURITY_EMERGENCY;
@@ -174,19 +186,6 @@ public class TriageService implements AutoCloseable, Triage {
             case "TRAFFIC", "ACCIDENT" -> Intent.TRAFFIC_EMERGENCY;
             default -> Intent.UNKNOWN;
         };
-    }
-
-    private float cosineSimilarity(float[] v1, float[] v2) {
-        float dot = 0.0f;
-        float n1 = 0.0f;
-        float n2 = 0.0f;
-        for (int i = 0; i < v1.length; i++) {
-            dot += v1[i] * v2[i];
-            n1 += v1[i] * v1[i];
-            n2 += v2[i] * v2[i];
-        }
-        float mag = (float) (Math.sqrt(n1) * Math.sqrt(n2));
-        return (mag > 1e-9) ? (dot / mag) : 0.0f;
     }
 
     private void logRaw(String filename, String content) {
@@ -206,18 +205,8 @@ public class TriageService implements AutoCloseable, Triage {
     }
 
     private float[] center(float[] vector) {
-        float[] result = new float[vector.length];
-        float norm = 0;
-        for (int i = 0; i < vector.length; i++) {
-            result[i] = vector[i] - centroid[i];
-            norm += result[i] * result[i];
-        }
-        norm = (float) Math.sqrt(norm);
-        if (norm > 1e-9) {
-            for (int i = 0; i < result.length; i++)
-                result[i] /= norm;
-        }
-        return result;
+        if (centroid == null) return vector;
+        return VectorMath.normalize(VectorMath.subtract(vector, centroid));
     }
 
     public LlamaModel getModel() {

@@ -32,4 +32,44 @@ class BootstrapServiceTest {
         assertNotNull(ready);
         assertFalse(ready.isDone());
     }
+
+    @Test
+    @DisplayName("Should accept provisioning in multiple internet-dominant languages")
+    void internetDominantLanguagesBootstrap() {
+        String[] languages = {"English", "Chinese", "Spanish", "Arabic", "Portuguese", 
+                             "French", "Japanese", "Russian", "German", "Hindi"};
+        
+        for (String lang : languages) {
+            // We just test if startProvisioning accepts the input without throwing
+            // as full initialization requires native binaries/models
+            assertDoesNotThrow(() -> 
+                bootstrapService.startProvisioning(com.soteria.infrastructure.intelligence.system.SystemCapability.AIModelProfile.STABLE, lang, null),
+                "Failed to initiate bootstrap for " + lang
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("Should support provisioning for major linguistic families")
+    void linguisticFamiliesBootstrap() {
+        java.util.Map<String, String> families = java.util.Map.of(
+            "Indo-European", "Bengali",
+            "Sino-Tibetan", "Burmese",
+            "Afroasiatic", "Amharic",
+            "Austronesian", "Indonesian",
+            "Dravidian", "Telugu",
+            "Turkic", "Turkish",
+            "Uralic", "Hungarian",
+            "Niger-Congo", "Swahili",
+            "Japonic", "Japanese",
+            "Koreanic", "Korean"
+        );
+
+        families.forEach((family, lang) -> {
+            assertDoesNotThrow(() -> 
+                bootstrapService.startProvisioning(com.soteria.infrastructure.intelligence.system.SystemCapability.AIModelProfile.STABLE, lang, null),
+                "Failed to initiate bootstrap for " + lang + " (" + family + ")"
+            );
+        });
+    }
 }

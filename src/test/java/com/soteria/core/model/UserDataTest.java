@@ -54,5 +54,53 @@ class UserDataTest {
         assertTrue(sample("Ana").isComplete());
         assertFalse(sample(UserData.INCOMPLETE_NAME).isComplete());
         assertFalse(sample(null).isComplete());
+        
+        // Stricter checks
+        UserData missingPhone = new UserData("Ana", "", "F", "1990", "Asthma", "112", "B", "ES", null);
+        assertFalse(missingPhone.isComplete(), "Should be incomplete without phone");
+        
+        UserData missingMedical = new UserData("Ana", "123", "F", "1990", null, "112", "B", "ES", null);
+        assertFalse(missingMedical.isComplete(), "Should be incomplete without medical info");
+    }
+
+    @Test
+    @DisplayName("Should support multilingual user profiles and medical data")
+    void multilingualUserProfiles() {
+        // Test data for names and medical conditions in various languages
+        java.util.Map<String, java.util.List<String>> users = java.util.Map.of(
+            "Japanese", java.util.List.of("佐藤 健", "ペニシリンアレルギー"),
+            "Portuguese", java.util.List.of("João Silva", "Diabetes tipo 1"),
+            "Korean", java.util.List.of("김철수", "갑상선 질환"),
+            "French", java.util.List.of("Marie Dubois", "Hypertension"),
+            "German", java.util.List.of("Hans Schmidt", "Herzschrittmacher")
+        );
+
+        users.forEach((lang, data) -> {
+            String name = data.get(0);
+            String medical = data.get(1);
+            
+            UserData u = new UserData(name, PHONE, "Other", "1985-05-05", 
+                                    medical, "Contact 123", "HIGH_PRECISION", lang, null);
+            
+            assertEquals(name, u.fullName(), "Name corruption in " + lang);
+            assertEquals(medical, u.medicalInfo(), "Medical info corruption in " + lang);
+            assertEquals(lang, u.preferredLanguage());
+            
+            assertTrue(u.isComplete());
+            String out = u.toString();
+            assertTrue(out.contains(name), "toString missing name in " + lang);
+            assertTrue(out.contains(medical), "toString missing medical info in " + lang);
+        });
+    }
+
+    @Test
+    @DisplayName("Should persist model configuration correctly")
+    void modelConfigurationPersistence() {
+        String customUrl = "http://local-llm:8080/v1";
+        UserData u = new UserData("Dev", PHONE, "M", "2000-01-01", 
+                                "None", "112", "CUSTOM", "English", customUrl);
+        
+        assertEquals("CUSTOM", u.preferredModel());
+        assertEquals(customUrl, u.customModelUrl());
     }
 }

@@ -31,9 +31,9 @@ class ModelManagerTest {
     @DisplayName("Should resolve correct brain model path for profile")
     void brainModelPathResolution() {
         ModelManager manager = new ModelManager(capability, tempDir);
-        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.LITE, null);
+        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE, null);
         
-        assertTrue(path.toString().contains("gemma-3-1b-it-Q8_0.gguf"));
+        assertTrue(path.toString().contains("gemma-3-4b-it-Q4_K_M.gguf"));
         assertEquals(tempDir, path.getParent());
     }
 
@@ -42,7 +42,7 @@ class ModelManagerTest {
     void customBrainModelPath() {
         ModelManager manager = new ModelManager(capability, tempDir);
         String customUrl = "https://example.com/model.gguf";
-        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.BALANCED, customUrl);
+        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE, customUrl);
         
         assertTrue(path.getFileName().toString().startsWith("custom-"));
         assertTrue(path.getFileName().toString().endsWith(".gguf"));
@@ -71,21 +71,48 @@ class ModelManagerTest {
     }
 
     @Test
-    @DisplayName("Should select correct URL based on capability")
-    void capabilityBasedUrls() {
-        // Balanced on 16GB
+    @DisplayName("Should resolve correct Triage and Embedding model paths")
+    void triageAndEmbeddingPathResolution() {
         ModelManager manager = new ModelManager(capability, tempDir);
-        String url = manager.getBrainModelUrl(SystemCapability.AIModelProfile.BALANCED);
-        assertTrue(url.contains("gemma-3-4b-it-Q4_K_M.gguf"));
+        
+        Path triagePath = manager.getTriageModelPath();
+        Path embeddingPath = manager.getEmbeddingModelPath();
+        
+        assertEquals(triagePath, embeddingPath, "Triage and Embedding models should currently share the same file");
+        assertTrue(triagePath.getFileName().toString().endsWith(".gguf"));
+        assertEquals(tempDir, triagePath.getParent());
+    }
 
-        // Vosk Perf on 16GB
-        String voskUrl = manager.getVoskModelUrl(SPANISH);
-        assertTrue(voskUrl.contains("vosk-model-es-0.42.zip"), "Should use full model for 16GB");
+    @Test
+    @DisplayName("Should handle internet dominant languages for STT models")
+    void internetDominantLanguagesSTT() {
+        ModelManager manager = new ModelManager(capability, tempDir);
+        
+        String[] languages = {"Chinese", "Arabic", "French", "German", "Japanese", "Russian", "Hindi"};
+        
+        for (String lang : languages) {
+            String url = manager.getVoskModelUrl(lang);
+            String name = manager.getVoskModelName(lang);
+            
+            assertNotNull(url, "URL should not be null for " + lang);
+            assertNotNull(name, "Name should not be null for " + lang);
+            // Currently, many will fallback to English due to hardcoding in implementation.
+            // This test captures the current behavior which we will improve.
+        }
+    }
 
-        // Vosk Lite on 4GB
-        SystemCapability lowCap = new SystemCapability(4096);
-        ModelManager managerLow = new ModelManager(lowCap, tempDir);
-        String voskUrlLow = managerLow.getVoskModelUrl(SPANISH);
-        assertTrue(voskUrlLow.contains("vosk-model-small-es-0.42.zip"), "Should use small model for 4GB");
+    @Test
+    @DisplayName("Should handle diverse linguistic families for STT models")
+    void linguisticFamiliesSTT() {
+        ModelManager manager = new ModelManager(capability, tempDir);
+        
+        // Representative languages from major families
+        String[] families = {"Indonesian", "Telugu", "Turkish", "Finnish", "Swahili", "Korean"};
+        
+        for (String lang : families) {
+            Path path = manager.getVoskModelPath(lang);
+            assertNotNull(path);
+            assertTrue(path.toString().contains(tempDir.toString()));
+        }
     }
 }

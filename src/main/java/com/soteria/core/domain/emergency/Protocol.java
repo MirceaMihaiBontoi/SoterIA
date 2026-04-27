@@ -40,6 +40,7 @@ public class Protocol {
      * Helper to get a full text representation for AI context.
      */
     public String getContent() {
-        return "Protocol: " + title + "\nSteps: " + String.join(". ", steps);
+        String stepsText = (steps == null || steps.isEmpty()) ? "No steps defined." : String.join(". ", steps);
+        return "Protocol: " + title + "\nSteps: " + stepsText;
     }
 }

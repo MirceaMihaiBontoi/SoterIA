@@ -1,0 +1,18 @@
+[
+  {
+    "id": "P_ZH",
+    "title": "心脏骤停",
+    "category": "MEDICAL",
+    "keywords": ["心脏", "呼吸", "急救"],
+    "steps": ["拨打120", "开始人工呼吸"],
+    "priority": 1
+  },
+  {
+    "id": "P_AR",
+    "title": "حالة طوارئ",
+    "category": "GENERAL",
+    "keywords": ["حالة", "طوارئ"],
+    "steps": ["ابق هادئا"],
+    "priority": 1
+  }
+]

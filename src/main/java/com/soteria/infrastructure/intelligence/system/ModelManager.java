@@ -33,23 +33,19 @@ public class ModelManager {
 
     private static final String MODEL_DIR = "models";
 
-    // Vosk (STT) — zipped bundles
-    private static final String VOSK_ES_LITE_URL = "https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip";
-    private static final String VOSK_ES_PERF_URL = "https://alphacephei.com/vosk/models/vosk-model-es-0.42.zip";
-    private static final String VOSK_EN_LITE_URL = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip";
-    private static final String VOSK_EN_PERF_URL = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip";
+    // Vosk constants for STT
+    private static final String DEFAULT_LANG = "ENGLISH";
+    private static final String DEFAULT_VOSK_VERSION = "en-us-0.22";
+    private static final String VOSK_MODEL_PREFIX = "vosk-model-";
+    private static final String VOSK_SMALL_PREFIX = "vosk-model-small-";
 
     // Brain (LLM) — GGUFs published by unsloth on HuggingFace.
-    // kherud:llama >= 4.3.0
+    // kherud:llama >= 4.3.0 when available
     // includes soporte for gemma4 architecture.
-    private static final String LLM_ULTRA_LITE_URL = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf";
-    private static final String LLM_LITE_URL = "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q8_0.gguf";
-    private static final String LLM_BALANCED_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
-    private static final String LLM_ULTRA_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
+    private static final String LLM_STABLE_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
+    private static final String LLM_PRO_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
 
-    // Triage (Intent) Model — Specialized crisis/emergency classifier (CT-XLMR-SE)
-    // V1: Fine-tuned with local protocols and stress tests
-    private static final String TRIAGE_MODEL_URL = "https://huggingface.co/mradermacher/CT-XLMR-SE-GGUF/resolve/main/CT-XLMR-SE.Q4_K_M.gguf";
+    // Triage (Intent) Model — Specialized crisis/emergency classifier (Local)
     private static final String TRIAGE_MODEL_NAME = "soteria-triage-v1.gguf";
 
     private final SystemCapability capability;
@@ -175,24 +171,17 @@ public class ModelManager {
 
     /**
      * Downloads the multilingual embedding model.
+     * Note: Currently uses the same model as Triage.
      */
     public CompletableFuture<Path> downloadEmbeddingModel() {
-        Path target = getEmbeddingModelPath();
-        if (Files.exists(target)) {
-            return CompletableFuture.completedFuture(target);
-        }
-        return downloadFile(TRIAGE_MODEL_URL, target);
+        return CompletableFuture.completedFuture(getEmbeddingModelPath());
     }
 
     /**
-     * Downloads the specialized triage classifier model.
+     * Triage model is now local-only. No download logic.
      */
     public CompletableFuture<Path> downloadTriageModel() {
-        Path target = getTriageModelPath();
-        if (Files.exists(target)) {
-            return CompletableFuture.completedFuture(target);
-        }
-        return downloadFile(TRIAGE_MODEL_URL, target);
+        return CompletableFuture.completedFuture(getTriageModelPath());
     }
 
     /**
@@ -293,20 +282,48 @@ public class ModelManager {
         }
     }
 
+    private static final String VOSK_BASE_URL = "https://alphacephei.com/vosk/models/";
+
+    private static final java.util.Map<String, String> VOSK_LANG_MAP = java.util.Map.ofEntries(
+            java.util.Map.entry("SPANISH", "es-0.42"),
+            java.util.Map.entry(DEFAULT_LANG, DEFAULT_VOSK_VERSION),
+            java.util.Map.entry("CHINESE", "cn-0.22"),
+            java.util.Map.entry("FRENCH", "fr-0.22"),
+            java.util.Map.entry("GERMAN", "de-0.15"),
+            java.util.Map.entry("RUSSIAN", "ru-0.42"),
+            java.util.Map.entry("JAPANESE", "ja-0.22"),
+            java.util.Map.entry("PORTUGUESE", "pt-fb-0.4"),
+            java.util.Map.entry("HINDI", "hi-0.22"),
+            java.util.Map.entry("ARABIC", "ar-0.22"),
+            java.util.Map.entry("ITALIAN", "it-0.22"),
+            java.util.Map.entry("TURKISH", "tr-0.3"),
+            java.util.Map.entry("VIETNAMESE", "vn-0.4"),
+            java.util.Map.entry("KOREAN", "ko-0.22"));
+
     public String getVoskModelUrl(String language) {
-        boolean isSpanish = language.equalsIgnoreCase("Spanish");
-        if (isSpanish) {
-            return capability.isLowPowerDevice() ? VOSK_ES_LITE_URL : VOSK_ES_PERF_URL;
+        String key = language.toUpperCase();
+        String version = VOSK_LANG_MAP.getOrDefault(key, DEFAULT_VOSK_VERSION);
+        String prefix = capability.isLowPowerDevice() ? VOSK_SMALL_PREFIX : VOSK_MODEL_PREFIX;
+
+        // Handle special case where full model doesn't follow the small/full naming
+        // pattern perfectly
+        if (key.equals(DEFAULT_LANG) && !capability.isLowPowerDevice()) {
+            return VOSK_BASE_URL + VOSK_MODEL_PREFIX + DEFAULT_VOSK_VERSION + ".zip";
         }
-        return capability.isLowPowerDevice() ? VOSK_EN_LITE_URL : VOSK_EN_PERF_URL;
+
+        return VOSK_BASE_URL + prefix + version + ".zip";
     }
 
     public String getVoskModelName(String language) {
-        boolean isSpanish = language.equalsIgnoreCase("Spanish");
-        if (isSpanish) {
-            return capability.isLowPowerDevice() ? "vosk-model-small-es-0.42" : "vosk-model-es-0.42";
+        String key = language.toUpperCase();
+        String version = VOSK_LANG_MAP.getOrDefault(key, DEFAULT_VOSK_VERSION);
+        String prefix = capability.isLowPowerDevice() ? VOSK_SMALL_PREFIX : VOSK_MODEL_PREFIX;
+
+        if (key.equals(DEFAULT_LANG) && !capability.isLowPowerDevice()) {
+            return VOSK_MODEL_PREFIX + DEFAULT_VOSK_VERSION;
         }
-        return capability.isLowPowerDevice() ? "vosk-model-small-en-us-0.15" : "vosk-model-en-us-0.22";
+
+        return prefix + version;
     }
 
     public String getBrainModelUrl() {
@@ -315,10 +332,9 @@ public class ModelManager {
 
     public String getBrainModelUrl(SystemCapability.AIModelProfile profile) {
         return switch (profile) {
-            case ULTRA_LITE -> LLM_ULTRA_LITE_URL;
-            case LITE -> LLM_LITE_URL;
-            case BALANCED -> LLM_BALANCED_URL;
-            case ULTRA -> LLM_ULTRA_URL;
+            case STABLE -> LLM_STABLE_URL;
+            case EXPERT -> LLM_PRO_URL;
+            default -> LLM_STABLE_URL;
         };
     }
 
@@ -328,10 +344,9 @@ public class ModelManager {
 
     public String getBrainModelFileName(SystemCapability.AIModelProfile profile) {
         return switch (profile) {
-            case ULTRA_LITE -> "gemma-3-1b-it-Q4_K_M.gguf";
-            case LITE -> "gemma-3-1b-it-Q8_0.gguf";
-            case BALANCED -> "gemma-3-4b-it-Q4_K_M.gguf";
-            case ULTRA -> "gemma-3-4b-it-Q8_0.gguf";
+            case STABLE -> "gemma-3-4b-it-Q4_K_M.gguf";
+            case EXPERT -> "gemma-3-4b-it-Q8_0.gguf";
+            default -> "gemma-3-4b-it-Q4_K_M.gguf";
         };
     }
 

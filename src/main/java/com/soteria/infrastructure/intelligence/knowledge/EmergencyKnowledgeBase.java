@@ -94,6 +94,15 @@ public class EmergencyKnowledgeBase implements AutoCloseable, KnowledgeBase {
         }
     }
 
+    /**
+     * Injects a mock embedder for tests to avoid native library crashes.
+     */
+    public synchronized void setTestEmbedder(SemanticEngine.VectorEmbedder testEmbedder) {
+        semanticEngine.setTestEmbedder(testEmbedder);
+        indexManager.clearIndex();
+        indexManager.indexProtocols(registry.getProtocols(), semanticEngine);
+    }
+
     private void setupDiagnostics(String protocolsPath) {
         try {
             Path logPath = Paths.get("logs/kb_diagnostics.log");

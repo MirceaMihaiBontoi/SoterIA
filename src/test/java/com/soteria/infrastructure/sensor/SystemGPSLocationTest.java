@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SystemGPSLocationTest {
 
     @Test
-    @DisplayName("detectPrimaryLanguage devuelve un idioma válido incluso sin GPS")
+    @DisplayName("detectPrimaryLanguage should return a valid language even without GPS")
     void detectPrimaryLanguageReturnsDefault() {
         SystemGPSLocation gps = new SystemGPSLocation();
         String lang = gps.detectPrimaryLanguage();
@@ -16,7 +16,7 @@ class SystemGPSLocationTest {
     }
 
     @Test
-    @DisplayName("getLocationDescription maneja resultados desconocidos")
+    @DisplayName("getLocationDescription should handle unknown results gracefully")
     void getLocationDescriptionHandlesUnknown() {
         SystemGPSLocation gps = new SystemGPSLocation();
         String desc = gps.getLocationDescription();

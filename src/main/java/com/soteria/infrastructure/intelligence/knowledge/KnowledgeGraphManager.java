@@ -54,7 +54,18 @@ public class KnowledgeGraphManager {
     private boolean stepsMention(Protocol source, Protocol target) {
         if (source.getSteps() == null || target.getTitle() == null) return false;
         String needle = firstTitleToken(target.getTitle());
-        if (needle.length() < 3) return false;
+        
+        // Unicode-aware length check (CJK can be 1-2 chars, others 3+)
+        boolean isCJK = needle.codePoints().anyMatch(cp -> {
+            Character.UnicodeBlock block = Character.UnicodeBlock.of(cp);
+            return block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
+                   block == Character.UnicodeBlock.HIRAGANA ||
+                   block == Character.UnicodeBlock.KATAKANA ||
+                   block == Character.UnicodeBlock.HANGUL_SYLLABLES;
+        });
+
+        if (needle.length() < (isCJK ? 1 : 3)) return false;
+
         for (String step : source.getSteps()) {
             if (step.toLowerCase(Locale.ROOT).contains(needle)) return true;
         }
@@ -62,9 +73,10 @@ public class KnowledgeGraphManager {
     }
 
     private String firstTitleToken(String title) {
-        String[] parts = title.toLowerCase(Locale.ROOT).split("[^a-z]+");
+        // Use \P{L}+ to split by any non-letter character (Unicode aware)
+        String[] parts = title.toLowerCase(Locale.ROOT).split("\\P{L}+");
         for (String p : parts) {
-            if (p.length() >= 3) return p;
+            if (!p.isEmpty()) return p;
         }
         return "";
     }

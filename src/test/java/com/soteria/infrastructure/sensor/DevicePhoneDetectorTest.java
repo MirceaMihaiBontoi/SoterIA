@@ -33,6 +33,23 @@ class DevicePhoneDetectorTest {
     }
 
     @Test
+    @DisplayName("Logic: Should identify Windows-like strings")
+    void logicWindows() {
+        // We can't easily test the actual PowerShell execution here,
+        // but we can verify the dispatcher logic.
+        // Note: detect("Windows 11") would call detectWindows() which likely returns UNKNOWN 
+        // in this environment if no modem is present.
+        String result = DevicePhoneDetector.detect("Windows 10");
+        assertNotNull(result);
+    }
+
+    @Test
+    @DisplayName("Logic: Should identify Android-like strings")
+    void logicAndroid() {
+        assertEquals(DevicePhoneDetector.UNKNOWN, DevicePhoneDetector.detect("Android 13"));
+    }
+
+    @Test
     @DisplayName("UNKNOWN constant should be exported")
     void constantExported() {
         assertEquals("Unknown", DevicePhoneDetector.UNKNOWN);

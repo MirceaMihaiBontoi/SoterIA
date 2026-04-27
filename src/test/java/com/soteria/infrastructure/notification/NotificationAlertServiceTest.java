@@ -68,4 +68,34 @@ class NotificationAlertServiceTest {
         UserData emptyUser = new UserData("", "", "", "", "", "", "", "", "");
         assertDoesNotThrow(() -> service.notifyContacts(emptyUser, null));
     }
+
+    @Test
+    @DisplayName("Should handle multilingual data correctly (UTF-8)")
+    void multilingualPersistence() throws IOException {
+        Path logFile = tempDir.resolve("multilingual.log");
+        NotificationAlertService service = new NotificationAlertService(logFile);
+        
+        // Test cases: [Language, Type, Location, Name]
+        String[][] cases = {
+            {"Chinese", "心脏骤停", "北京市中心", "王小明"},
+            {"Arabic", "نوبة قلبية", "وسط القاهرة", "أحمد"},
+            {"Hindi", "हृदय गति रुकना", "मुंबई", "राहुल"},
+            {"Russian", "Остановка сердца", "Москва", "Иван"},
+            {"Greek", "Καρδιακή ανακοπή", "Αθήνα", "Νίκος"}
+        };
+
+        for (String[] c : cases) {
+            String type = c[1];
+            String loc = c[2];
+            String name = c[3];
+
+            EmergencyEvent event = new EmergencyEvent(type, loc, 10, LocalDateTime.now(), "User: " + name);
+            service.send(event);
+            
+            String content = Files.readString(logFile);
+            assertTrue(content.contains(type), "Missing " + c[0] + " type");
+            assertTrue(content.contains(loc), "Missing " + c[0] + " location");
+            assertTrue(content.contains(name), "Missing " + c[0] + " name");
+        }
+    }
 }

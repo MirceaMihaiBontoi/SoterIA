@@ -98,7 +98,7 @@ public class LuceneIndexManager implements AutoCloseable {
         List<Protocol> validProtocols = new ArrayList<>();
         List<float[]> rawVectors = new ArrayList<>();
 
-        if (semanticEngine.getEmbedder() != null) {
+        if (semanticEngine.isEmbedderAvailable()) {
             prepareVectors(protocols, semanticEngine, validProtocols, rawVectors);
             semanticEngine.computeAndSaveCentroid(rawVectors);
         } else {
@@ -113,7 +113,7 @@ public class LuceneIndexManager implements AutoCloseable {
         for (Protocol p : protocols) {
             if (p.getId() == null || p.getTitle() == null) continue;
             String content = buildIndexContent(p);
-            float[] v = semanticEngine.getEmbedder().embed(content);
+            float[] v = semanticEngine.embedQuery(content);
             validProtocols.add(p);
             rawVectors.add(v);
         }
@@ -127,7 +127,8 @@ public class LuceneIndexManager implements AutoCloseable {
             role = "[WIT]";
         }
         String keywordsStr = p.getKeywords() == null ? "" : String.join(" ", p.getKeywords());
-        return String.format("%s %s %s", role, p.getTitle(), keywordsStr).trim();
+        // Added ID to the content to help semantic engine recognize category and specific identity
+        return String.format("%s %s %s %s", role, p.getId(), p.getTitle(), keywordsStr).trim();
     }
 
     private void filterValidProtocols(List<Protocol> protocols, List<Protocol> validProtocols) {
@@ -146,7 +147,7 @@ public class LuceneIndexManager implements AutoCloseable {
             for (int i = 0; i < validProtocols.size(); i++) {
                 Protocol p = validProtocols.get(i);
                 Document doc = createDocument(p);
-                if (semanticEngine.getEmbedder() != null && i < rawVectors.size()) {
+                if (semanticEngine.isEmbedderAvailable() && i < rawVectors.size()) {
                     float[] raw = rawVectors.get(i);
                     float[] centroid = semanticEngine.getCentroid();
                     float[] vectorToStore = (centroid != null)

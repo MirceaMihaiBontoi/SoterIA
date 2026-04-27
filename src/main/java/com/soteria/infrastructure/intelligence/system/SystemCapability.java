@@ -13,16 +13,12 @@ public class SystemCapability {
     private static final Logger logger = Logger.getLogger(SystemCapability.class.getName());
 
     // Thresholds for choosing between models (GB)
-    private static final long T1_THRESHOLD_GB = 3;
-    private static final long T2_THRESHOLD_GB = 4;
-    private static final long T4_THRESHOLD_GB = 12; // Back to 12GB for ultra (Q8) since threading is now optimized
+    private static final long T4_THRESHOLD_GB = 12; // Threshold for ULTRA (Q8)
     private static final long BYTES_IN_GB = 1024L * 1024L * 1024L;
 
     public enum AIModelProfile {
-        ULTRA_LITE("gemma-3-1b-it-q4_k_m.gguf", 0.7),
-        LITE("gemma-3-1b-it-q8_0.gguf", 1.2),
-        BALANCED("gemma-3-4b-it-q4_k_m.gguf", 2.7),
-        ULTRA("gemma-3-4b-it-q8_0.gguf", 4.6);
+        STABLE("gemma-3-4b-it-q4_k_m.gguf", 2.7),
+        EXPERT("gemma-3-4b-it-q8_0.gguf", 4.6);
 
         private final String displayName;
         private final double sizeGB;
@@ -96,20 +92,16 @@ public class SystemCapability {
     /**
      * Internal constructor for testing.
      */
-    SystemCapability(long totalMemory) {
+    public SystemCapability(long totalMemory) {
         this.totalMemory = totalMemory;
         this.availableProcessors = Runtime.getRuntime().availableProcessors();
 
         long ramInGB = totalMemory / BYTES_IN_GB;
 
-        if (ramInGB < T1_THRESHOLD_GB) {
-            this.recommendedProfile = AIModelProfile.ULTRA_LITE;
-        } else if (ramInGB < T2_THRESHOLD_GB) {
-            this.recommendedProfile = AIModelProfile.LITE;
-        } else if (ramInGB < T4_THRESHOLD_GB) {
-            this.recommendedProfile = AIModelProfile.BALANCED;
+        if (ramInGB < T4_THRESHOLD_GB) {
+            this.recommendedProfile = AIModelProfile.STABLE;
         } else {
-            this.recommendedProfile = AIModelProfile.ULTRA; // Back to trusting RAM for ULTRA
+            this.recommendedProfile = AIModelProfile.EXPERT;
         }
 
         logger.info("====================================================");
@@ -151,6 +143,6 @@ public class SystemCapability {
     }
 
     public boolean isLowPowerDevice() {
-        return recommendedProfile == AIModelProfile.ULTRA_LITE || recommendedProfile == AIModelProfile.LITE;
+        return recommendedProfile == AIModelProfile.STABLE && totalMemory / BYTES_IN_GB < 4;
     }
 }

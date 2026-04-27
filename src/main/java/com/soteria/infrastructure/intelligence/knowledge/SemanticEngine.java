@@ -18,7 +18,13 @@ import java.util.logging.Logger;
 public class SemanticEngine implements AutoCloseable {
     private static final Logger logger = Logger.getLogger(SemanticEngine.class.getName());
 
+    @FunctionalInterface
+    public interface VectorEmbedder {
+        float[] embed(String text);
+    }
+
     private LlamaModel embedder;
+    private VectorEmbedder testEmbedder;
     private float[] centroid;
     private final Path indexPath;
     private final SystemCapability capability;
@@ -51,17 +57,38 @@ public class SemanticEngine implements AutoCloseable {
         this.embedder = embedder;
     }
 
+    /**
+     * Injects a test-only embedder to avoid native library issues during CI/CD.
+     */
+    public void setTestEmbedder(VectorEmbedder testEmbedder) {
+        this.testEmbedder = testEmbedder;
+    }
+
+    public boolean isEmbedderAvailable() {
+        return testEmbedder != null || embedder != null;
+    }
+
     public float[] getCentroid() {
         return centroid;
     }
 
     public float[] embedQuery(String queryText) {
-        if (embedder == null) return new float[0];
-        float[] raw = embedder.embed(queryText);
+        float[] raw;
+        if (testEmbedder != null) {
+            raw = testEmbedder.embed(queryText);
+        } else if (embedder != null) {
+            raw = embedder.embed(queryText);
+        } else {
+            return new float[0];
+        }
+        return processRawVector(raw);
+    }
+
+    private float[] processRawVector(float[] raw) {
         if (centroid != null) {
             return VectorMath.normalize(VectorMath.subtract(raw, centroid));
         }
-        return raw;
+        return VectorMath.normalize(raw);
     }
 
     public void computeAndSaveCentroid(List<float[]> vectors) {

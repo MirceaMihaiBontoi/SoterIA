@@ -28,8 +28,11 @@ public class InferenceEngine {
 
     public interface UIUpdateListener {
         void onSubtitleUpdate(String text);
+
         void onFaceStateChange(String state);
+
         void onResponseFinalized(String finalMessage, String query);
+
         void onSafetyBoxUpdate(String protocolId, String status);
     }
 
@@ -60,32 +63,25 @@ public class InferenceEngine {
 
             Triage.TriageResult triage = triageService.classifyDynamic(contextualQuery, candidates);
 
-            // 2. RAG Context Preparation & Optimization
-            String context;
-            if (!triage.isEmergency() && attempt <= 1) {
-                context = "This is a casual conversation or greeting. No medical protocols needed. Be friendly but keep it short.";
-            } else {
-                // Update session state with triage findings (Logic restored from ChatController.old.java)
-                if (triage.isEmergency()) {
-                    String category = getEmergencyCategory(triage.intent());
-                    session.getCategorizedContext()
-                            .computeIfAbsent(category, k -> new ArrayList<>())
-                            .add(message);
-                    session.getActiveCategories().add(category);
-                }
+            // 2. RAG Context Preparation
+            List<KnowledgeBase.ProtocolMatch> results = new ArrayList<>();
+            if (triage.isEmergency()) {
+                String category = getEmergencyCategory(triage.intent());
+                session.getCategorizedContext()
+                        .computeIfAbsent(category, k -> new ArrayList<>())
+                        .add(message);
+                session.getActiveCategories().add(category);
 
-                List<KnowledgeBase.ProtocolMatch> results = new ArrayList<>();
                 if (triage.protocol() != null) {
                     results.add(new KnowledgeBase.ProtocolMatch(triage.protocol(), "CLASSIFIER", triage.score()));
-                    // Auto-lock the protocol if the classifier is confident
                     if (session.getActiveEmergencyId() == null) {
                         session.setActiveEmergencyId(triage.protocol().getId());
                         session.setProtocolLocked(true);
                     }
                 }
                 applyStickyContext(results, session);
-                context = buildProtocolManifest(results, session);
             }
+            String context = buildProtocolManifest(results, session, triage.intent());
 
             // 3. History Filtering (Crucial for context limit management)
             List<ChatMessage> filteredHistory = filterRelevantHistory(session.getMessages(), message, session);
@@ -125,7 +121,7 @@ public class InferenceEngine {
         private String currentActiveId;
 
         BrainCallbackHandler(String message, ChatSession session, UserData user, String language,
-                             UIUpdateListener listener, int attempt, String activeId) {
+                UIUpdateListener listener, int attempt, String activeId) {
             this.message = message;
             this.session = session;
             this.user = user;
@@ -158,24 +154,41 @@ public class InferenceEngine {
 
         @Override
         public void onFinalResponse(String text) {
-            if (dirty) {
+            if (dirty && attempt < 3) {
+                logger.info(() -> "Retrying inference after REJECT... Attempt " + (attempt + 1));
                 runInferenceFlowInternal(message, session, user, language, listener, attempt + 1);
             } else {
                 int respIdx = text.toUpperCase().indexOf(RESPONSE_MARKER);
                 String finalContent = (respIdx != -1) ? text.substring(respIdx + RESPONSE_MARKER.length()) : text;
                 String cleaned = cleanResponse(finalContent);
-                
+
                 // Restore fallback logic from ChatController.old.java
                 if (cleaned.isEmpty()) {
-                    cleaned = "Entiendo. Estoy analizando la mejor forma de ayudarte.";
+                    if (dirty) {
+                        cleaned = "Lo siento, no he podido encontrar un protocolo exacto, pero estoy aquí para ayudarte. ¿Puedes darme más detalles?";
+                    } else {
+                        cleaned = "Entiendo. Estoy analizando la mejor forma de ayudarte.";
+                    }
                 }
-                
+
                 listener.onResponseFinalized(cleaned, message);
             }
         }
 
         @Override
         public void onStatusUpdate(String protocolId, String status) {
+            if ("REJECT".equals(protocolId)) {
+                String activeId = session.getActiveEmergencyId();
+                if (activeId != null && !"N/A".equals(activeId)) {
+                    session.addRejectedProtocolId(activeId);
+                    session.setActiveEmergencyId(null);
+                    session.setProtocolLocked(false);
+                    logger.info(() -> "Protocol " + activeId + " rejected by brain. Triggering retry flow.");
+                }
+                dirty = true;
+                return;
+            }
+
             if (protocolId != null && !"N/A".equals(protocolId) && !protocolId.equals(currentActiveId)) {
                 this.currentActiveId = protocolId;
                 session.setActiveEmergencyId(protocolId);
@@ -192,12 +205,7 @@ public class InferenceEngine {
         }
 
         private String cleanResponse(String text) {
-            // Restore surgical cleaning from ChatController.old.java
-            // Only remove tags/signals, not the content following them
-            return text.replaceAll("(?i)(PROTOCOL|STEP|STATE|STATUS|RESOLVED|ANALISIS|RESPONSE):", "")
-                       .replace("STOP IMMEDIATELY", "")
-                       .replaceAll("\\s+", " ")
-                       .trim();
+            return text.trim();
         }
     }
 
@@ -213,7 +221,7 @@ public class InferenceEngine {
         }
     }
 
-    private String prepareContextualQuery(String message, ChatSession session) {
+    String prepareContextualQuery(String message, ChatSession session) {
         StringBuilder sb = new StringBuilder();
         if (session.getCategorizedContext() != null) {
             session.getCategorizedContext().values()
@@ -222,20 +230,20 @@ public class InferenceEngine {
         return sb.toString() + message;
     }
 
-
-
     private String getEmergencyCategory(Triage.Intent intent) {
-        if (intent == null) return "GENERAL";
+        if (intent == null)
+            return "GENERAL";
         return switch (intent) {
             case MEDICAL_EMERGENCY -> "MEDICAL";
             case SECURITY_EMERGENCY -> "SECURITY";
             case ENVIRONMENTAL_EMERGENCY -> "ENVIRONMENTAL";
             case TRAFFIC_EMERGENCY -> "TRAFFIC";
+            case GREETING_OR_CASUAL -> "GREETING";
             default -> "GENERAL";
         };
     }
 
-    private List<ChatMessage> filterRelevantHistory(List<ChatMessage> history, String currentQuery, ChatSession session) {
+    List<ChatMessage> filterRelevantHistory(List<ChatMessage> history, String currentQuery, ChatSession session) {
         final List<ChatMessage> filtered = new ArrayList<>();
         final java.util.Set<String> relevantTurns = new java.util.HashSet<>();
 
@@ -251,8 +259,8 @@ public class InferenceEngine {
             if (shouldIncludeMessage(i, startCoherence, msg, currentQuery, relevantTurns)) {
                 filtered.add(msg);
                 // If it's a relevant user message, also add the following model response
-                if (isRelevantUserMessage(msg, currentQuery, relevantTurns) 
-                        && (i + 1 < history.size()) 
+                if (isRelevantUserMessage(msg, currentQuery, relevantTurns)
+                        && (i + 1 < history.size())
                         && "model".equals(history.get(i + 1).role())) {
                     filtered.add(history.get(i + 1));
                     i++; // Skip the model response
@@ -267,7 +275,7 @@ public class InferenceEngine {
         return filtered;
     }
 
-    private boolean shouldIncludeMessage(int index, int coherenceStart, ChatMessage msg, 
+    private boolean shouldIncludeMessage(int index, int coherenceStart, ChatMessage msg,
             String query, java.util.Set<String> relevantTurns) {
         return index >= coherenceStart || isRelevantUserMessage(msg, query, relevantTurns);
     }
@@ -276,9 +284,14 @@ public class InferenceEngine {
         return "user".equals(msg.role()) && (msg.content().equals(query) || relevantTurns.contains(msg.content()));
     }
 
-    public String buildProtocolManifest(List<KnowledgeBase.ProtocolMatch> results, ChatSession session) {
-        if (results.isEmpty())
-            return "No specific protocol matched.";
+    String buildProtocolManifest(List<KnowledgeBase.ProtocolMatch> results, ChatSession session,
+            Triage.Intent intent) {
+        if (results.isEmpty()) {
+            if (intent == Triage.Intent.GREETING_OR_CASUAL) {
+                return "PROTOCOL_MANIFEST: greeting or casual";
+            }
+            return "PROTOCOL_MANIFEST: no protocol matched, ask the user for more info";
+        }
         StringBuilder out = new StringBuilder("PROTOCOL_MANIFEST:\n");
         out.append("The following EMERGENCY PROTOCOLS have been retrieved. Use them for ANALYSIS and RESPONSE.\n\n");
         results.forEach(m -> appendProtocolInfo(out, m, session));
@@ -292,13 +305,13 @@ public class InferenceEngine {
         List<String> steps = p.getSteps();
         int total = (steps != null) ? steps.size() : 0;
 
-        out.append("- ID: ").append(p.getId())
-                .append(" | Title: ").append(p.getTitle())
-                .append(" | STATUS: ").append(isLocked ? "LOCKED" : "UNLOCKED")
-                .append(" | TOTAL_STEPS: ").append(total).append("\n");
+        out.append("- Source-Ref: ").append(p.getId())
+                .append(" | Situation: ").append(p.getTitle())
+                .append(" | State: ").append(isLocked ? "LOCKED" : "UNLOCKED")
+                .append(" | Steps-Count: ").append(total).append("\n");
 
         if (total > 0) {
-            String req = (session != null) ? session.getRequestedStepsMap().getOrDefault(p.getId(), "1") : "1";
+            String req = (session != null) ? session.getRequestedStepsMap().getOrDefault(p.getId(), "1") : "1-10";
             out.append("  | REQUESTED_STEPS (").append(req).append("):\n");
             renderSteps(out, steps, req);
         } else {

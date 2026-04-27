@@ -17,14 +17,18 @@ public record UserData(
     public static final String INCOMPLETE_NAME = "[INCOMPLETE]";
 
     public boolean isComplete() {
-        return fullName != null && !fullName.equals(INCOMPLETE_NAME);
+        return fullName != null && !fullName.equals(INCOMPLETE_NAME) 
+                && phoneNumber != null && !phoneNumber.isBlank()
+                && medicalInfo != null && !medicalInfo.isBlank();
     }
 
     @Override
     public String toString() {
         return String.format(
-            "Name: %s%nPhone: %s%nGender: %s%nBirthDate: %s%nEmergency Contact: %s%nMedical Info: %s",
-            fullName, phoneNumber, gender, birthDate, emergencyContact, medicalInfo
+            "Name: %s%nPhone: %s%nGender: %s%nBirthDate: %s%nEmergency Contact: %s%nMedical Info: %s%n" +
+            "Language: %s%nModel: %s%nCustom URL: %s",
+            fullName, phoneNumber, gender, birthDate, emergencyContact, medicalInfo,
+            preferredLanguage, preferredModel, (customModelUrl != null ? customModelUrl : "None")
         );
     }
 }

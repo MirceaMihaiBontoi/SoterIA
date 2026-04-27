@@ -24,18 +24,33 @@ public class BootstrapState {
     private final AtomicReference<CompletableFuture<Void>> readyFuture = new AtomicReference<>(new CompletableFuture<>());
 
     public void update(String text, double pct) {
-        Platform.runLater(() -> {
+        Runnable updateTask = () -> {
             status.set(text);
             progress.set(pct);
             if (pct >= 1.0 && "Ready".equals(text)) {
                 java.util.logging.Logger.getLogger(BootstrapState.class.getName()).info("BootstrapState: pct >= 1.0 and text is 'Ready'. Setting readyToChat to true.");
                 readyToChat.set(true);
             }
-        });
+        };
+
+        executeInFxThread(updateTask);
     }
 
     public void setReadyToChat(boolean ready) {
-        Platform.runLater(() -> readyToChat.set(ready));
+        executeInFxThread(() -> readyToChat.set(ready));
+    }
+
+    private void executeInFxThread(Runnable task) {
+        try {
+            if (Platform.isFxApplicationThread()) {
+                task.run();
+            } else {
+                Platform.runLater(task);
+            }
+        } catch (IllegalStateException _) {
+            // JavaFX Platform not initialized (common in unit tests)
+            task.run();
+        }
     }
 
     public void completeReadyFuture() {

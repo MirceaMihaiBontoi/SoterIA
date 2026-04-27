@@ -4,14 +4,12 @@ import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.core.exception.AIEngineException;
 import com.soteria.core.port.Brain;
-import com.soteria.core.port.Brain.BrainCallback;
 import com.soteria.core.port.InferenceListener;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import de.kherud.llama.InferenceParameters;
 import de.kherud.llama.LlamaModel;
 import de.kherud.llama.LlamaOutput;
 import de.kherud.llama.ModelParameters;
-import de.kherud.llama.args.MiroStat;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -149,7 +147,8 @@ public class LocalBrainService implements AutoCloseable, Brain {
         chat(session.getMessages(), context, profile, language, callback);
     }
 
-    public void chat(List<ChatMessage> history, String context, com.soteria.core.model.UserData profile, String language,
+    public void chat(List<ChatMessage> history, String context, com.soteria.core.model.UserData profile,
+            String language,
             BrainCallback callback) {
         generateResponse(history, context, language, profile, new InferenceListener() {
             @Override
@@ -194,68 +193,22 @@ public class LocalBrainService implements AutoCloseable, Brain {
      */
     public void generateResponse(List<ChatMessage> history, String context, String targetLanguage,
             com.soteria.core.model.UserData profile, InferenceListener listener) {
-        String profileContext = (profile != null)
-                ? String.format("USER DATA: Name: %s | Medical Info: %s",
-                        profile.fullName(), profile.medicalInfo())
-                : "No user profile data available.";
+        String prompt = preparePrompt(history, context, targetLanguage, profile);
 
-        String staticSystem = buildStaticInstructions(targetLanguage);
-        String dynamicContext = buildDynamicContext(profileContext, context);
-        String prompt = buildGemmaPrompt(staticSystem, dynamicContext, history);
-
-        // Log a cleaner version of the inference request
-        logChatMessage(DASHBOARD_BORDER);
-        logChatMessage("--- INFERENCE REQUEST ---");
-        logChatMessage("  - Language: " + targetLanguage);
-        logChatMessage("  - History:  " + (history.size() - 1) + " turns");
-        logChatMessage("  - User:     " + history.get(history.size() - 1).content());
-
-        // Truncate context for logs to keep them readable
-        String contextSnippet = context.length() > 200 ? context.substring(0, 200) + "..." : context;
-        logChatMessage("  - Context:  " + contextSnippet.replace("\n", " "));
-        logChatMessage("----------------------------------------------------");
-
+        logInferenceRequest(targetLanguage, history, context);
         logRaw("llm_input.log", prompt);
-        StringBuilder fullOutput = new StringBuilder();
-
-        InferenceParameters infer = createInferenceParameters(prompt);
-
-        StringBuilder headerBuffer = new StringBuilder();
-        StringBuilder textBuffer = new StringBuilder();
-        boolean[] headerDone = { false };
-
-        long startTime = System.currentTimeMillis();
-        long ttft = -1;
 
         try {
-            for (LlamaOutput output : model.generate(infer)) {
-                if (ttft == -1) {
-                    ttft = System.currentTimeMillis() - startTime;
-                }
-                String token = output.toString();
-                listener.onToken(token); // Send everything to UI for filtering
+            InferenceParameters infer = createInferenceParameters(prompt);
+            StringBuilder fullOutput = new StringBuilder();
 
-                if (!headerDone[0]) {
-                    headerDone[0] = handleHeaderToken(token, headerBuffer, textBuffer, listener);
-                } else {
-                    handleTextToken(token, textBuffer);
-                }
-                fullOutput.append(token);
-            }
+            boolean rejected = runInferenceLoop(infer, listener, fullOutput);
 
-            // Fallback: model emitted a free-form reply without the MANDATORY_FORMAT
-            // header. Salvage the buffer as response so the UI doesn't end up empty.
-            if (!headerDone[0] && headerBuffer.length() > 0) {
-                parseAndNotifyAnalysis(headerBuffer.toString(), listener);
-                String salvaged = headerBuffer.toString()
-                        .replaceFirst("(?is)^.*?\\bANALISIS:[^\\n]*\\n?", "")
-                        .replaceFirst("(?i)^\\s*RESPONSE:\\s*", "");
-                textBuffer.append(salvaged);
-            }
+            String finalResult = fullOutput.toString().trim();
+            logRaw("llm_output.log", finalResult);
 
-            logRaw("llm_output.log", fullOutput.toString());
-            listener.onComplete(textBuffer.toString().trim());
-            logInferenceFinished(headerBuffer, textBuffer, ttft);
+            finalizeResponse(finalResult, rejected, listener);
+            logInferenceFinished("MODE: FREEFORM", finalResult, 0);
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Streaming inference failed", e);
@@ -263,48 +216,85 @@ public class LocalBrainService implements AutoCloseable, Brain {
         }
     }
 
+    private String preparePrompt(List<ChatMessage> history, String context, String targetLanguage,
+            com.soteria.core.model.UserData profile) {
+        String profileContext = (profile != null)
+                ? String.format("USER DATA: Name: %s | Medical Info: %s", profile.fullName(), profile.medicalInfo())
+                : "No user profile data available.";
+
+        String staticSystem = buildStaticInstructions(targetLanguage);
+        String dynamicContext = buildDynamicContext(profileContext, context);
+        return buildGemmaPrompt(staticSystem, dynamicContext, history);
+    }
+
+    private boolean runInferenceLoop(InferenceParameters infer, InferenceListener listener, StringBuilder fullOutput) {
+        StringBuilder rejectBuffer = new StringBuilder();
+        boolean[] isReject = { false };
+        boolean[] isFirstTokens = { true };
+
+        for (LlamaOutput output : model.generate(infer)) {
+            String token = output.toString();
+            fullOutput.append(token);
+
+            if (isFirstTokens[0]) {
+                if (detectRejection(token, rejectBuffer, isReject, isFirstTokens, listener)) {
+                    return true;
+                }
+            } else if (!isReject[0]) {
+                listener.onToken(token);
+            }
+        }
+        return isReject[0];
+    }
+
+    private boolean detectRejection(String token, StringBuilder rejectBuffer, boolean[] isReject,
+            boolean[] isFirstTokens, InferenceListener listener) {
+        rejectBuffer.append(token);
+        String current = rejectBuffer.toString();
+
+        if (current.toUpperCase().startsWith("REJECT:")) {
+            isReject[0] = true;
+            return current.contains("\n"); // Break loop if we have the full rejection line
+        }
+
+        if (current.length() > 15 || current.contains("\n")) {
+            isFirstTokens[0] = false;
+            listener.onToken(current);
+        }
+        return false;
+    }
+
+    private void finalizeResponse(String finalResult, boolean rejected, InferenceListener listener) {
+        if (rejected) {
+            int rejectIdx = finalResult.toUpperCase().indexOf("REJECT:");
+            String reason = finalResult.substring(rejectIdx + 7).split("\n")[0].trim();
+            logger.log(Level.INFO, "Inference REJECTED by brain. Reason: {0}", reason);
+            listener.onAnalysisComplete("REJECT", reason);
+            listener.onComplete("");
+        } else {
+            listener.onComplete(finalResult);
+        }
+    }
+
     private String buildStaticInstructions(String targetLanguage) {
-        String prompt = """
-                ## ROLE: SOTERIA_EMERGENCY_DISPATCHER
-                You are Soteria, a professional emergency dispatcher. You provide authoritative guidance based on the urgency of the user's situation.
-
-                ### CORE_PRINCIPLES
-                1. **Prioritize Life**: If a threat is detected, give life-saving orders immediately.
-                2. **Command and Control**: You are the expert. Do not ask for permission; provide clear directions.
-                3. **Voice-optimized**: Keep responses punchy and direct. No filler or technical jargon.
-
-                ### DYNAMIC_RESPONSE_FRAMEWORK
-                Adapt your style based on the detected **URGENCY_LEVEL**:
-
-                - **LEVEL_3 (IMMEDIATE_THREAT)**:
-                  - TONE: Absolute authority.
-                  - ACTION: Start with 1-2 words of composure (e.g. "Escúchame bien") and then give 1-2 mandatory safety instructions using imperative verbs.
-                  - FORBIDDEN: Do not ask "How can I help?".
-
-                - **LEVEL_2 (UNCERTAIN/EVOLVING)**:
-                  - TONE: Investigative and calm.
-                  - ACTION: Ask 1 specific question to identify the exact nature of the threat or verify the user's safety.
-
-                - **LEVEL_1 (CASUAL/GREETING)**:
-                  - TONE: Professional and friendly.
-                  - ACTION: Respond naturally and briefly. Set STATUS=INACTIVE.
-
-                ### MANDATORY_FORMAT
-                ANALISIS: ID={PROTOCOL_ID} [Optional STEP:N if next action is clear]
-                RESPONSE: {Your direct, spoken response to the user in [TARGET_LANG]}
-
-                ### EMERGENCY_CONTEXT
-                - Use the provided SITUATIONAL_DATA to personalize your guidance, but never reference internal system logic (like "protocol ID").
-                - If no protocol matches but a threat exists, use your internal expertise to provide standard safety guidance.
+        String staticPrompt = """
+                ## ROLE: EMERGENCY_DISPATCHER
+                You are a calm and supportive human dispatcher helping someone in a crisis.
+                
+                ### CRITICAL INSTRUCTIONS
+                1. **LANGUAGE**: Always respond in [TARGET_LANG]. Even if the instructions are in English, your response MUST be in [TARGET_LANG].
+                2. **STAY IN CHARACTER**: Talk like a real person on a phone call. Be supportive, empathetic, and direct.
+                3. **USE THE PROTOCOL**: Use the provided protocol as your technical knowledge base. Don't mention "steps" or "protocols". Just use the information to give the best advice for the situation.
+                4. **BREVITY**: Keep your response to 1 or 2 natural sentences. Focus on the immediate action the user should take.
                 """;
-        return prompt.replace("[TARGET_LANG]", targetLanguage);
+        return staticPrompt.replace("[TARGET_LANG]", targetLanguage);
     }
 
     private String buildDynamicContext(String profileContext, String context) {
         String template = """
                 ### SITUATIONAL_DATA
                 **USER_BACKGROUND_PROFILE (DO NOT MENTION UNLESS RELEVANT)**: [PROFILE]
-                **EMERGENCY_PROTOCOL_MANIFEST**:
+                **PROTOCOL**:
                 [MANIFEST]
                 """;
         return template.replace("[PROFILE]", profileContext).replace("[MANIFEST]", context);
@@ -312,70 +302,20 @@ public class LocalBrainService implements AutoCloseable, Brain {
 
     private InferenceParameters createInferenceParameters(String prompt) {
         return new InferenceParameters(prompt)
-                .setTemperature(0.1f)
+                .setTemperature(0.4f)
                 .setTopP(0.9f)
-                .setNPredict(800)
-                .setMiroStat(MiroStat.V2)
+                .setRepeatPenalty(1.2f)
+                .setNPredict(128)
                 .setStopStrings("<end_of_turn>");
     }
 
-    private static final String ANALYSIS_TAG = "ANALISIS:";
-    private static final String RESPONSE_TAG = "RESPONSE:";
-
-    private void parseAndNotifyAnalysis(String rawHeader, InferenceListener listener) {
-        String cleanHeader = rawHeader.replace(ANALYSIS_TAG, "").replace(RESPONSE_TAG, "").trim();
-
-        String protocolId = "N/A";
-        String status = "INACTIVE";
-
-        try {
-            if (cleanHeader.contains("ID=")) {
-                protocolId = cleanHeader.split("ID=")[1].split("\\|")[0].trim();
-            }
-            if (cleanHeader.contains("STATUS=")) {
-                status = cleanHeader.split("STATUS=")[1].split("\\|")[0].trim();
-            }
-        } catch (Exception e) {
-            logger.warning("Header parsing failed: " + e.getMessage());
-        }
-
-        listener.onAnalysisComplete(protocolId, status);
-    }
-
-    private boolean handleHeaderToken(String token, StringBuilder headerBuffer, StringBuilder textBuffer,
-            InferenceListener listener) {
-        headerBuffer.append(token);
-        String currentHeader = headerBuffer.toString();
-
-        if (currentHeader.contains(RESPONSE_TAG)) {
-            String[] parts = currentHeader.split(RESPONSE_TAG, 2);
-            parseAndNotifyAnalysis(parts[0], listener);
-
-            if (parts.length > 1 && !parts[1].isEmpty()) {
-                textBuffer.append(parts[1]);
-            }
-            return true;
-        }
-
-        if (currentHeader.length() > 200) {
-            parseAndNotifyAnalysis(currentHeader, listener);
-            return true;
-        }
-
-        return false;
-    }
-
-    private void handleTextToken(String token, StringBuilder textBuffer) {
-        textBuffer.append(token);
-    }
-
-    private void logInferenceFinished(StringBuilder headerBuffer, StringBuilder textBuffer, long ttft) {
+    private void logInferenceFinished(String header, String text, long ttft) {
         logChatMessage("--- INFERENCE COMPLETED ---");
         if (ttft > 0) {
             logChatMessage("  - Latency (TTFT): " + ttft + " ms");
         }
-        logChatMessage("  " + headerBuffer.toString().trim());
-        logChatMessage("  " + textBuffer.toString().trim().replace("\n", " "));
+        logChatMessage("  " + header.trim());
+        logChatMessage("  " + text.trim().replace("\n", " "));
         logChatMessage(DASHBOARD_BORDER);
     }
 
@@ -409,10 +349,24 @@ public class LocalBrainService implements AutoCloseable, Brain {
                 sb.append("## FIRST_USER_MESSAGE\n");
             }
 
-            sb.append(msg.content()).append("<end_of_turn>\n");
+            if (i == lastIndex && "user".equals(msg.role())) {
+                // Simplified reminder to focus on language and natural tone
+                sb.append(msg.content())
+                  .append("\n\n(Respond in [TARGET_LANG]. 1-2 natural sentences.)")
+                  .append("<end_of_turn>\n");
+            } else {
+                sb.append(msg.content()).append("<end_of_turn>\n");
+            }
         }
+
         sb.append("<start_of_turn>model\n");
         return sb.toString();
+    }
+
+    private void logInferenceRequest(String language, List<ChatMessage> history, String context) {
+        String log = String.format("[%s] Lang: %s | Context: %s | Hist: %d turns%n",
+                LocalDateTime.now().format(TIME_FORMATTER), language, context, history.size());
+        logRaw("inference_requests.log", log);
     }
 
     @Override

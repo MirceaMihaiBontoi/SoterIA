@@ -10,6 +10,8 @@ import com.soteria.infrastructure.intelligence.system.ModelManager;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.system.ResourceLocalizationService;
+import com.soteria.core.port.LocalizationService;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -44,6 +46,7 @@ public class BootstrapService {
     private VoskSTTService sttService;
     private TriageService triageService;
     private LocalBrainService brainService;
+    private LocalizationService localizationService;
 
     /**
      * Kicks off hardware detection and local indexing. Does NOT trigger downloads.
@@ -54,6 +57,7 @@ public class BootstrapService {
             state.update("Detecting hardware...", 0.10);
             capability = new SystemCapability();
             modelManager = new ModelManager(capability);
+            localizationService = new ResourceLocalizationService();
 
             state.update("Building knowledge base...", 0.30);
             knowledgeBase = new EmergencyKnowledgeBase(PROTOCOLS_PATH, modelManager.getKBIndexPath(), capability);
@@ -71,6 +75,10 @@ public class BootstrapService {
      * This ensures that only ONE provisioning process is active.
      */
     public void startProvisioning(SystemCapability.AIModelProfile profile, String language, String customUrl) {
+        if (modelManager == null) {
+            log.info("startProvisioning called before preInitialize. Triggering auto-init...");
+            preInitialize();
+        }
         log.info(() -> "BootstrapService: starting provisioning for " + profile + " in " + language);
         provisioningManager.start(state, this, profile, language, customUrl);
     }
@@ -113,6 +121,10 @@ public class BootstrapService {
 
     public Brain brainService() {
         return brainService;
+    }
+
+    public LocalizationService localizationService() {
+        return localizationService;
     }
 
     // Package-private accessors for ProvisioningManager — exposes infra-only
@@ -160,7 +172,6 @@ public class BootstrapService {
         closeService(knowledgeBase, "KnowledgeBase");
 
         log.info("Cleanup complete.");
-        System.exit(0);
     }
 
     private void closeService(AutoCloseable service, String name) {

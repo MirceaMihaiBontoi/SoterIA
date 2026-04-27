@@ -1,0 +1,18 @@
+[
+  {
+    "id": "P001",
+    "title": "Ataque Cardíaco",
+    "category": "MEDICAL",
+    "keywords": ["corazón", "dolor", "pecho"],
+    "steps": ["Llamar emergencias", "Mantener la calma", "Aflojar ropa"],
+    "priority": 1
+  },
+  {
+    "id": "P002",
+    "title": "Incendio Cocina",
+    "category": "FIRE",
+    "keywords": ["fuego", "cocina", "humo"],
+    "steps": ["No usar agua en aceite", "Usar extintor clase K", "Evacuar si es incontrolable"],
+    "priority": 1
+  }
+]

@@ -59,6 +59,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Mockito for unit testing -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.14.2</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Vosk para STT Nativo -->
         <dependency>
             <groupId>com.alphacephei</groupId>
@@ -124,10 +132,11 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>25</release>
-                    <!-- Preserves record component names so Jackson can
-                         deserialize UserData from profile.json without
-                         explicit @JsonProperty annotations. -->
                     <parameters>true</parameters>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>jdk.incubator.vector</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -140,10 +149,10 @@
                     <mainClass>com.soteria.ui.MainApp</mainClass>
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
-                        <!-- Overrides java.library.path to prevent VS Code debug extensions
-                             from injecting malformed path entries that crash LlamaLoader. -->
                         <option>-Djava.library.path=${java.io.tmpdir}</option>
                         <option>--enable-native-access=ALL-UNNAMED</option>
+                        <option>--add-modules</option>
+                        <option>jdk.incubator.vector</option>
                     </options>
                 </configuration>
             </plugin>
@@ -162,11 +171,13 @@
                 </configuration>
             </plugin>
 
-            <!-- Surefire para ejecutar los tests JUnit 5 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <argLine>-Dfile.encoding=UTF-8 -Djava.library.path=${java.io.tmpdir} --add-modules jdk.incubator.vector</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

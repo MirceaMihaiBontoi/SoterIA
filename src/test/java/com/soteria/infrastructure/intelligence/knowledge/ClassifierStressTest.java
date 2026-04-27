@@ -17,6 +17,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+
 /**
  * Realistic Stress Test for TriageService classification.
  * Data-driven approach to comply with the "NEVER HARDCODE LANGUAGE" rule.
@@ -76,11 +77,11 @@ public class ClassifierStressTest {
         }
         System.out.println("Using model: " + modelPath.toAbsolutePath());
 
-        try (TriageService triage = new TriageService(modelPath);
+        try (TriageService triageService = new TriageService(modelPath);
                 EmergencyKnowledgeBase kb = new EmergencyKnowledgeBase()) {
 
             kb.initializeSemanticIndex(modelPath);
-            triage.setCentroid(kb.getCentroid());
+            triageService.setCentroid(kb.getCentroid());
 
             // Load test cases from external JSON
             ObjectMapper mapper = new ObjectMapper();
@@ -113,7 +114,7 @@ public class ClassifierStressTest {
 
                 List<KnowledgeBase.ProtocolMatch> matches = kb.findProtocols(input, Collections.emptySet());
 
-                Triage.TriageResult result = triage.classifyDynamic(input, matches.stream()
+                Triage.TriageResult result = triageService.classifyDynamic(input, matches.stream()
                         .map(KnowledgeBase.ProtocolMatch::protocol)
                         .toList());
 
