@@ -14,8 +14,7 @@
     /* near-black with cool tint */
     -soteria-bg-subtle: #101a1d;
     -soteria-bg-elevated: #15242a;
-    -soteria-border: #1f3740;
-    border: 1px solid transparent; /* Compatibility */
+    -soteria-border-color: #1f3740;
     -soteria-fg: #e6f1f3;
     /* warm off-white for stress reading */
     -soteria-fg-muted: #7c9aa3;
@@ -49,9 +48,9 @@
     -color-fg-subtle: -soteria-fg-muted;
     -color-fg-emphasis: white;
 
-    -color-border-default: -soteria-border;
-    -color-border-muted: -soteria-border;
-    -color-border-subtle: -soteria-border;
+    -color-border-default: -soteria-line-color;
+    -color-border-muted: -soteria-line-color;
+    -color-border-subtle: -soteria-line-color;
 
     -color-accent-fg: -soteria-accent;
     -color-accent-emphasis: -soteria-accent;
@@ -258,6 +257,17 @@
     fill: -soteria-fg;
     -fx-font-size: 14px;
     font-size: 14px;
+}
+
+.thinking-dots {
+    -fx-spacing: 4px;
+    -fx-padding: 4px 8px;
+    -fx-alignment: center-left;
+}
+
+.thinking-dot {
+    -fx-fill: -soteria-accent;
+    fill: -soteria-accent;
 }
 
 .chat-input-bar {

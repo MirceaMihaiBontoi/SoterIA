@@ -24,6 +24,9 @@
                 <padding><Insets top="5" right="10" bottom="5" left="9"/></padding>
                 <Circle fx:id="statusDot" radius="4" styleClass="status-dot"/>
                 <Label fx:id="aiStatusLabel" text="Preparando" styleClass="status-pill-label"/>
+                <Button fx:id="ttsToggle" onAction="#toggleTTS" styleClass="icon-button-mini">
+                    <graphic><FontIcon fx:id="ttsIcon" iconLiteral="mdmz-volume_up" iconSize="16" styleClass="fab-icon-alt"/></graphic>
+                </Button>
             </HBox>
         </HBox>
 

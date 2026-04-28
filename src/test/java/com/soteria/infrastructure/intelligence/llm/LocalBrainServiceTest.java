@@ -21,14 +21,14 @@ class LocalBrainServiceTest {
         history.add(ChatMessage.model("Yes"));
         history.add(ChatMessage.user("Bleeding"));
 
-        String result = LocalBrainService.buildGemmaPrompt(system, "Protocol: NONE", history);
+        String result = LocalBrainService.buildGemmaPrompt(system, "Protocol: NONE", history, "Spanish");
 
         // Verify role markers and the structured framing the prompt builder applies:
         // first user turn carries SYSTEM_INSTRUCTIONS + FIRST_USER_MESSAGE,
         // last user turn carries SITUATIONAL_CONTEXT + USER_INPUT.
         assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nAnswer in Spanish.\n\n## FIRST_USER_MESSAGE\nHelp me<end_of_turn>"));
         assertTrue(result.contains("<start_of_turn>model\nYes<end_of_turn>"));
-        assertTrue(result.contains("<start_of_turn>user\n## SITUATIONAL_CONTEXT\nProtocol: NONE\n\n## USER_INPUT\nBleeding<end_of_turn>"));
+        assertTrue(result.contains("<start_of_turn>user\n## SITUATIONAL_CONTEXT\nProtocol: NONE\n\n## USER_INPUT\nBleeding\n\n(Respond in Spanish. 1-2 natural sentences.)<end_of_turn>"));
 
         // Verify final model trigger
         assertTrue(result.endsWith("<start_of_turn>model\n"));
@@ -40,9 +40,9 @@ class LocalBrainServiceTest {
         String system = "Helpful Assistant.";
         List<ChatMessage> history = List.of(ChatMessage.user("Hi"));
 
-        String result = LocalBrainService.buildGemmaPrompt(system, "No context", history);
+        String result = LocalBrainService.buildGemmaPrompt(system, "No context", history, "English");
 
-        assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nHelpful Assistant.\n\n## SITUATIONAL_CONTEXT\nNo context\n\n## USER_INPUT\nHi<end_of_turn>"));
+        assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nHelpful Assistant.\n\n## SITUATIONAL_CONTEXT\nNo context\n\n## USER_INPUT\nHi\n\n(Respond in English. 1-2 natural sentences.)<end_of_turn>"));
         assertTrue(result.endsWith("<start_of_turn>model\n"));
     }
 
@@ -69,7 +69,7 @@ class LocalBrainServiceTest {
             String system = "Respond in " + lang;
             
             List<ChatMessage> history = List.of(ChatMessage.user(input));
-            String result = LocalBrainService.buildGemmaPrompt(system, context, history);
+            String result = LocalBrainService.buildGemmaPrompt(system, context, history, lang);
             
             assertTrue(result.contains(lang), "Prompt should contain language instruction for " + lang);
             assertTrue(result.contains(input), "Prompt should contain user input for " + lang);
@@ -101,7 +101,7 @@ class LocalBrainServiceTest {
             String context = c[2];
             
             List<ChatMessage> history = List.of(ChatMessage.user(input));
-            String result = LocalBrainService.buildGemmaPrompt("Emergency mode.", context, history);
+            String result = LocalBrainService.buildGemmaPrompt("Emergency mode.", context, history, family);
             
             assertNotNull(result);
             assertTrue(result.contains(input), "Should contain " + family + " input");

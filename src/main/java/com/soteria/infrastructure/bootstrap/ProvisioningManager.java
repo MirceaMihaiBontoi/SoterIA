@@ -4,6 +4,7 @@ import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.port.InferenceListener;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.tts.SherpaTTSService;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
 
@@ -69,6 +70,10 @@ public class ProvisioningManager {
             provisionTriageModel(state, service);
 
             if (isInterrupted()) return;
+            log.info("Provisioning TTS model...");
+            provisionTTSModel(state, service, language);
+
+            if (isInterrupted()) return;
             log.info("Provisioning Knowledge Base...");
             provisionKnowledgeBase(state, service);
 
@@ -104,9 +109,11 @@ public class ProvisioningManager {
 
     private void provisionSTT(BootstrapState state, BootstrapService service, String language) throws IOException {
         if (!service.modelManager().isVoskModelReady(language)) {
-            state.update("Downloading speech model...", 0.10);
+            state.update("Downloading speech model (" + language + ")...", 0.10);
             activeDownload = service.modelManager().downloadVoskModel(language);
             activeDownload.join();
+        } else {
+            state.update("Speech model ready", 0.20);
         }
 
         if (isInterrupted()) return;
@@ -121,10 +128,14 @@ public class ProvisioningManager {
 
     private void provisionBrainModel(BootstrapState state, BootstrapService service, 
                                      SystemCapability.AIModelProfile profile, String customUrl) {
-        String modelDisplay = (customUrl != null && !customUrl.isBlank()) ? "Custom" : profile.getDisplayName();
-        state.update("Downloading AI brain (" + modelDisplay + ")...", 0.40);
-        activeDownload = service.modelManager().downloadBrainModel(profile, customUrl);
-        activeDownload.join();
+        if (!service.modelManager().isBrainModelReady(profile, customUrl)) {
+            String modelDisplay = (customUrl != null && !customUrl.isBlank()) ? "Custom" : profile.getDisplayName();
+            state.update("Downloading AI brain (" + modelDisplay + ")...", 0.40);
+            activeDownload = service.modelManager().downloadBrainModel(profile, customUrl);
+            activeDownload.join();
+        } else {
+            state.update("AI brain model ready", 0.60);
+        }
     }
 
     private void provisionKnowledgeBase(BootstrapState state, BootstrapService service) {
@@ -136,10 +147,12 @@ public class ProvisioningManager {
     }
 
     private void provisionTriageModel(BootstrapState state, BootstrapService service) {
-        state.update("Loading intent classifier...", 0.68);
         if (!service.modelManager().isTriageModelReady()) {
+            state.update("Downloading intent classifier...", 0.65);
             activeDownload = service.modelManager().downloadTriageModel();
             activeDownload.join();
+        } else {
+            state.update("Intent classifier ready", 0.70);
         }
 
         if (isInterrupted()) return;
@@ -151,9 +164,28 @@ public class ProvisioningManager {
         service.setTriageService(triage);
     }
 
+    private void provisionTTSModel(BootstrapState state, BootstrapService service, String language) {
+        if (!service.modelManager().isTTSModelReady()) {
+            state.update("Downloading speech synthesis model...", 0.72);
+            activeDownload = service.modelManager().downloadTTSModel();
+            activeDownload.join();
+        } else {
+            state.update("Speech synthesis model ready", 0.74);
+        }
+
+        if (isInterrupted()) return;
+
+        state.update("Loading speech synthesis...", 0.75);
+        if (service.ttsServiceImpl() != null) {
+            service.ttsServiceImpl().shutdown();
+        }
+        SherpaTTSService tts = new SherpaTTSService(service.modelManager().getTTSModelPath(), language);
+        service.setTtsService(tts);
+    }
+
     private void initBrainService(BootstrapState state, BootstrapService service, 
                                   SystemCapability.AIModelProfile profile, String customUrl, String language) {
-        state.update("Loading AI brain...", 0.70);
+        state.update("Loading AI brain...", 0.80);
         if (service.brainServiceImpl() != null) {
             service.brainServiceImpl().close();
         }

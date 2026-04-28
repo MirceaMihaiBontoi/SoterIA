@@ -2,7 +2,7 @@ package com.soteria.application.chat;
 
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.port.KnowledgeBase;
-import com.soteria.core.port.Triage;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ class InferenceEngineTest {
     void buildEmptyContext() {
         InferenceEngine engine = new InferenceEngine(null, null, null);
         String context = engine.buildProtocolManifest(List.of(), null, null);
-        assertEquals("No specific protocol matched.", context);
+        assertEquals("PROTOCOL_MANIFEST: no protocol matched, ask the user for more info", context);
     }
 
     @Test

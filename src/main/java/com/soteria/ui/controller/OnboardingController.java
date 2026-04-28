@@ -43,6 +43,9 @@ public class OnboardingController {
     private static final Logger log = Logger.getLogger(OnboardingController.class.getName());
     private static final String UNKNOWN = "Unknown";
     private static final String DEFAULT_LANGUAGE = "English";
+    private static final java.util.List<String> SUPPORTED_LANGUAGES = java.util.List.of(
+        DEFAULT_LANGUAGE, "Spanish", "French", "German", "Italian", "Portuguese"
+    );
     private static final int CUSTOM_URL_MAX_LEN = 500;
     private static final Duration PROBE_CONNECT_TIMEOUT = Duration.ofSeconds(5);
     private static final Duration PROBE_REQUEST_TIMEOUT = Duration.ofSeconds(8);
@@ -159,7 +162,7 @@ public class OnboardingController {
     }
 
     private void setupLanguageAndGender() {
-        languageComboBox.setItems(FXCollections.observableArrayList("Spanish", DEFAULT_LANGUAGE));
+        languageComboBox.setItems(FXCollections.observableArrayList(SUPPORTED_LANGUAGES));
         languageComboBox.setValue(DEFAULT_LANGUAGE);
         genderComboBox.setItems(FXCollections.observableArrayList("Male", "Female", "Other", "Prefer not to say"));
         genderComboBox.getSelectionModel().selectFirst();
@@ -212,8 +215,19 @@ public class OnboardingController {
     }
 
     private void selectLanguageSafely(String lang) {
-        if (lang != null && languageComboBox.getItems().contains(lang)) {
-            languageComboBox.setValue(lang);
+        if (lang == null) {
+            languageComboBox.setValue(DEFAULT_LANGUAGE);
+            return;
+        }
+        
+        // Try to find a match (case-insensitive)
+        String match = SUPPORTED_LANGUAGES.stream()
+                .filter(s -> s.equalsIgnoreCase(lang))
+                .findFirst()
+                .orElse(null);
+        
+        if (match != null) {
+            languageComboBox.setValue(match);
         } else {
             languageComboBox.setValue(DEFAULT_LANGUAGE);
         }

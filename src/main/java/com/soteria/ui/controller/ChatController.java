@@ -5,6 +5,7 @@ import com.soteria.core.port.KnowledgeBase;
 import com.soteria.core.port.LocationProvider;
 import com.soteria.core.port.STT;
 import com.soteria.core.port.STTListener;
+import com.soteria.core.port.TTS;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
 import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.domain.chat.ChatMessage;
@@ -46,6 +47,8 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     @FXML private FontIcon micIcon;
     @FXML private Button alertButton;
     @FXML private Button chatButton;
+    @FXML private Button ttsToggle;
+    @FXML private FontIcon ttsIcon;
     @FXML private VBox chatSheet;
     @FXML private ScrollPane chatScrollPane;
     @FXML private VBox chatMessages;
@@ -60,6 +63,7 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
     // Services
     private STT sttService;
+    private TTS ttsService;
     private KnowledgeBase knowledgeBase;
     private final LocationProvider locationProvider = new SystemGPSLocation();
     private final AlertService alertService = new NotificationAlertService();
@@ -70,8 +74,10 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     private SessionCoordinator sessionCoordinator;
 
     private boolean aiAvailable = false;
+    private boolean botMessageStarted = false;
     private boolean isRecording = false;
-    private String currentLanguage = "Spanish";
+    private boolean ttsEnabled = true;
+    private String currentLanguage = "English";
 
     @FXML
     private void initialize() {
@@ -94,6 +100,10 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
     public void init(UserData profile, BootstrapService bootstrap) {
         this.currentUser = profile;
+        if (profile.preferredLanguage() != null) {
+            this.currentLanguage = profile.preferredLanguage();
+        }
+        
         viewManager.addBotMessage("Hola " + profile.fullName() + ". Soy SoterIA. "
                 + "Pulsa el micro y cuéntame qué pasa, o escribe si no puedes hablar.");
 
@@ -119,6 +129,7 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
                 return;
             }
             this.sttService = bootstrap.sttService();
+            this.ttsService = bootstrap.ttsService();
             this.knowledgeBase = bootstrap.knowledgeBase();
             this.inferenceEngine = new InferenceEngine(bootstrap.triageService(), bootstrap.brainService(), knowledgeBase);
             this.aiAvailable = true;
@@ -198,6 +209,8 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         activeSession.addMessage(ChatMessage.user(message));
         face.setState(SoterIAFace.State.THINKING);
         viewManager.setSubtitle("Pensando…");
+        viewManager.showThinkingIndicator();
+        botMessageStarted = false;
 
         new Thread(() -> inferenceEngine.runInference(message, activeSession, currentUser, currentLanguage, this), 
                 "soteria-inference").start();
@@ -207,7 +220,14 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
     @Override
     public void onSubtitleUpdate(String text) {
-        viewManager.setSubtitle(text);
+        Platform.runLater(() -> {
+            if (!botMessageStarted) {
+                viewManager.startBotMessage();
+                botMessageStarted = true;
+            }
+            viewManager.setSubtitle(text);
+            viewManager.updateBotMessage(text);
+        });
     }
 
     @Override
@@ -218,21 +238,51 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     @Override
     public void onResponseFinalized(String finalMessage, String query) {
         Platform.runLater(() -> {
-            activeSession.addMessage(ChatMessage.model(finalMessage));
-            activeSession.setTimestamp(System.currentTimeMillis());
-            
-            // Dynamic Titling
-            if (activeSession.getMessages().size() <= 2) {
-                String title = query.substring(0, Math.min(query.length(), 25));
-                if (query.length() > 25) title += "...";
-                activeSession.setTitle(title);
-            }
-
+            updateActiveSession(finalMessage, query);
             sessionCoordinator.saveCurrentSession();
-            viewManager.addBotMessage(finalMessage);
-            face.setState(SoterIAFace.State.IDLE);
+            viewManager.updateBotMessage(finalMessage); 
+            
+            if (ttsEnabled && ttsService != null && ttsService.isSpeaking()) {
+                handleTTSCompletion();
+            } else {
+                face.setState(SoterIAFace.State.IDLE);
+            }
+            
             viewManager.setSubtitle(PROMPT_READY);
         });
+    }
+
+    private void updateActiveSession(String finalMessage, String query) {
+        activeSession.addMessage(ChatMessage.model(finalMessage));
+        activeSession.setTimestamp(System.currentTimeMillis());
+        
+        if (activeSession.getMessages().size() <= 2) {
+            String title = query.substring(0, Math.min(query.length(), 25));
+            if (query.length() > 25) title += "...";
+            activeSession.setTitle(title);
+        }
+    }
+
+    private void handleTTSCompletion() {
+        new Thread(() -> {
+            while (ttsService.isSpeaking()) {
+                try { 
+                    Thread.sleep(100); 
+                } catch (InterruptedException _) { 
+                    Thread.currentThread().interrupt();
+                    break; 
+                }
+            }
+            Platform.runLater(() -> face.setState(SoterIAFace.State.IDLE));
+        }, "soteria-tts-wait").start();
+    }
+
+    @Override
+    public void onSpeakSentence(String sentence, String language) {
+        if (ttsEnabled && ttsService != null) {
+            ttsService.setLanguage(language);
+            ttsService.speakQueued(sentence);
+        }
     }
 
     @Override
@@ -329,6 +379,17 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         this.activeSession = sessionCoordinator.startNewSession();
         viewManager.clearMessages();
         if (aiAvailable) viewManager.addBotMessage("Nueva sesión de emergencia iniciada. Dime qué sucede.");
+    }
+
+    @FXML
+    private void toggleTTS() {
+        ttsEnabled = !ttsEnabled;
+        if (ttsIcon != null) {
+            ttsIcon.setIconLiteral(ttsEnabled ? "mdmz-volume_up" : "mdmz-volume_off");
+        }
+        if (ttsService != null && !ttsEnabled) {
+            ttsService.stop();
+        }
     }
 
     private void refreshSessionList() {

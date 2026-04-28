@@ -87,8 +87,15 @@ public class SystemGPSLocation implements LocationProvider {
     public String detectPrimaryLanguage() {
         String coords = getCoordinates();
         if (coords == null || coords.equals(UNKNOWN)) {
-            String lang = java.util.Locale.getDefault().getLanguage();
-            return lang.equalsIgnoreCase("es") ? "Spanish" : "English";
+            String lang = java.util.Locale.getDefault().getLanguage().toLowerCase();
+            return switch (lang) {
+                case "es" -> "Spanish";
+                case "fr" -> "French";
+                case "de" -> "German";
+                case "it" -> "Italian";
+                case "pt" -> "Portuguese";
+                default -> "English";
+            };
         }
 
         try {

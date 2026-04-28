@@ -121,6 +121,25 @@
             <artifactId>ikonli-material2-pack</artifactId>
             <version>12.3.1</version>
         </dependency>
+
+        <!-- Apache Commons Compress para extraer el bundle tar.bz2 de Kokoro -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
+        </dependency>
+
+        <!-- sherpa-onnx JNI (local) para TTS -->
+        <dependency>
+            <groupId>com.k2fsa.sherpa</groupId>
+            <artifactId>sherpa-onnx</artifactId>
+            <version>1.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.k2fsa.sherpa</groupId>
+            <artifactId>sherpa-onnx-native-win-x64</artifactId>
+            <version>1.13.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -149,7 +168,7 @@
                     <mainClass>com.soteria.ui.MainApp</mainClass>
                     <options>
                         <option>--enable-native-access=javafx.graphics</option>
-                        <option>-Djava.library.path=${java.io.tmpdir}</option>
+                        <option>-Djava.library.path=${project.basedir}/lib/native;${java.io.tmpdir}</option>
                         <option>--enable-native-access=ALL-UNNAMED</option>
                         <option>--add-modules</option>
                         <option>jdk.incubator.vector</option>

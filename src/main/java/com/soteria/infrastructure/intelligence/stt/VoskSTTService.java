@@ -132,8 +132,8 @@ public class VoskSTTService implements AutoCloseable, STT {
                 recognizer.close();
             if (model != null)
                 model.close();
-        } catch (Exception _) {
-            // Silently swallow native memory access errors during shutdown
+        } catch (Throwable _) {
+            // Silently swallow native memory access errors (java.lang.Error) during shutdown
             logger.log(Level.FINE, "Silent failure during Vosk memory cleanup");
         }
     }

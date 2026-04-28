@@ -3,6 +3,7 @@ package com.soteria.infrastructure.bootstrap;
 import com.soteria.core.port.Brain;
 import com.soteria.core.port.KnowledgeBase;
 import com.soteria.core.port.STT;
+import com.soteria.core.port.TTS;
 import com.soteria.core.port.Triage;
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
 import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
@@ -10,6 +11,7 @@ import com.soteria.infrastructure.intelligence.system.ModelManager;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.tts.SherpaTTSService;
 import com.soteria.infrastructure.intelligence.system.ResourceLocalizationService;
 import com.soteria.core.port.LocalizationService;
 
@@ -44,6 +46,7 @@ public class BootstrapService {
     private ModelManager modelManager;
     private EmergencyKnowledgeBase knowledgeBase;
     private VoskSTTService sttService;
+    private SherpaTTSService ttsService;
     private TriageService triageService;
     private LocalBrainService brainService;
     private LocalizationService localizationService;
@@ -115,6 +118,10 @@ public class BootstrapService {
         return sttService;
     }
 
+    public TTS ttsService() {
+        return ttsService;
+    }
+
     public Triage triageService() {
         return triageService;
     }
@@ -138,6 +145,10 @@ public class BootstrapService {
         return sttService;
     }
 
+    SherpaTTSService ttsServiceImpl() {
+        return ttsService;
+    }
+
     TriageService triageServiceImpl() {
         return triageService;
     }
@@ -150,6 +161,10 @@ public class BootstrapService {
 
     void setSttService(VoskSTTService stt) {
         this.sttService = stt;
+    }
+
+    void setTtsService(SherpaTTSService tts) {
+        this.ttsService = tts;
     }
 
     void setTriageService(TriageService triage) {
@@ -167,11 +182,16 @@ public class BootstrapService {
 
         // Close services safely
         closeService(sttService, "STT");
+        closeService(ttsService, "TTS");
         closeService(triageService, "Triage");
         closeService(brainService, "Brain");
         closeService(knowledgeBase, "KnowledgeBase");
 
         log.info("Cleanup complete.");
+
+        // Force JVM exit — native threads (ONNX, llama.cpp) survive Java-level
+        // shutdown and keep the process alive indefinitely without this.
+        System.exit(0);
     }
 
     private void closeService(AutoCloseable service, String name) {

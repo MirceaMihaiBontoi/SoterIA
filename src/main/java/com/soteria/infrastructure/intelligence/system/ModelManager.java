@@ -1,6 +1,5 @@
 package com.soteria.infrastructure.intelligence.system;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +46,10 @@ public class ModelManager {
 
     // Triage (Intent) Model — Specialized crisis/emergency classifier (Local)
     private static final String TRIAGE_MODEL_NAME = "soteria-triage-v1.gguf";
+
+    // TTS Model — Kokoro-82M for multilingual speech synthesis
+    private static final String TTS_MODEL_NAME = "kokoro-multi-lang-v1_0";
+    private static final String TTS_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-multi-lang-v1_0.tar.bz2";
 
     private final SystemCapability capability;
     private final Path modelBasePath;
@@ -140,6 +143,18 @@ public class ModelManager {
         return modelBasePath.resolve(TRIAGE_MODEL_NAME);
     }
 
+    public boolean isTTSModelReady() {
+        Path path = getTTSModelPath();
+        // The Kokoro model needs model.onnx, voices.bin and tokens.txt to be considered ready
+        return Files.exists(path) && Files.isDirectory(path) 
+            && Files.exists(path.resolve("model.onnx"))
+            && Files.exists(path.resolve("voices.bin"));
+    }
+
+    public Path getTTSModelPath() {
+        return modelBasePath.resolve(TTS_MODEL_NAME);
+    }
+
     /**
      * Downloads a specific GGUF model profile.
      */
@@ -182,6 +197,27 @@ public class ModelManager {
      */
     public CompletableFuture<Path> downloadTriageModel() {
         return CompletableFuture.completedFuture(getTriageModelPath());
+    }
+
+    /**
+     * Downloads the Kokoro-82M TTS bundle for multilingual speech synthesis.
+     */
+    public CompletableFuture<Path> downloadTTSModel() {
+        Path target = getTTSModelPath();
+        if (isTTSModelReady()) {
+            return CompletableFuture.completedFuture(target);
+        }
+        Path tarFile = modelBasePath.resolve(TTS_MODEL_NAME + ".tar.bz2");
+        return downloadFile(TTS_MODEL_URL, tarFile)
+                .thenApply(tar -> {
+                    extractTarBz2(tar, modelBasePath);
+                    try {
+                        Files.deleteIfExists(tar);
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, "Failed to delete tar.bz2 after extraction", e);
+                    }
+                    return target;
+                });
     }
 
     /**
@@ -352,7 +388,7 @@ public class ModelManager {
 
     private void extractZip(Path zipFile, Path destDir) {
         logger.log(Level.INFO, "Extracting: {0}", zipFile.getFileName());
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
+        try (ZipInputStream zis = new ZipInputStream(new java.io.BufferedInputStream(Files.newInputStream(zipFile), 128 * 1024))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 Path newPath = destDir.resolve(entry.getName());
@@ -360,8 +396,8 @@ public class ModelManager {
                     Files.createDirectories(newPath);
                 } else {
                     Files.createDirectories(newPath.getParent());
-                    try (OutputStream os = Files.newOutputStream(newPath)) {
-                        byte[] buffer = new byte[8192];
+                    try (OutputStream os = new java.io.BufferedOutputStream(Files.newOutputStream(newPath), 128 * 1024)) {
+                        byte[] buffer = new byte[65536];
                         int len;
                         while ((len = zis.read(buffer)) > 0) {
                             os.write(buffer, 0, len);
@@ -372,6 +408,36 @@ public class ModelManager {
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Failed to extract zip", e);
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void extractTarBz2(Path tarFile, Path destDir) {
+        logger.log(Level.INFO, "Extracting: {0} (this may take a minute...)", tarFile.getFileName());
+        try (InputStream fi = new java.io.BufferedInputStream(Files.newInputStream(tarFile), 128 * 1024);
+             InputStream bi = new org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream(fi);
+             InputStream bbi = new java.io.BufferedInputStream(bi, 128 * 1024);
+             org.apache.commons.compress.archivers.tar.TarArchiveInputStream ti = new org.apache.commons.compress.archivers.tar.TarArchiveInputStream(bbi)) {
+
+            org.apache.commons.compress.archivers.tar.TarArchiveEntry entry;
+            while ((entry = ti.getNextEntry()) != null) {
+                Path newPath = destDir.resolve(entry.getName());
+                if (entry.isDirectory()) {
+                    Files.createDirectories(newPath);
+                } else {
+                    Files.createDirectories(newPath.getParent());
+                    try (OutputStream os = new java.io.BufferedOutputStream(Files.newOutputStream(newPath), 128 * 1024)) {
+                        byte[] buffer = new byte[65536];
+                        int len;
+                        while ((len = ti.read(buffer)) != -1) {
+                            os.write(buffer, 0, len);
+                        }
+                    }
+                }
+            }
+            logger.log(Level.INFO, "Extraction complete: {0}", tarFile.getFileName());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Failed to extract tar.bz2", e);
             throw new UncheckedIOException(e);
         }
     }

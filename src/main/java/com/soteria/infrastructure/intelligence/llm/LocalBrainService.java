@@ -224,7 +224,7 @@ public class LocalBrainService implements AutoCloseable, Brain {
 
         String staticSystem = buildStaticInstructions(targetLanguage);
         String dynamicContext = buildDynamicContext(profileContext, context);
-        return buildGemmaPrompt(staticSystem, dynamicContext, history);
+        return buildGemmaPrompt(staticSystem, dynamicContext, history, targetLanguage);
     }
 
     private boolean runInferenceLoop(InferenceParameters infer, InferenceListener listener, StringBuilder fullOutput) {
@@ -324,7 +324,7 @@ public class LocalBrainService implements AutoCloseable, Brain {
      * so the system instruction is prepended to the first user turn. History
      * must alternate user/model and end with a user turn.
      */
-    static String buildGemmaPrompt(String staticSystem, String dynamicContext, List<ChatMessage> history) {
+    static String buildGemmaPrompt(String staticSystem, String dynamicContext, List<ChatMessage> history, String targetLanguage) {
         StringBuilder sb = new StringBuilder();
         int lastIndex = history.size() - 1;
 
@@ -352,7 +352,7 @@ public class LocalBrainService implements AutoCloseable, Brain {
             if (i == lastIndex && "user".equals(msg.role())) {
                 // Simplified reminder to focus on language and natural tone
                 sb.append(msg.content())
-                  .append("\n\n(Respond in [TARGET_LANG]. 1-2 natural sentences.)")
+                  .append("\n\n(Respond in ").append(targetLanguage).append(". 1-2 natural sentences.)")
                   .append("<end_of_turn>\n");
             } else {
                 sb.append(msg.content()).append("<end_of_turn>\n");

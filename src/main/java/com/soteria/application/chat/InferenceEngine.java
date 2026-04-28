@@ -11,6 +11,7 @@ import javafx.application.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -20,7 +21,6 @@ import java.util.logging.Logger;
  */
 public class InferenceEngine {
     private static final Logger logger = Logger.getLogger(InferenceEngine.class.getName());
-    private static final String RESPONSE_MARKER = "RESPONSE:";
 
     private final Triage triageService;
     private final Brain brainService;
@@ -34,6 +34,9 @@ public class InferenceEngine {
         void onResponseFinalized(String finalMessage, String query);
 
         void onSafetyBoxUpdate(String protocolId, String status);
+
+        /** Called when a complete sentence is ready for TTS during streaming. */
+        void onSpeakSentence(String sentence, String language);
     }
 
     public InferenceEngine(Triage triage, Brain brain, KnowledgeBase kb) {
@@ -117,7 +120,9 @@ public class InferenceEngine {
         private final int attempt;
         private final StringBuilder responseBuffer = new StringBuilder();
         private boolean dirty = false;
-        private boolean isResponseStarted = false;
+        private int lastTTSSentenceEnd;
+        private boolean ttsStarted;
+        private int sentenceCount;
         private String currentActiveId;
 
         BrainCallbackHandler(String message, ChatSession session, UserData user, String language,
@@ -129,40 +134,120 @@ public class InferenceEngine {
             this.listener = listener;
             this.attempt = attempt;
             this.currentActiveId = activeId;
+            this.lastTTSSentenceEnd = 0;
+            this.ttsStarted = false;
+            this.sentenceCount = 0;
         }
 
         @Override
         public void onPartialResponse(String token) {
             responseBuffer.append(token);
-            String full = responseBuffer.toString();
-            handlePartialResponse(full);
+            String fullUncut = responseBuffer.toString();
+            String full = fullUncut.trim();
+
+            // Always update subtitle — no RESPONSE: marker gating
+            if (!full.isEmpty()) {
+                listener.onSubtitleUpdate(full);
+            }
+
+            // Detect sentence boundaries for streaming TTS using un-trimmed text
+            checkAndSpeakSentences(fullUncut, false);
         }
 
-        private void handlePartialResponse(String full) {
-            int respIdx = full.toUpperCase().indexOf(RESPONSE_MARKER);
-            if (!isResponseStarted) {
-                if (respIdx != -1) {
-                    isResponseStarted = true;
-                    String actualContent = full.substring(respIdx + RESPONSE_MARKER.length());
-                    listener.onSubtitleUpdate(cleanResponse(actualContent));
+        private void checkAndSpeakSentences(String fullText, boolean isFinal) {
+            String remaining = fullText.substring(lastTTSSentenceEnd);
+            
+            while (true) {
+                int boundaryIndex = findBestSplitPoint(remaining, isFinal);
+                if (boundaryIndex == -1) break;
+                
+                int absoluteBoundary = lastTTSSentenceEnd + boundaryIndex + 1;
+                String sentence = fullText.substring(lastTTSSentenceEnd, absoluteBoundary).trim();
+                
+                if (!sentence.isEmpty()) {
+                    speakSentence(sentence);
+                    lastTTSSentenceEnd = absoluteBoundary;
                 }
-            } else {
-                String actualContent = (respIdx != -1) ? full.substring(respIdx + RESPONSE_MARKER.length()) : full;
-                listener.onSubtitleUpdate(cleanResponse(actualContent));
+                
+                remaining = fullText.substring(lastTTSSentenceEnd);
             }
         }
 
+        private int findBestSplitPoint(String text, boolean isFinal) {
+            if (text.isEmpty()) return -1;
+            
+            // 1. Check for sentence boundaries (. ! ? : ; ...)
+            int boundary = findFirstSentenceBoundary(text);
+            
+            if (boundary != -1) {
+                // Reject splits that produce fragments too short for natural prosody
+                int wordCount = text.substring(0, boundary + 1).trim().split("\\s+").length;
+                if (wordCount >= 3 || isFinal) {
+                    return boundary;
+                }
+                // Fragment too short — keep accumulating unless it's the final chunk
+            }
+            
+            // 2. If no sentence boundary but text is getting long, split at comma
+            if (!isFinal && text.split("\\s+").length > 5) {
+                int commaIndex = text.indexOf(',');
+                if (commaIndex != -1 && commaIndex > 2) {
+                    return commaIndex;
+                }
+            }
+            
+            // 3. If final, return everything remaining
+            return isFinal ? text.length() - 1 : -1;
+        }
+
+
+        private void speakSentence(String sentence) {
+            if (!ttsStarted) {
+                ttsStarted = true;
+                listener.onFaceStateChange("SPEAKING");
+            }
+            sentenceCount++;
+            logger.log(Level.INFO, "TTS Triggered sentence #{0}: [{1}] ({2})", new Object[]{sentenceCount, sentence, this.language});
+            listener.onSpeakSentence(sentence, this.language);
+        }
+
+        private int findFirstSentenceBoundary(String text) {
+            if (text == null || text.isEmpty()) return -1;
+
+            int wordCount = 0;
+            for (int i = 0; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (Character.isWhitespace(c)) wordCount++;
+                if (isStrongBoundary(c)) return i;
+                if (shouldForceSplit(c, wordCount, i)) return i;
+            }
+            return -1;
+        }
+
+        private boolean isStrongBoundary(char c) {
+            return c == '.' || c == '!' || c == '?' || c == '\n' || c == ';' || c == ':';
+        }
+
+        private boolean shouldForceSplit(char c, int wordCount, int index) {
+            // For the first sentence, split slightly earlier so TTS starts sooner
+            boolean isFirstSentence = (sentenceCount == 0);
+            int commaThreshold = isFirstSentence ? 3 : 4;
+            int runOnWordLimit = isFirstSentence ? 6 : 10;
+            int runOnCharLimit = isFirstSentence ? 45 : 70;
+            
+            if (c == ',' && wordCount >= commaThreshold) return true;
+            return wordCount >= runOnWordLimit || index >= runOnCharLimit;
+        }
+
+
         @Override
         public void onFinalResponse(String text) {
+            String cleaned = cleanResponse(text);
+
             if (dirty && attempt < 3) {
                 logger.info(() -> "Retrying inference after REJECT... Attempt " + (attempt + 1));
                 runInferenceFlowInternal(message, session, user, language, listener, attempt + 1);
             } else {
-                int respIdx = text.toUpperCase().indexOf(RESPONSE_MARKER);
-                String finalContent = (respIdx != -1) ? text.substring(respIdx + RESPONSE_MARKER.length()) : text;
-                String cleaned = cleanResponse(finalContent);
-
-                // Restore fallback logic from ChatController.old.java
                 if (cleaned.isEmpty()) {
                     if (dirty) {
                         cleaned = "Lo siento, no he podido encontrar un protocolo exacto, pero estoy aquí para ayudarte. ¿Puedes darme más detalles?";
@@ -170,7 +255,10 @@ public class InferenceEngine {
                         cleaned = "Entiendo. Estoy analizando la mejor forma de ayudarte.";
                     }
                 }
-
+                
+                // Finalize any remaining speech using adaptive logic
+                this.checkAndSpeakSentences(text, true);
+                
                 listener.onResponseFinalized(cleaned, message);
             }
         }

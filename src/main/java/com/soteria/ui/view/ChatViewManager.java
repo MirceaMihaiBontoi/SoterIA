@@ -34,6 +34,8 @@ public class ChatViewManager {
 
     private final UIComponents ui;
     private boolean sheetOpen = false;
+    private TextFlow activeBotFlow = null;
+    private HBox activeThinkingIndicator = null;
 
     public ChatViewManager(UIComponents ui) {
         this.ui = ui;
@@ -66,6 +68,81 @@ public class ChatViewManager {
 
     public void addBotMessage(String message) {
         addBubble(message, "chat-bubble-bot", Pos.CENTER_LEFT, new Insets(5, 50, 5, 0));
+    }
+
+    public void startBotMessage() {
+        removeThinkingIndicator();
+        VBox bubble = new VBox();
+        bubble.getStyleClass().add("chat-bubble-bot");
+        bubble.setMaxWidth(420);
+
+        activeBotFlow = new TextFlow();
+        activeBotFlow.setMaxWidth(400);
+        bubble.getChildren().add(activeBotFlow);
+
+        HBox box = new HBox(bubble);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(5, 50, 5, 0));
+
+        Platform.runLater(() -> {
+            ui.chatMessages().getChildren().add(box);
+            scrollToBottom();
+        });
+    }
+
+    public void updateBotMessage(String text) {
+        if (activeBotFlow != null) {
+            Platform.runLater(() -> {
+                activeBotFlow.getChildren().clear();
+                renderMarkdown(text, activeBotFlow, "chat-bubble-bot-text");
+                scrollToBottom();
+            });
+        }
+    }
+
+    public void showThinkingIndicator() {
+        if (activeThinkingIndicator != null) return;
+
+        HBox dots = new HBox(5);
+        dots.getStyleClass().add("thinking-dots");
+        
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(3);
+            dot.getStyleClass().add("thinking-dot");
+            dots.getChildren().add(dot);
+            
+            Timeline anim = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(dot.opacityProperty(), 0.3)),
+                new KeyFrame(Duration.millis(300), new KeyValue(dot.opacityProperty(), 1.0)),
+                new KeyFrame(Duration.millis(600), new KeyValue(dot.opacityProperty(), 0.3))
+            );
+            anim.setCycleCount(Timeline.INDEFINITE);
+            anim.setDelay(Duration.millis(i * 200));
+            anim.play();
+        }
+
+        VBox bubble = new VBox(dots);
+        bubble.getStyleClass().add("chat-bubble-bot");
+        bubble.setPadding(new Insets(8, 12, 8, 12));
+        bubble.setMaxWidth(60);
+
+        activeThinkingIndicator = new HBox(bubble);
+        activeThinkingIndicator.setAlignment(Pos.CENTER_LEFT);
+        activeThinkingIndicator.setPadding(new Insets(5, 50, 5, 0));
+
+        Platform.runLater(() -> {
+            ui.chatMessages().getChildren().add(activeThinkingIndicator);
+            scrollToBottom();
+        });
+    }
+
+    public void removeThinkingIndicator() {
+        if (activeThinkingIndicator != null) {
+            Platform.runLater(() -> {
+                ui.chatMessages().getChildren().remove(activeThinkingIndicator);
+                activeThinkingIndicator = null;
+            });
+        }
     }
 
     private void renderMarkdown(String text, TextFlow flow, String styleClass) {

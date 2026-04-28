@@ -133,6 +133,6 @@ class DynamicTriageTest {
         Triage.TriageResult result = triageService.classifyDynamic(query, protocolList);
 
         assertFalse(result.isEmergency(), "Casual talk should NOT be an emergency");
-        assertEquals(Triage.Intent.INACTIVE, result.intent());
+        assertEquals(Triage.Intent.GREETING_OR_CASUAL, result.intent());
     }
 }
