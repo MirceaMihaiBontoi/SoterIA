@@ -3,10 +3,11 @@ package com.soteria.infrastructure.bootstrap;
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.port.InferenceListener;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
-import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.stt.SherpaSTTService;
 import com.soteria.infrastructure.intelligence.tts.SherpaTTSService;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
 import com.soteria.infrastructure.intelligence.llm.LocalBrainService;
+import com.soteria.infrastructure.intelligence.kws.WakeWordService;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,38 +57,61 @@ public class ProvisioningManager {
     private void runProvisioning(BootstrapState state, BootstrapService service,
                                  SystemCapability.AIModelProfile profile, String language, String customUrl) {
         try {
+            long totalStart = System.nanoTime();
             log.info("Starting provisioning sequence...");
+
             if (isInterrupted()) return;
-            log.info("Provisioning STT model...");
+            long stepStart = System.nanoTime();
             provisionSTT(state, service, language);
+            long sttMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] STT provision: %d ms", sttMs));
 
             if (isInterrupted()) return;
-            log.info("Provisioning Brain model...");
+            stepStart = System.nanoTime();
+            provisionKWSModel(state, service);
+            long kwsMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] KWS provision: %d ms", kwsMs));
+
+            if (isInterrupted()) return;
+            stepStart = System.nanoTime();
             provisionBrainModel(state, service, profile, customUrl);
+            long brainDlMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] Brain model download/check: %d ms", brainDlMs));
 
             if (isInterrupted()) return;
-            log.info("Provisioning Triage model...");
+            stepStart = System.nanoTime();
             provisionTriageModel(state, service);
+            long triageMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] Triage provision: %d ms", triageMs));
 
             if (isInterrupted()) return;
-            log.info("Provisioning TTS model...");
+            stepStart = System.nanoTime();
             provisionTTSModel(state, service, language);
+            long ttsMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] TTS provision: %d ms", ttsMs));
 
             if (isInterrupted()) return;
-            log.info("Provisioning Knowledge Base...");
+            stepStart = System.nanoTime();
             provisionKnowledgeBase(state, service);
+            long kbMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] Knowledge Base provision: %d ms", kbMs));
 
             if (isInterrupted()) return;
-            log.info("Initializing Brain service...");
+            stepStart = System.nanoTime();
             initBrainService(state, service, profile, customUrl, language);
+            long brainInitMs = (System.nanoTime() - stepStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] Brain init + warmup: %d ms", brainInitMs));
 
-            log.info("Provisioning complete. Setting status to Ready.");
+            long totalMs = (System.nanoTime() - totalStart) / 1_000_000;
+            log.info(() -> String.format("[TIMING] ======= TOTAL PROVISIONING: %d ms (%.1f s) =======", totalMs, totalMs / 1000.0));
+
             state.update("Ready", 1.0);
             state.completeReadyFuture();
         } catch (Exception e) {
             log.log(Level.SEVERE, "Provisioning failed during runProvisioning", e);
             handleProvisioningError(state, e);
         } finally {
+
             cleanupActiveProvisioner();
         }
     }
@@ -108,12 +132,22 @@ public class ProvisioningManager {
     }
 
     private void provisionSTT(BootstrapState state, BootstrapService service, String language) throws IOException {
-        if (!service.modelManager().isVoskModelReady(language)) {
-            state.update("Downloading speech model (" + language + ")...", 0.10);
-            activeDownload = service.modelManager().downloadVoskModel(language);
+        if (!service.modelManager().isSTTModelReady()) {
+            state.update("Downloading multilingual speech model...", 0.10);
+            activeDownload = service.modelManager().downloadSTTModel();
             activeDownload.join();
         } else {
-            state.update("Speech model ready", 0.20);
+            state.update("Speech model ready", 0.15);
+        }
+
+        if (isInterrupted()) return;
+
+        if (!service.modelManager().isVADModelReady()) {
+            state.update("Downloading voice activity detector...", 0.20);
+            activeDownload = service.modelManager().downloadVADModel();
+            activeDownload.join();
+        } else {
+            state.update("VAD model ready", 0.25);
         }
 
         if (isInterrupted()) return;
@@ -122,8 +156,27 @@ public class ProvisioningManager {
         if (service.sttServiceImpl() != null) {
             service.sttServiceImpl().shutdown();
         }
-        VoskSTTService stt = new VoskSTTService(service.modelManager().getVoskModelPath(language));
+        SherpaSTTService stt = new SherpaSTTService(service.modelManager().getSTTModelPath(), language, service.modelManager());
         service.setSttService(stt);
+    }
+
+    private void provisionKWSModel(BootstrapState state, BootstrapService service) throws IOException {
+        if (!service.modelManager().isKWSModelReady()) {
+            state.update("Downloading wake-word model...", 0.35);
+            activeDownload = service.modelManager().downloadKWSModel();
+            activeDownload.join();
+        } else {
+            state.update("Wake-word model ready", 0.38);
+        }
+
+        if (isInterrupted()) return;
+
+        state.update("Loading wake-word service...", 0.39);
+        if (service.wakeWordService() != null) {
+            service.wakeWordService().shutdown();
+        }
+        WakeWordService kws = new WakeWordService(service.modelManager().getKWSModelPath());
+        service.setWakeWordService(kws);
     }
 
     private void provisionBrainModel(BootstrapState state, BootstrapService service, 
@@ -218,8 +271,13 @@ public class ProvisioningManager {
             log.info("Provisioning task aborted cleanly.");
             return;
         }
+        
+        String errorMsg = e.getMessage();
+        if (errorMsg == null && e.getCause() != null) errorMsg = e.getCause().getMessage();
+        if (errorMsg == null) errorMsg = e.getClass().getSimpleName();
+
         log.log(Level.SEVERE, "Provisioning failed", e);
-        state.update("Setup Error: " + e.getMessage(), state.getProgress());
+        state.update("Setup Error: " + errorMsg, state.getProgress());
         state.completeReadyFutureExceptionally(e);
     }
 

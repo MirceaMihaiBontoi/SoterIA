@@ -28,10 +28,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
 public class ChatController implements InferenceEngine.UIUpdateListener {
+    private static final Logger logger = Logger.getLogger(ChatController.class.getName());
+    private final String instanceId = "ChatController-" + java.util.UUID.randomUUID().toString().substring(0, 8);
     private static final String PROMPT_READY = "Pulsa el micro para hablar";
     private static final String STATUS_READY = "ready";
     private static final String STATUS_WARMING = "warming";
@@ -72,6 +76,7 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     private ChatViewManager viewManager;
     private InferenceEngine inferenceEngine;
     private SessionCoordinator sessionCoordinator;
+    private com.soteria.infrastructure.intelligence.kws.WakeWordService wakeWordService;
 
     private boolean aiAvailable = false;
     private boolean botMessageStarted = false;
@@ -123,20 +128,49 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
         bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> {
             if (err != null) {
+                logger.log(Level.SEVERE, "[{0}] Bootstrap failed: {1}", new Object[]{instanceId, err.getMessage()});
                 viewManager.setAiStatusPill("IA offline", STATUS_OFFLINE);
                 viewManager.setSubtitle("No puedo escucharte ahora. Usa el botón SOS si es urgente.");
                 face.setState(SoterIAFace.State.IDLE);
                 return;
             }
+            logger.log(Level.INFO, "[{0}] ready() complete. Configuring services...", instanceId);
             this.sttService = bootstrap.sttService();
             this.ttsService = bootstrap.ttsService();
             this.knowledgeBase = bootstrap.knowledgeBase();
             this.inferenceEngine = new InferenceEngine(bootstrap.triageService(), bootstrap.brainService(), knowledgeBase);
+            this.wakeWordService = bootstrap.wakeWordService();
             this.aiAvailable = true;
+
+            if (this.wakeWordService != null) {
+                logger.log(Level.INFO, "[{0}] Registering wake-word listener.", instanceId);
+                this.wakeWordService.startListening(this::onWakeWordDetected);
+            }
+
             viewManager.setAiStatusPill("IA lista", STATUS_READY);
             viewManager.setSubtitle(PROMPT_READY);
             setInputLocked(false);
         }));
+    }
+
+    private void prepareForInput() {
+        if (ttsService != null) {
+            ttsService.stop();
+        }
+        if (inferenceEngine != null) {
+            inferenceEngine.cancel();
+        }
+        botMessageStarted = false;
+        viewManager.setPartialTranscript("");
+        face.setState(SoterIAFace.State.LISTENING);
+    }
+
+    public void onWakeWordDetected() {
+        logger.log(Level.INFO, "[{0}] Wake-word callback received by active controller", instanceId);
+        Platform.runLater(() -> {
+            prepareForInput();
+            startRecording();
+        });
     }
 
     @FXML
@@ -156,6 +190,7 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         }
 
         if (!isRecording) {
+            prepareForInput();
             startRecording();
         } else {
             stopRecording();
@@ -164,19 +199,36 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
     private void startRecording() {
         isRecording = true;
+        if (wakeWordService != null) {
+            wakeWordService.stopListening(); // Pause wake-word to free mic
+        }
         micButton.getStyleClass().add("mic-fab-active");
         if (micIcon != null) micIcon.setIconLiteral("mdmz-stop");
         face.setState(SoterIAFace.State.LISTENING);
         viewManager.setSubtitle("Escuchando…");
+        viewManager.setPartialTranscript("");
         sttService.startListening(new STTListener() {
             @Override
             public void onResult(String text) {
                 if (!text.isEmpty()) {
+                    logger.log(Level.INFO, "[{0}] STT Result: ''{1}''", new Object[]{instanceId, text});
+                    // Filter out accidental transcription of the wake-word itself
+                    String cleanText = text.toLowerCase().replaceAll("[^a-z]", "");
+                    if (cleanText.equals("soteria")) {
+                        logger.log(Level.INFO, "[{0}] STT: Ignored wake-word ''SoterIA'' in result stream. Cleaning up.", instanceId);
+                        Platform.runLater(() -> stopRecording());
+                        return;
+                    }
+
                     Platform.runLater(() -> {
+                        logger.log(Level.INFO, "[{0}] Processing message: ''{1}''", new Object[]{instanceId, text});
                         stopRecording();
                         viewManager.addUserMessage(text);
                         processMessage(text);
                     });
+                } else {
+                    logger.log(Level.INFO, "[{0}] STT: Empty result received.", instanceId);
+                    Platform.runLater(() -> stopRecording());
                 }
             }
             @Override
@@ -198,22 +250,32 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         sttService.stopListening();
         micButton.getStyleClass().remove("mic-fab-active");
         if (micIcon != null) micIcon.setIconLiteral("mdmz-mic");
-        viewManager.setPartialTranscript("");
+        
+        if (wakeWordService != null) {
+            wakeWordService.startListening(this::onWakeWordDetected);
+        }
+        // Do NOT clear partial transcript here, let processMessage handle it
         face.setState(SoterIAFace.State.IDLE);
-        viewManager.setSubtitle(PROMPT_READY);
     }
 
     private void processMessage(String message) {
-        if (!aiAvailable) return;
+        if (!aiAvailable) {
+            logger.log(Level.WARNING, "[{0}] processMessage called but AI not available.", instanceId);
+            return;
+        }
 
+        logger.log(Level.INFO, "[{0}] processMessage: ''{1}''", new Object[]{instanceId, message});
         activeSession.addMessage(ChatMessage.user(message));
         face.setState(SoterIAFace.State.THINKING);
         viewManager.setSubtitle("Pensando…");
+        viewManager.setPartialTranscript(message); // Keep the transcribed text visible under the face
         viewManager.showThinkingIndicator();
         botMessageStarted = false;
 
-        new Thread(() -> inferenceEngine.runInference(message, activeSession, currentUser, currentLanguage, this), 
-                "soteria-inference").start();
+        new Thread(() -> {
+            logger.log(Level.INFO, "[{0}] Starting inference thread.", instanceId);
+            inferenceEngine.runInference(message, activeSession, currentUser, currentLanguage, this);
+        }, "soteria-inference").start();
     }
 
     // --- Inference Engine Callbacks ---

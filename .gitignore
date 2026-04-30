@@ -26,7 +26,7 @@ Thumbs.db
 # Otros
 .classpath
 .project
-.settings/
+.*
 ROADMAP.md
 execution_flow.txt
 *aider*

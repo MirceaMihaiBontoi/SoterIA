@@ -36,12 +36,18 @@ public class LocalBrainService implements AutoCloseable, Brain {
     private final Path modelFile;
     private final SystemCapability capability;
     private LlamaModel model;
+    private volatile boolean isCancelled = false;
 
     public LocalBrainService(Path modelFile, SystemCapability capability) {
         this.modelFile = modelFile;
         this.capability = capability;
         initializeModel();
         setupPromptLogging();
+    }
+
+    @Override
+    public void cancel() {
+        this.isCancelled = true;
     }
 
     private void setupPromptLogging() {
@@ -193,6 +199,7 @@ public class LocalBrainService implements AutoCloseable, Brain {
      */
     public void generateResponse(List<ChatMessage> history, String context, String targetLanguage,
             com.soteria.core.model.UserData profile, InferenceListener listener) {
+        this.isCancelled = false;
         String prompt = preparePrompt(history, context, targetLanguage, profile);
 
         logInferenceRequest(targetLanguage, history, context);
@@ -233,6 +240,10 @@ public class LocalBrainService implements AutoCloseable, Brain {
         boolean[] isFirstTokens = { true };
 
         for (LlamaOutput output : model.generate(infer)) {
+            if (isCancelled) {
+                logger.info("Inference loop cancelled by user/system.");
+                break;
+            }
             String token = output.toString();
             fullOutput.append(token);
 

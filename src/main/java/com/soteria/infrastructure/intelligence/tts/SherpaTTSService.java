@@ -2,11 +2,11 @@ package com.soteria.infrastructure.intelligence.tts;
 
 import com.soteria.core.port.TTS;
 import com.k2fsa.sherpa.onnx.*;
+import com.soteria.infrastructure.intelligence.system.NativeLibraryLoader;
+import com.soteria.infrastructure.intelligence.system.LanguageUtils;
 import javax.sound.sampled.*;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -67,21 +67,6 @@ public class SherpaTTSService implements TTS, AutoCloseable {
             "pt", 40 // pf_dora (Portuguese female)
     );
 
-    private static final Map<String, String> LANG_CODE_MAP = Map.ofEntries(
-            Map.entry("spanish", "es"),
-            Map.entry("español", "es"),
-            Map.entry("castellano", "es"),
-            Map.entry("english", "en"),
-            Map.entry("inglés", "en"),
-            Map.entry("french", "fr"),
-            Map.entry("français", "fr"),
-            Map.entry("francés", "fr"),
-            Map.entry("italian", "it"),
-            Map.entry("italiano", "it"),
-            Map.entry("portuguese", "pt"),
-            Map.entry("português", "pt"),
-            Map.entry("portugués", "pt"));
-
     public SherpaTTSService(Path modelPath) {
         this.modelPath = modelPath;
         this.cachedSpeakerId = resolveSpeakerId(this.language);
@@ -97,21 +82,9 @@ public class SherpaTTSService implements TTS, AutoCloseable {
         startWorkerThreads();
     }
 
-    private void loadNativeLibraries() {
-        try {
-            String userDir = System.getProperty("user.dir");
-            Path nativeDir = Paths.get(userDir, "lib", "native");
-            System.load(nativeDir.resolve("onnxruntime.dll").toAbsolutePath().toString());
-            System.load(nativeDir.resolve("sherpa-onnx-jni.dll").toAbsolutePath().toString());
-            logger.info("Native sherpa-onnx libraries loaded successfully from lib/native");
-        } catch (UnsatisfiedLinkError | Exception e) {
-            logger.log(Level.WARNING, "Failed to load native libraries manually: {0}", e.getMessage());
-        }
-    }
-
     private void initializeSherpaOnnx() {
         try {
-            loadNativeLibraries();
+            NativeLibraryLoader.load();
 
             logger.log(Level.INFO, "Initializing sherpa-onnx TTS with model: {0}", modelPath);
 
@@ -218,56 +191,64 @@ public class SherpaTTSService implements TTS, AutoCloseable {
 
     private void synthesizeText(String text) {
         try {
-            int sid = this.cachedSpeakerId;
             String trimmedText = text.trim();
+            float currentSpeechRate = calculateSpeechRate(trimmedText);
             
-            // Adjust speech rate slightly slower for questions
-            float currentSpeechRate = this.speechRate;
-            boolean isQuestion = trimmedText.endsWith("?");
-            boolean isStatement = trimmedText.endsWith(".");
-            
-            if (isQuestion) {
-                currentSpeechRate = this.speechRate * 0.90f; // 10% slower for questions
-            }
-
-            GeneratedAudio audio = offlineTts.generate(text, sid, currentSpeechRate);
+            GeneratedAudio audio = offlineTts.generate(text, this.cachedSpeakerId, currentSpeechRate);
 
             if (audio != null && audio.getSamples() != null && audio.getSamples().length > 0) {
-                float[] samples = trimSilence(audio.getSamples());
-                if (samples.length > 0) {
-                    byte[] pcm = floatToPcm16(samples);
-                    applyFadeIn(pcm);
-                    applyFadeOut(pcm);
-
-                    logger.log(Level.INFO, "TTS synthesized ({0}): [{1}] → {2}ms audio (rate: {3})",
-                            new Object[] { this.language, text, (samples.length * 1000L) / SAMPLE_RATE, currentSpeechRate });
-
-                    if (!interruptRequested.get()) {
-                        playbackQueue.put(pcm);
-                        
-                        // Add dynamic silence after the sentence based on punctuation
-                        int silenceMs = 30; // base natural silence
-                        if (isStatement) {
-                            silenceMs = 150; // slightly longer pause after a period
-                        } else if (isQuestion) {
-                            silenceMs = 120; // medium pause after a question
-                        } else if (trimmedText.endsWith(",")) {
-                            silenceMs = 60; // short pause after a comma
-                        }
-                        
-                        // 16-bit mono = 2 bytes per sample
-                        byte[] silence = new byte[(int) (SAMPLE_RATE * (silenceMs / 1000f)) * 2];
-                        playbackQueue.put(silence);
-                    }
-                }
+                processAndEnqueueAudio(audio, trimmedText, currentSpeechRate);
             } else {
                 logger.log(Level.WARNING, "TTS: empty audio for: {0}", text);
             }
+        } catch (InterruptedException _) {
+            Thread.currentThread().interrupt();
+            logger.log(Level.WARNING, "TTS synthesis interrupted");
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "TTS synthesis error", ex);
         } finally {
             pendingSynthesis.decrementAndGet();
         }
+    }
+
+    private float calculateSpeechRate(String trimmedText) {
+        if (trimmedText.endsWith("?")) {
+            return this.speechRate * 0.90f; // 10% slower for questions
+        }
+        return this.speechRate;
+    }
+
+    private void processAndEnqueueAudio(GeneratedAudio audio, String text, float rate) throws InterruptedException {
+        float[] samples = trimSilence(audio.getSamples());
+        if (samples.length == 0) {
+            return;
+        }
+
+        byte[] pcm = floatToPcm16(samples);
+        applyFadeIn(pcm);
+        applyFadeOut(pcm);
+
+        logger.log(Level.INFO, "TTS synthesized ({0}): [{1}] → {2}ms audio (rate: {3})",
+                new Object[] { this.language, text, (samples.length * 1000L) / SAMPLE_RATE, rate });
+
+        if (!interruptRequested.get()) {
+            playbackQueue.put(pcm);
+            playbackQueue.put(generateSilence(text));
+        }
+    }
+
+    private byte[] generateSilence(String text) {
+        int silenceMs = 30; // base natural silence
+        if (text.endsWith(".")) {
+            silenceMs = 150; // slightly longer pause after a period
+        } else if (text.endsWith("?")) {
+            silenceMs = 120; // medium pause after a question
+        } else if (text.endsWith(",")) {
+            silenceMs = 60; // short pause after a comma
+        }
+        
+        // 16-bit mono = 2 bytes per sample
+        return new byte[(int) (SAMPLE_RATE * (silenceMs / 1000f)) * 2];
     }
 
     /**
@@ -299,8 +280,8 @@ public class SherpaTTSService implements TTS, AutoCloseable {
      * Writes PCM data to the audio line in small chunks.
      */
     private void playPcm(byte[] audioData) {
-        if (persistentLine == null || !persistentLine.isOpen()) {
-            if (!openPersistentLine()) return;
+        if ((persistentLine == null || !persistentLine.isOpen()) && !openPersistentLine()) {
+            return;
         }
 
         int frameSize = persistentLine.getFormat().getFrameSize();
@@ -406,26 +387,8 @@ public class SherpaTTSService implements TTS, AutoCloseable {
     }
 
     private String resolveLanguageCode(String lang) {
-        if (lang == null || lang.isBlank())
-            return "en";
-        String lower = lang.toLowerCase().trim();
-
-        if (LANG_CODE_MAP.containsKey(lower)) {
-            return LANG_CODE_MAP.get(lower);
-        }
-
-        if (lower.length() == 2)
-            return lower;
-
-        for (Locale locale : Locale.getAvailableLocales()) {
-            if (lower.equalsIgnoreCase(locale.getDisplayLanguage(Locale.ENGLISH)) ||
-                    lower.equalsIgnoreCase(locale.getDisplayLanguage(locale)) ||
-                    lower.equalsIgnoreCase(locale.getDisplayLanguage(Locale.forLanguageTag("es")))) {
-                return locale.getLanguage();
-            }
-        }
-
-        return "en";
+        String code = LanguageUtils.isoCode(lang);
+        return code.isEmpty() ? "en" : code;
     }
 
     // --- TTS Interface ---

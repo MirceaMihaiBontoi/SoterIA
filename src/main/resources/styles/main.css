@@ -71,9 +71,7 @@
     -color-success-subtle: -soteria-success-soft;
 
     -fx-font-family: "Inter", "Segoe UI", "Arial", sans-serif;
-    font-family: "Inter", "Segoe UI", "Arial", sans-serif;
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 /* ==========================================================
@@ -82,49 +80,37 @@
 
 .onboarding-root {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .onboarding-title {
     -fx-font-size: 30px;
-    font-size: 30px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-fg;
 }
 
 .onboarding-subtitle {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-text-fill: -soteria-fg-muted;
 }
 
 .field-label {
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-fg-muted;
 }
 
 .input-field {
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 .primary-button {
     -fx-font-size: 15px;
-    font-size: 15px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 14px 22px;
-    padding: 14px 22px;
     -fx-background-color: -soteria-accent;
-    background-color: -soteria-accent;
     -fx-text-fill: -soteria-bg;
     -fx-background-radius: 10px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .primary-button:hover,
@@ -132,61 +118,46 @@
 /* stylelint-disable-next-line selector-pseudo-class-no-unknown */
 .primary-button:focused {
     -fx-background-color: derive(-soteria-accent, -8%);
-    background-color: #05a7c3; /* Static fallback for derive(-soteria-accent, -8%) */
 }
 
 .primary-button:disabled {
     -fx-opacity: 0.55;
-    opacity: 0.55;
 }
 
 .error-label {
     -fx-text-fill: -soteria-danger;
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-font-weight: bold;
-    font-weight: bold;
 }
 
 .boot-status,
 .caption-label {
     -fx-text-fill: -soteria-fg-muted;
     -fx-font-size: 12px;
-    font-size: 12px;
 }
 
 .recommended-tag {
-    font-size: 10px;
     -fx-font-size: 10px;
-    font-weight: bold;
     -fx-font-weight: bold;
     -fx-text-fill: -soteria-success;
-    background-color: -soteria-success-soft;
     -fx-background-color: -soteria-success-soft;
     -fx-background-radius: 4px;
-    padding: 2 7 2 7;
     -fx-padding: 2 7 2 7;
 }
 
 .size-tag {
-    font-size: 11px;
     -fx-font-size: 11px;
     -fx-text-fill: -soteria-fg-muted;
-    font-family: "JetBrains Mono", "Consolas", monospace;
     -fx-font-family: "JetBrains Mono", "Consolas", monospace;
 }
 
 .success-button {
     -fx-background-color: -soteria-success;
-    background-color: -soteria-success;
     -fx-text-fill: -soteria-bg;
     -fx-background-radius: 10px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 14px 22px;
-    padding: 14px 22px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .success-button:hover,
@@ -194,22 +165,17 @@
 /* stylelint-disable-next-line selector-pseudo-class-no-unknown */
 .success-button:focused {
     -fx-background-color: derive(-soteria-success, -8%);
-    background-color: #0eaa76; /* Static fallback for derive(-soteria-success, -8%) */
 }
 
 .flat-button {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-text-fill: -soteria-fg-muted;
     -fx-padding: 14px 22px;
-    padding: 14px 22px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .flat-button:hover {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-text-fill: -soteria-fg;
 }
 
@@ -220,43 +186,31 @@
 .chat-panel,
 .chat-messages {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .chat-bubble-user {
     -fx-background-color: -soteria-accent;
-    background-color: -soteria-accent;
     -fx-background-radius: 18px 18px 4px 18px;
     -fx-padding: 10px 14px;
-    padding: 10px 14px;
 }
 
 .chat-bubble-user-text {
     -fx-fill: -soteria-bg;
-    fill: -soteria-bg;
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 .chat-bubble-bot {
     -fx-background-color: -soteria-bg-elevated;
-    background-color: -soteria-bg-elevated;
     -fx-background-radius: 18px 18px 18px 4px;
     -fx-padding: 10px 14px;
-    padding: 10px 14px;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-radius: 18px 18px 18px 4px;
-    border-radius: 18px 18px 18px 4px;
     -fx-border-width: 1px;
-    border-width: 1px;
 }
 
 .chat-bubble-bot-text {
     -fx-fill: -soteria-fg;
-    fill: -soteria-fg;
     -fx-font-size: 14px;
-    font-size: 14px;
 }
 
 .thinking-dots {
@@ -267,51 +221,39 @@
 
 .thinking-dot {
     -fx-fill: -soteria-accent;
-    fill: -soteria-accent;
 }
 
 .chat-input-bar {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-width: 1px 0 0 0;
-    border-width: 1px 0 0 0;
 }
 
 .voice-button,
 .send-button {
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-background-radius: 24px;
     -fx-min-width: 48px;
-    min-width: 48px;
     -fx-min-height: 48px;
-    min-height: 48px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .voice-button {
     -fx-background-color: -soteria-accent;
-    background-color: -soteria-accent;
     -fx-text-fill: -soteria-bg;
 }
 
 .voice-button:hover {
     -fx-background-color: derive(-soteria-accent, -8%);
-    background-color: #05a7c3; /* Static fallback for derive(-soteria-accent, -8%) */
 }
 
 .send-button {
     -fx-background-color: -soteria-accent-strong;
-    background-color: -soteria-accent-strong;
     -fx-text-fill: -soteria-bg;
 }
 
 .send-button:hover {
     -fx-background-color: derive(-soteria-accent-strong, -8%);
-    background-color: #0785a4; /* Static fallback for derive(-soteria-accent-strong, -8%) */
 }
 
 /* ==========================================================
@@ -320,18 +262,14 @@
 
 .status-bar {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-width: 1px 0 0 0;
-    border-width: 1px 0 0 0;
 }
 
 .status-label,
 .ai-status {
     -fx-text-fill: -soteria-fg-muted;
     -fx-font-size: 12px;
-    font-size: 12px;
 }
 
 /* ==========================================================
@@ -341,7 +279,6 @@
 .scroll-pane,
 .scroll-pane .viewport {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 /* ==========================================================
@@ -350,91 +287,68 @@
 
 .voice-shell {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .top-bar {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .brand-label {
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
 }
 
 .status-pill {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-background-radius: 999px;
-    border-radius: 999px;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-radius: 999px;
     -fx-border-width: 1px;
-    border-width: 1px;
 }
 
 .status-pill-label {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-text-fill: -soteria-fg-muted;
-    color: -soteria-fg-muted;
 }
 
 .status-dot {
     -fx-fill: -soteria-fg-muted;
-    fill: -soteria-fg-muted;
 }
 
 .status-dot.ready {
     -fx-fill: -soteria-success;
-    fill: -soteria-success;
     -fx-effect: dropshadow(gaussian, #10b981, 8, 0.4, 0, 0);
 }
 
 .status-dot.warming {
     -fx-fill: -soteria-warning;
-    fill: -soteria-warning;
     -fx-effect: dropshadow(gaussian, #f59e0b, 6, 0.3, 0, 0);
 }
 
 .status-dot.offline {
     -fx-fill: -soteria-fg-muted;
-    fill: -soteria-fg-muted;
 }
 
 .status-dot.alert {
     -fx-fill: -soteria-danger;
-    fill: -soteria-danger;
     -fx-effect: dropshadow(gaussian, #ef4444, 10, 0.5, 0, 0);
 }
 
 .voice-center {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .subtitle-label {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
     -fx-font-weight: 500;
-    font-weight: 500;
 }
 
 .partial-transcript {
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-text-fill: -soteria-fg-muted;
-    color: -soteria-fg-muted;
     -fx-font-style: italic;
-    font-style: italic;
 }
 
 /* ==========================================================
@@ -443,7 +357,6 @@
 
 .fab-row {
     -fx-background-color: -soteria-bg;
-    background-color: -soteria-bg;
 }
 
 .fab-icon {
@@ -460,27 +373,17 @@
 
 .mic-fab {
     -fx-min-width: 72px;
-    min-width: 72px;
     -fx-min-height: 72px;
-    min-height: 72px;
     -fx-pref-width: 72px;
-    width: 72px;
     -fx-pref-height: 72px;
-    height: 72px;
     -fx-background-radius: 36px;
-    border-radius: 36px;
     -fx-background-color: -soteria-accent;
-    background-color: -soteria-accent;
     -fx-text-fill: -soteria-bg;
-    color: -soteria-bg;
     -fx-font-size: 24px;
-    font-size: 24px;
     -fx-padding: 0;
-    padding: 0;
     -fx-content-display: center;
     -fx-alignment: center;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-effect: dropshadow(gaussian, #06b6d4, 20, 0.45, 0, 0);
 }
 
@@ -489,92 +392,61 @@
 /* stylelint-disable-next-line selector-pseudo-class-no-unknown */
 .mic-fab:focused {
     -fx-background-color: derive(-soteria-accent, -6%);
-    background-color: #06abc8; /* Static fallback for derive(-soteria-accent, -6%) */
 }
 
 .mic-fab-active {
     -fx-background-color: -soteria-danger;
-    background-color: -soteria-danger;
     -fx-effect: dropshadow(gaussian, #ef4444, 28, 0.55, 0, 0);
 }
 
 .mic-fab-active:hover {
     -fx-background-color: derive(-soteria-danger, -6%);
-    background-color: #df3f3f; /* Static fallback for derive(-soteria-danger, -6%) */
 }
 
 .alert-fab {
     -fx-min-width: 50px;
-    min-width: 50px;
     -fx-min-height: 50px;
-    min-height: 50px;
     -fx-pref-width: 50px;
-    width: 50px;
     -fx-pref-height: 50px;
-    height: 50px;
     -fx-background-radius: 25px;
-    border-radius: 25px;
     -fx-background-color: -soteria-danger-soft;
-    background-color: -soteria-danger-soft;
     -fx-text-fill: -soteria-danger;
-    color: -soteria-danger;
     -fx-font-size: 12px;
-    font-size: 12px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 0;
-    padding: 0;
     -fx-content-display: center;
     -fx-alignment: center;
     -fx-border-color: -soteria-danger;
-    border-color: -soteria-danger;
     -fx-border-radius: 25px;
     -fx-border-width: 1.5px;
-    border-width: 1.5px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .alert-fab:hover {
     -fx-background-color: -soteria-danger;
-    background-color: -soteria-danger;
     -fx-text-fill: -soteria-bg;
-    color: -soteria-bg;
 }
 
 .chat-fab {
     -fx-min-width: 50px;
-    min-width: 50px;
     -fx-min-height: 50px;
-    min-height: 50px;
     -fx-pref-width: 50px;
-    width: 50px;
     -fx-pref-height: 50px;
-    height: 50px;
     -fx-background-radius: 25px;
-    border-radius: 25px;
     -fx-background-color: -soteria-bg-elevated;
-    background-color: -soteria-bg-elevated;
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
     -fx-font-size: 17px;
-    font-size: 17px;
     -fx-padding: 0;
-    padding: 0;
     -fx-content-display: center;
     -fx-alignment: center;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-radius: 25px;
     -fx-border-width: 1px;
-    border-width: 1px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .chat-fab:hover {
     -fx-background-color: -soteria-border;
-    background-color: -soteria-border;
 }
 
 /* ==========================================================
@@ -583,67 +455,47 @@
 
 .chat-sheet {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-background-radius: 18px 18px 0 0;
-    border-radius: 18px 18px 0 0;
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-width: 1px 1px 0 1px;
-    border-width: 1px 1px 0 1px;
     -fx-border-radius: 18px 18px 0 0;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 24, 0.3, 0, -6);
 }
 
 .sheet-grabber {
     -fx-background-color: -soteria-border;
-    background-color: -soteria-border;
     -fx-background-radius: 2px;
-    border-radius: 2px;
     -fx-translate-y: 8;
 }
 
 .sheet-header {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 .sheet-title {
     -fx-font-size: 14px;
-    font-size: 14px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
 }
 
 .sheet-close {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-text-fill: -soteria-fg-muted;
-    color: -soteria-fg-muted;
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-cursor: hand;
-    cursor: pointer;
     -fx-padding: 4 10;
-    padding: 4 10;
 }
 
 .sheet-close:hover {
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
     -fx-background-color: -soteria-bg-elevated;
-    background-color: -soteria-bg-elevated;
     -fx-background-radius: 6px;
-    border-radius: 6px;
 }
 
 .chat-scroll,
 .chat-scroll .viewport {
     -fx-background: transparent;
-    background: transparent;
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 /* ==========================================================
@@ -652,87 +504,62 @@
 
 .history-sidebar {
     -fx-background-color: -soteria-bg-elevated;
-    background-color: #15242a; /* -soteria-bg-elevated */
     -fx-border-color: -soteria-border;
-    border-color: -soteria-border;
     -fx-border-width: 0 1px 0 0;
-    border-width: 0 1px 0 0;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 15, 0.2, 5, 0);
 }
 
 .sidebar-title {
     -fx-font-size: 16px;
-    font-size: 16px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-fg;
 }
 
 .new-chat-button {
     -fx-background-color: -soteria-accent-soft;
-    background-color: -soteria-accent-soft;
     -fx-text-fill: -soteria-accent;
-    color: -soteria-accent;
     -fx-border-color: -soteria-accent-strong;
-    border-color: -soteria-accent-strong;
     -fx-border-radius: 8px;
-    border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-padding: 10px;
-    padding: 10px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .new-chat-button:hover {
     -fx-background-color: -soteria-accent-strong;
-    background-color: -soteria-accent-strong;
     -fx-text-fill: -soteria-bg;
-    color: -soteria-bg;
 }
 
 .session-item {
     -fx-padding: 12px;
-    padding: 12px;
     -fx-background-radius: 8px;
-    border-radius: 8px;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .session-item:hover {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
 }
 
 .session-item-selected {
     -fx-background-color: -soteria-bg-subtle;
-    background-color: -soteria-bg-subtle;
     -fx-border-color: -soteria-accent;
-    border-color: -soteria-accent;
     -fx-border-width: 0 0 0 3px;
-    border-width: 0 0 0 3px;
 }
 
 .session-title {
     -fx-font-size: 13px;
-    font-size: 13px;
     -fx-text-fill: -soteria-fg;
 }
 
 .session-date {
     -fx-font-size: 11px;
-    font-size: 11px;
     -fx-text-fill: -soteria-fg-muted;
 }
 
 .icon-button {
     -fx-background-color: transparent;
-    background-color: transparent;
     -fx-cursor: hand;
-    cursor: pointer;
 }
 
 .fab-icon-alt {
@@ -746,7 +573,6 @@
 .no-bg-scroll,
 .no-bg-scroll .viewport {
     -fx-background-color: transparent;
-    background-color: transparent;
 }
 
 /* ==========================================================
@@ -755,35 +581,23 @@
 
 .safety-box {
     -fx-background-color: -soteria-danger-soft;
-    background-color: -soteria-danger-soft;
     -fx-border-color: -soteria-danger;
-    border-color: -soteria-danger;
     -fx-border-width: 2px;
-    border-width: 2px;
     -fx-background-radius: 12px;
-    border-radius: 12px;
     -fx-border-radius: 12px;
     -fx-padding: 20px;
-    padding: 20px;
     -fx-spacing: 12px;
     -fx-max-width: 500px;
-    max-width: 500px;
 }
 
 .safety-title {
     -fx-font-size: 18px;
-    font-size: 18px;
     -fx-font-weight: bold;
-    font-weight: bold;
     -fx-text-fill: -soteria-danger;
-    color: -soteria-danger;
 }
 
 .safety-step {
     -fx-font-size: 15px;
-    font-size: 15px;
     -fx-text-fill: -soteria-fg;
-    color: -soteria-fg;
     -fx-font-weight: 500;
-    font-weight: 500;
 }

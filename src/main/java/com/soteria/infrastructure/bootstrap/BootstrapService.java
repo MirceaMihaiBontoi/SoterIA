@@ -10,8 +10,9 @@ import com.soteria.infrastructure.intelligence.knowledge.EmergencyKnowledgeBase;
 import com.soteria.infrastructure.intelligence.system.ModelManager;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.infrastructure.intelligence.triage.TriageService;
-import com.soteria.infrastructure.intelligence.stt.VoskSTTService;
+import com.soteria.infrastructure.intelligence.stt.SherpaSTTService;
 import com.soteria.infrastructure.intelligence.tts.SherpaTTSService;
+import com.soteria.infrastructure.intelligence.kws.WakeWordService;
 import com.soteria.infrastructure.intelligence.system.ResourceLocalizationService;
 import com.soteria.core.port.LocalizationService;
 
@@ -24,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Background boot of every heavy runtime component (model downloads, Vosk,
+ * Background boot of every heavy runtime component (model downloads, Sherpa-ONNX,
  * Gemma, Lucene/JGraphT knowledge base) so the onboarding screen doubles as
  * a loading screen. By the time the user finishes typing their profile, the
  * chat is typically ready to respond.
@@ -45,8 +46,9 @@ public class BootstrapService {
     private SystemCapability capability;
     private ModelManager modelManager;
     private EmergencyKnowledgeBase knowledgeBase;
-    private VoskSTTService sttService;
+    private SherpaSTTService sttService;
     private SherpaTTSService ttsService;
+    private WakeWordService wakeWordService;
     private TriageService triageService;
     private LocalBrainService brainService;
     private LocalizationService localizationService;
@@ -122,6 +124,10 @@ public class BootstrapService {
         return ttsService;
     }
 
+    public WakeWordService wakeWordService() {
+        return wakeWordService;
+    }
+
     public Triage triageService() {
         return triageService;
     }
@@ -141,7 +147,7 @@ public class BootstrapService {
         return knowledgeBase;
     }
 
-    VoskSTTService sttServiceImpl() {
+    SherpaSTTService sttServiceImpl() {
         return sttService;
     }
 
@@ -159,12 +165,16 @@ public class BootstrapService {
 
     // --- Package-private setters for ProvisioningManager ---
 
-    void setSttService(VoskSTTService stt) {
+    void setSttService(SherpaSTTService stt) {
         this.sttService = stt;
     }
 
     void setTtsService(SherpaTTSService tts) {
         this.ttsService = tts;
+    }
+
+    void setWakeWordService(WakeWordService wakeWordService) {
+        this.wakeWordService = wakeWordService;
     }
 
     void setTriageService(TriageService triage) {
@@ -183,6 +193,7 @@ public class BootstrapService {
         // Close services safely
         closeService(sttService, "STT");
         closeService(ttsService, "TTS");
+        closeService(wakeWordService, "WakeWord");
         closeService(triageService, "Triage");
         closeService(brainService, "Brain");
         closeService(knowledgeBase, "KnowledgeBase");

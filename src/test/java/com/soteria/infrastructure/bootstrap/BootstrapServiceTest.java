@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BootstrapServiceTest {
@@ -43,7 +45,7 @@ class BootstrapServiceTest {
             // We just test if startProvisioning accepts the input without throwing
             // as full initialization requires native binaries/models
             assertDoesNotThrow(() -> 
-                bootstrapService.startProvisioning(com.soteria.infrastructure.intelligence.system.SystemCapability.AIModelProfile.STABLE, lang, null),
+                bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang, null),
                 "Failed to initiate bootstrap for " + lang
             );
         }
@@ -67,7 +69,7 @@ class BootstrapServiceTest {
 
         families.forEach((family, lang) -> {
             assertDoesNotThrow(() -> 
-                bootstrapService.startProvisioning(com.soteria.infrastructure.intelligence.system.SystemCapability.AIModelProfile.STABLE, lang, null),
+                bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang, null),
                 "Failed to initiate bootstrap for " + lang + " (" + family + ")"
             );
         });

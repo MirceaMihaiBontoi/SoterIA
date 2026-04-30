@@ -17,8 +17,8 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <javafx.version>25.0.1</javafx.version>
-        <jackson.version>2.17.0</jackson.version>
-        <junit.version>5.10.2</junit.version>
+        <jackson.version>2.18.2</jackson.version>
+        <junit.version>5.11.3</junit.version>
     </properties>
 
     <dependencies>
@@ -67,16 +67,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Vosk para STT Nativo -->
         <dependency>
-            <groupId>com.alphacephei</groupId>
-            <artifactId>vosk</artifactId>
-            <version>0.3.45</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>5.13.0</version>
+            <groupId>de.kherud</groupId>
+            <artifactId>llama</artifactId>
+            <version>4.2.0</version>
         </dependency>
 
         <dependency>
@@ -88,12 +82,12 @@
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>9.11.1</version>
+            <version>9.12.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queryparser</artifactId>
-            <version>9.11.1</version>
+            <version>9.12.1</version>
         </dependency>
 
         <!-- JGraphT para Grafo de Conocimiento -->
@@ -139,6 +133,11 @@
             <groupId>com.k2fsa.sherpa</groupId>
             <artifactId>sherpa-onnx-native-win-x64</artifactId>
             <version>1.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.21.0</version>
         </dependency>
     </dependencies>
 

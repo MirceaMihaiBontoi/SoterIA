@@ -432,4 +432,10 @@ public class InferenceEngine {
             }
         }
     }
+
+    public void cancel() {
+        if (this.brainService != null) {
+            this.brainService.cancel();
+        }
+    }
 }

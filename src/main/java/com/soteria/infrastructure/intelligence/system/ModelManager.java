@@ -13,11 +13,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Manages AI assets on disk:
@@ -32,11 +31,9 @@ public class ModelManager {
 
     private static final String MODEL_DIR = "models";
 
-    // Vosk constants for STT
-    private static final String DEFAULT_LANG = "ENGLISH";
-    private static final String DEFAULT_VOSK_VERSION = "en-us-0.22";
-    private static final String VOSK_MODEL_PREFIX = "vosk-model-";
-    private static final String VOSK_SMALL_PREFIX = "vosk-model-small-";
+    // STT Model — Lightweight Multilingual ASR (99 languages)
+    private static final String STT_MODEL_NAME = "sherpa-onnx-whisper-small";
+    private static final String STT_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.tar.bz2";
 
     // Brain (LLM) — GGUFs published by unsloth on HuggingFace.
     // kherud:llama >= 4.3.0 when available
@@ -50,6 +47,17 @@ public class ModelManager {
     // TTS Model — Kokoro-82M for multilingual speech synthesis
     private static final String TTS_MODEL_NAME = "kokoro-multi-lang-v1_0";
     private static final String TTS_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-multi-lang-v1_0.tar.bz2";
+
+    // KWS Model — sherpa-onnx KeywordSpotter (3M parameters, Bilingual ZH/EN)
+    private static final String KWS_MODEL_NAME = "sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20";
+    private static final String KWS_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20.tar.bz2";
+
+    // VAD Model — Silero VAD for robust speech detection
+    private static final String VAD_MODEL_NAME = "silero_vad.onnx";
+    private static final String VAD_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx";
+
+    private static final String TAR_BZ2_EXT = ".tar.bz2";
+    private static final String CLEANUP_ERROR_MSG = "Failed to delete tar.bz2 after extraction";
 
     private final SystemCapability capability;
     private final Path modelBasePath;
@@ -98,13 +106,6 @@ public class ModelManager {
         return getTriageModelPath();
     }
 
-    /**
-     * Returns the on-disk path for a Vosk model directory, whether it exists or
-     * not.
-     */
-    public Path getVoskModelPath(String language) {
-        return modelBasePath.resolve(getVoskModelName(language));
-    }
 
     /**
      * Gets the path to the persistent Knowledge Base index.
@@ -127,8 +128,25 @@ public class ModelManager {
         return Files.exists(getBrainModelPath(profile, customUrl));
     }
 
-    public boolean isVoskModelReady(String language) {
-        return Files.exists(getVoskModelPath(language));
+
+    public boolean isSTTModelReady() {
+        Path path = getSTTModelPath();
+        if (!Files.exists(path) || !Files.isDirectory(path)) return false;
+        
+        try (var stream = Files.list(path)) {
+            List<Path> files = stream.toList();
+            boolean hasEncoder = files.stream().anyMatch(p -> p.getFileName().toString().endsWith("-encoder.onnx") || p.getFileName().toString().endsWith("-encoder.int8.onnx"));
+            boolean hasDecoder = files.stream().anyMatch(p -> p.getFileName().toString().endsWith("-decoder.onnx") || p.getFileName().toString().endsWith("-decoder.int8.onnx"));
+            boolean hasTokens = files.stream().anyMatch(p -> p.getFileName().toString().endsWith("-tokens.txt") || p.getFileName().toString().equals("tokens.txt"));
+            
+            return hasEncoder && hasDecoder && hasTokens;
+        } catch (IOException _) {
+            return false;
+        }
+    }
+
+    public Path getSTTModelPath() {
+        return modelBasePath.resolve(STT_MODEL_NAME);
     }
 
     public boolean isEmbeddingModelReady() {
@@ -153,6 +171,24 @@ public class ModelManager {
 
     public Path getTTSModelPath() {
         return modelBasePath.resolve(TTS_MODEL_NAME);
+    }
+
+    public boolean isKWSModelReady() {
+        Path path = getKWSModelPath();
+        return Files.exists(path) && Files.isDirectory(path) 
+            && Files.exists(path.resolve("encoder-epoch-13-avg-2-chunk-16-left-64.onnx"));
+    }
+
+    public Path getKWSModelPath() {
+        return modelBasePath.resolve(KWS_MODEL_NAME);
+    }
+
+    public boolean isVADModelReady() {
+        return Files.exists(getVADModelPath());
+    }
+
+    public Path getVADModelPath() {
+        return modelBasePath.resolve(VAD_MODEL_NAME);
     }
 
     /**
@@ -192,6 +228,24 @@ public class ModelManager {
         return CompletableFuture.completedFuture(getEmbeddingModelPath());
     }
 
+    public CompletableFuture<Path> downloadSTTModel() {
+        Path target = getSTTModelPath();
+        if (isSTTModelReady()) {
+            return CompletableFuture.completedFuture(target);
+        }
+        Path tarFile = modelBasePath.resolve(STT_MODEL_NAME + TAR_BZ2_EXT);
+        return downloadFile(STT_MODEL_URL, tarFile)
+                .thenApply(tar -> {
+                    extractTarBz2(tar, modelBasePath);
+                    try {
+                        Files.deleteIfExists(tar);
+                    } catch (IOException e) {
+                        logger.log(Level.WARNING, CLEANUP_ERROR_MSG, e);
+                    }
+                    return target;
+                });
+    }
+
     /**
      * Triage model is now local-only. No download logic.
      */
@@ -207,40 +261,48 @@ public class ModelManager {
         if (isTTSModelReady()) {
             return CompletableFuture.completedFuture(target);
         }
-        Path tarFile = modelBasePath.resolve(TTS_MODEL_NAME + ".tar.bz2");
+        Path tarFile = modelBasePath.resolve(TTS_MODEL_NAME + TAR_BZ2_EXT);
         return downloadFile(TTS_MODEL_URL, tarFile)
                 .thenApply(tar -> {
                     extractTarBz2(tar, modelBasePath);
                     try {
                         Files.deleteIfExists(tar);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Failed to delete tar.bz2 after extraction", e);
+                        logger.log(Level.WARNING, CLEANUP_ERROR_MSG, e);
                     }
                     return target;
                 });
     }
 
     /**
-     * Downloads and extracts the Vosk bundle for the given language. No-op if
-     * present.
+     * Downloads the sherpa-onnx KWS model for wake-word detection.
      */
-    public CompletableFuture<Path> downloadVoskModel(String language) {
-        Path target = getVoskModelPath(language);
-        if (Files.exists(target)) {
+    public CompletableFuture<Path> downloadKWSModel() {
+        Path target = getKWSModelPath();
+        if (isKWSModelReady()) {
             return CompletableFuture.completedFuture(target);
         }
-        Path zipFile = modelBasePath.resolve(getVoskModelName(language) + ".zip");
-        return downloadFile(getVoskModelUrl(language), zipFile)
-                .thenApply(zip -> {
-                    extractZip(zip, modelBasePath);
+        Path tarFile = modelBasePath.resolve(KWS_MODEL_NAME + TAR_BZ2_EXT);
+        return downloadFile(KWS_MODEL_URL, tarFile)
+                .thenApply(tar -> {
+                    extractTarBz2(tar, modelBasePath);
                     try {
-                        Files.deleteIfExists(zip);
+                        Files.deleteIfExists(tar);
                     } catch (IOException e) {
-                        logger.log(Level.WARNING, "Failed to delete zip after extraction", e);
+                        logger.log(Level.WARNING, CLEANUP_ERROR_MSG, e);
                     }
                     return target;
                 });
     }
+
+    public CompletableFuture<Path> downloadVADModel() {
+        Path target = getVADModelPath();
+        if (isVADModelReady()) {
+            return CompletableFuture.completedFuture(target);
+        }
+        return downloadFile(VAD_MODEL_URL, target);
+    }
+
 
     private CompletableFuture<Path> downloadFile(String url, Path finalTarget) {
         Path partFile = Paths.get(finalTarget.toString() + ".part");
@@ -318,49 +380,6 @@ public class ModelManager {
         }
     }
 
-    private static final String VOSK_BASE_URL = "https://alphacephei.com/vosk/models/";
-
-    private static final java.util.Map<String, String> VOSK_LANG_MAP = java.util.Map.ofEntries(
-            java.util.Map.entry("SPANISH", "es-0.42"),
-            java.util.Map.entry(DEFAULT_LANG, DEFAULT_VOSK_VERSION),
-            java.util.Map.entry("CHINESE", "cn-0.22"),
-            java.util.Map.entry("FRENCH", "fr-0.22"),
-            java.util.Map.entry("GERMAN", "de-0.15"),
-            java.util.Map.entry("RUSSIAN", "ru-0.42"),
-            java.util.Map.entry("JAPANESE", "ja-0.22"),
-            java.util.Map.entry("PORTUGUESE", "pt-fb-0.4"),
-            java.util.Map.entry("HINDI", "hi-0.22"),
-            java.util.Map.entry("ARABIC", "ar-0.22"),
-            java.util.Map.entry("ITALIAN", "it-0.22"),
-            java.util.Map.entry("TURKISH", "tr-0.3"),
-            java.util.Map.entry("VIETNAMESE", "vn-0.4"),
-            java.util.Map.entry("KOREAN", "ko-0.22"));
-
-    public String getVoskModelUrl(String language) {
-        String key = language.toUpperCase();
-        String version = VOSK_LANG_MAP.getOrDefault(key, DEFAULT_VOSK_VERSION);
-        String prefix = capability.isLowPowerDevice() ? VOSK_SMALL_PREFIX : VOSK_MODEL_PREFIX;
-
-        // Handle special case where full model doesn't follow the small/full naming
-        // pattern perfectly
-        if (key.equals(DEFAULT_LANG) && !capability.isLowPowerDevice()) {
-            return VOSK_BASE_URL + VOSK_MODEL_PREFIX + DEFAULT_VOSK_VERSION + ".zip";
-        }
-
-        return VOSK_BASE_URL + prefix + version + ".zip";
-    }
-
-    public String getVoskModelName(String language) {
-        String key = language.toUpperCase();
-        String version = VOSK_LANG_MAP.getOrDefault(key, DEFAULT_VOSK_VERSION);
-        String prefix = capability.isLowPowerDevice() ? VOSK_SMALL_PREFIX : VOSK_MODEL_PREFIX;
-
-        if (key.equals(DEFAULT_LANG) && !capability.isLowPowerDevice()) {
-            return VOSK_MODEL_PREFIX + DEFAULT_VOSK_VERSION;
-        }
-
-        return prefix + version;
-    }
 
     public String getBrainModelUrl() {
         return getBrainModelUrl(capability.getRecommendedProfile());
@@ -386,31 +405,6 @@ public class ModelManager {
         };
     }
 
-    private void extractZip(Path zipFile, Path destDir) {
-        logger.log(Level.INFO, "Extracting: {0}", zipFile.getFileName());
-        try (ZipInputStream zis = new ZipInputStream(new java.io.BufferedInputStream(Files.newInputStream(zipFile), 128 * 1024))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                Path newPath = destDir.resolve(entry.getName());
-                if (entry.isDirectory()) {
-                    Files.createDirectories(newPath);
-                } else {
-                    Files.createDirectories(newPath.getParent());
-                    try (OutputStream os = new java.io.BufferedOutputStream(Files.newOutputStream(newPath), 128 * 1024)) {
-                        byte[] buffer = new byte[65536];
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            os.write(buffer, 0, len);
-                        }
-                    }
-                }
-                zis.closeEntry();
-            }
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Failed to extract zip", e);
-            throw new UncheckedIOException(e);
-        }
-    }
 
     private void extractTarBz2(Path tarFile, Path destDir) {
         logger.log(Level.INFO, "Extracting: {0} (this may take a minute...)", tarFile.getFileName());
@@ -444,5 +438,41 @@ public class ModelManager {
 
     public Path getModelBasePath() {
         return modelBasePath;
+    }
+
+    // --- STT Configuration ---
+    public static final int STT_SAMPLE_RATE = 16000;
+    public static final int STT_CHANNELS = 1;
+    public static final int STT_BIT_DEPTH = 16;
+    public static final int VAD_WINDOW_SIZE = 512;
+
+    /**
+     * Volume multiplier for microphone input. 
+     * Higher values increase sensitivity but also noise.
+     */
+    public float getSTTVolumeBoost() {
+        return 1.0f; 
+    }
+
+    /**
+     * Threshold for Silero VAD (0.0 to 1.0).
+     * Higher is more strict.
+     */
+    public float getSTTVadThreshold() {
+        return 0.35f;
+    }
+
+    /**
+     * Milliseconds of silence required to trigger an endpoint (sentence end).
+     */
+    public float getSTTMinSilenceDuration() {
+        return 0.25f;
+    }
+
+    /**
+     * Minimum duration of speech in seconds to consider it valid.
+     */
+    public float getSTTMinSpeechDuration() {
+        return 0.5f;
     }
 }

@@ -17,4 +17,6 @@ public interface Brain {
     }
 
     void chat(List<ChatMessage> history, String context, UserData profile, String language, BrainCallback callback);
+
+    void cancel();
 }

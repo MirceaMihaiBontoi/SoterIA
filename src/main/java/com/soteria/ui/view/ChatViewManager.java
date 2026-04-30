@@ -1,5 +1,7 @@
 package com.soteria.ui.view;
 
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -15,6 +17,10 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
+
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Manages the UI components and rendering of the chat interface.
@@ -32,6 +38,13 @@ public class ChatViewManager {
         Circle statusDot
     ) {}
 
+    private static final Logger logger = Logger.getLogger(ChatViewManager.class.getName());
+    private final String instanceId = "ChatViewManager-" + UUID.randomUUID().toString().substring(0, 8);
+
+    private static final String CLASS_BOT_BUBBLE = "chat-bubble-bot";
+    private static final String CLASS_USER_BUBBLE = "chat-bubble-user";
+    private static final String CLASS_THINKING_DOT = "thinking-dot";
+
     private final UIComponents ui;
     private boolean sheetOpen = false;
     private TextFlow activeBotFlow = null;
@@ -41,7 +54,8 @@ public class ChatViewManager {
         this.ui = ui;
     }
 
-    public void addBubble(String message, String bubbleClass, Pos alignment, Insets padding) {
+    private void addMessageBubble(String message, String bubbleClass, Pos alignment, Insets padding) {
+        logger.log(Level.INFO, "[{0}] Adding bubble to UI. Class: {1}", new Object[]{instanceId, bubbleClass});
         VBox bubble = new VBox();
         bubble.getStyleClass().add(bubbleClass);
         bubble.setMaxWidth(420);
@@ -63,17 +77,17 @@ public class ChatViewManager {
     }
 
     public void addUserMessage(String message) {
-        addBubble(message, "chat-bubble-user", Pos.CENTER_RIGHT, new Insets(5, 0, 5, 50));
+        addMessageBubble(message, CLASS_USER_BUBBLE, Pos.CENTER_RIGHT, new Insets(5, 0, 5, 50));
     }
 
     public void addBotMessage(String message) {
-        addBubble(message, "chat-bubble-bot", Pos.CENTER_LEFT, new Insets(5, 50, 5, 0));
+        addMessageBubble(message, CLASS_BOT_BUBBLE, Pos.CENTER_LEFT, new Insets(5, 50, 5, 0));
     }
 
     public void startBotMessage() {
         removeThinkingIndicator();
         VBox bubble = new VBox();
-        bubble.getStyleClass().add("chat-bubble-bot");
+        bubble.getStyleClass().add(CLASS_BOT_BUBBLE);
         bubble.setMaxWidth(420);
 
         activeBotFlow = new TextFlow();
@@ -85,6 +99,7 @@ public class ChatViewManager {
         box.setPadding(new Insets(5, 50, 5, 0));
 
         Platform.runLater(() -> {
+            logger.info("[" + instanceId + "] Starting bot message bubble in UI.");
             ui.chatMessages().getChildren().add(box);
             scrollToBottom();
         });
@@ -94,7 +109,7 @@ public class ChatViewManager {
         if (activeBotFlow != null) {
             Platform.runLater(() -> {
                 activeBotFlow.getChildren().clear();
-                renderMarkdown(text, activeBotFlow, "chat-bubble-bot-text");
+                renderMarkdown(text, activeBotFlow, CLASS_BOT_BUBBLE + "-text");
                 scrollToBottom();
             });
         }
@@ -107,22 +122,21 @@ public class ChatViewManager {
         dots.getStyleClass().add("thinking-dots");
         
         for (int i = 0; i < 3; i++) {
-            Circle dot = new Circle(3);
-            dot.getStyleClass().add("thinking-dot");
+            Label dot = new Label("•");
+            dot.getStyleClass().add(CLASS_THINKING_DOT);
             dots.getChildren().add(dot);
             
-            Timeline anim = new Timeline(
-                new KeyFrame(Duration.ZERO, new KeyValue(dot.opacityProperty(), 0.3)),
-                new KeyFrame(Duration.millis(300), new KeyValue(dot.opacityProperty(), 1.0)),
-                new KeyFrame(Duration.millis(600), new KeyValue(dot.opacityProperty(), 0.3))
-            );
-            anim.setCycleCount(Timeline.INDEFINITE);
-            anim.setDelay(Duration.millis(i * 200));
+            FadeTransition anim = new FadeTransition(Duration.millis(500), dot);
+            anim.setFromValue(0.3);
+            anim.setToValue(1.0);
+            anim.setCycleCount(Animation.INDEFINITE);
+            anim.setAutoReverse(true);
+            anim.setDelay(Duration.millis(i * 200.0));
             anim.play();
         }
 
         VBox bubble = new VBox(dots);
-        bubble.getStyleClass().add("chat-bubble-bot");
+        bubble.getStyleClass().add(CLASS_BOT_BUBBLE);
         bubble.setPadding(new Insets(8, 12, 8, 12));
         bubble.setMaxWidth(60);
 
@@ -196,6 +210,7 @@ public class ChatViewManager {
     }
 
     public void setSubtitle(String text) {
+        logger.log(Level.INFO, "[{0}] Updating subtitle: {1}", new Object[]{instanceId, text});
         Platform.runLater(() -> ui.subtitleLabel().setText(text));
     }
 
