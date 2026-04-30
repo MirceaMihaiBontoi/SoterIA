@@ -67,17 +67,13 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>de.kherud</groupId>
-            <artifactId>llama</artifactId>
-            <version>4.2.0</version>
-        </dependency>
 
         <dependency>
             <groupId>de.kherud</groupId>
             <artifactId>llama</artifactId>
             <version>4.2.0</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
