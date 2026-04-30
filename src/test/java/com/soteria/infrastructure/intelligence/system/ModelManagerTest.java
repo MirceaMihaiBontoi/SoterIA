@@ -53,7 +53,7 @@ class ModelManagerTest {
         ModelManager manager = new ModelManager(capability, tempDir);
         Path path = manager.getSTTModelPath();
         
-        assertTrue(path.toString().contains("sherpa-onnx-whisper-base"));
+        assertTrue(path.toString().contains("sherpa-onnx-whisper-small"));
         assertEquals(tempDir, path.getParent());
     }
 
@@ -66,8 +66,11 @@ class ModelManagerTest {
         assertFalse(manager.isSTTModelReady(), "Should not be ready if directory doesn't exist");
         
         Files.createDirectories(modelDir);
-        Files.createFile(modelDir.resolve("base-encoder.onnx"));
-        assertTrue(manager.isSTTModelReady(), "Should be ready if directory and encoder file exist");
+        Files.createFile(modelDir.resolve("small-encoder.onnx"));
+        Files.createFile(modelDir.resolve("small-decoder.onnx"));
+        Files.createFile(modelDir.resolve("tokens.txt"));
+        
+        assertTrue(manager.isSTTModelReady(), "Should be ready if directory and required files exist");
     }
 
 }
