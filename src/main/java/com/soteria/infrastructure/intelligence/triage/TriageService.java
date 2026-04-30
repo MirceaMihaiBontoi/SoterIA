@@ -82,6 +82,8 @@ public class TriageService implements AutoCloseable, Triage {
         return result.intent().name();
     }
 
+    private static final String NAME_EXCLUSION_REGEX = "(?i)\\b(soteria|sotelia|zoteria|soteia)\\b";
+
     /**
      * Dynamically classifies an input against a set of protocol candidates.
      */
@@ -92,6 +94,10 @@ public class TriageService implements AutoCloseable, Triage {
         if (model == null || text == null || text.isBlank()) {
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);
         }
+
+        // PRE-PROCESSING: Remove assistant name variations to avoid semantic noise/false positives
+        String processedText = preprocess(text);
+
         // No candidates = RAG found nothing relevant; the input was processable but
         // doesn't map to any protocol. That's "casual / not an emergency", not an error.
         if (candidates == null || candidates.isEmpty()) {
@@ -99,7 +105,7 @@ public class TriageService implements AutoCloseable, Triage {
         }
 
         // High information density script detection (CJK, Arabic, Indic, etc.)
-        boolean isHighDensity = text.codePoints().anyMatch(cp -> {
+        boolean isHighDensity = processedText.codePoints().anyMatch(cp -> {
             Character.UnicodeBlock block = Character.UnicodeBlock.of(cp);
             return block == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS ||
                    block == Character.UnicodeBlock.HIRAGANA ||
@@ -111,13 +117,13 @@ public class TriageService implements AutoCloseable, Triage {
                    block == Character.UnicodeBlock.THAI;
         });
 
-        if (text.trim().length() < (isHighDensity ? 1 : 3)) {
-            logRaw(LOG_OUTPUT, "Result: UNKNOWN (too short to embed: '" + text.trim() + "')");
-            return new TriageResult(null, 0.0f, Intent.UNKNOWN);
+        if (processedText.trim().length() < (isHighDensity ? 1 : 3)) {
+            logRaw(LOG_OUTPUT, "Result: GREETING_OR_CASUAL (too short after filtering: '" + processedText.trim() + "')");
+            return new TriageResult(null, 0.0f, Intent.GREETING_OR_CASUAL);
         }
 
         try {
-            float[] inputVector = model.embed(text);
+            float[] inputVector = model.embed(processedText);
             float[] centeredInput = (centroid != null) ? center(inputVector) : inputVector;
 
             ProtocolBestMatch bestMatch = findBestProtocol(centeredInput, candidates);
@@ -130,14 +136,18 @@ public class TriageService implements AutoCloseable, Triage {
             }
 
             // Below threshold = no protocol matched, but the input was processable.
-            // INACTIVE means "casual / not an emergency" (UI can keep chat tone friendly).
-            // UNKNOWN is reserved for errors or unprocessable inputs (early returns above).
             logRaw(LOG_OUTPUT, String.format("Result: GREETING_OR_CASUAL (Score: %.4f, no match above threshold)", bestMatch.score));
             return new TriageResult(null, bestMatch.score, Intent.GREETING_OR_CASUAL);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Dynamic triage failed", e);
             return new TriageResult(null, 0.0f, Intent.UNKNOWN);
         }
+    }
+
+    private String preprocess(String text) {
+        if (text == null) return null;
+        // Remove names and extra spaces
+        return text.replaceAll(NAME_EXCLUSION_REGEX, "").replaceAll("\\s+", " ").trim();
     }
 
     private record ProtocolBestMatch(Protocol protocol, float score) {}

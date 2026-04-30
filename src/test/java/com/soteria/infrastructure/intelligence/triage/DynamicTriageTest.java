@@ -124,6 +124,24 @@ class DynamicTriageTest {
         assertEquals(Triage.Intent.SECURITY_EMERGENCY, result.intent());
     }
 
+    @ParameterizedTest(name = "Non-emergency assistant name variation: {0}")
+    @CsvSource({
+        "SoterIA",
+        "Sotelia",
+        "Zoteria",
+        "Soteia",
+        "Hola SoterIA",
+        "Sotelia help me with nothing"
+    })
+    void testInactiveIntentWithNames(String query) {
+        List<KnowledgeBase.ProtocolMatch> candidates = knowledgeBase.findProtocols(query);
+        List<Protocol> protocolList = candidates.stream().map(KnowledgeBase.ProtocolMatch::protocol).toList();
+        Triage.TriageResult result = triageService.classifyDynamic(query, protocolList);
+
+        assertFalse(result.isEmergency(), "Assistant name variation '" + query + "' should NOT be an emergency");
+        assertEquals(Triage.Intent.GREETING_OR_CASUAL, result.intent());
+    }
+
     @Test
     void testInactiveIntent() {
         String query = "Hola, ¿cómo estás hoy? Qué buen tiempo hace.";

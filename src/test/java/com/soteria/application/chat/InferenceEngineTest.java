@@ -24,8 +24,8 @@ class InferenceEngineTest {
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "Vector", 0.95f);
 
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("ID1"));
         assertTrue(context.contains("Title"));
@@ -35,8 +35,8 @@ class InferenceEngineTest {
     @Test
     @DisplayName("Should handle empty matches in context builder")
     void buildEmptyContext() {
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(), null, null);
         assertEquals("PROTOCOL_MANIFEST: no protocol matched, ask the user for more info", context);
     }
 
@@ -49,8 +49,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Realizar RCP", "Llamar al 112"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "CLASSIFIER", 0.99f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
         System.out.print("HEX DUMP: ");
         for (char c : context.toCharArray()) System.out.printf("\\u%04x ", (int)c);
         System.out.println();
@@ -69,8 +69,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("\u907f\u96e3\u3057\u3066\u304f\u3060\u3055\u3044", "119\u756a\u306b\u96fb\u8a71\u3057\u3066\u304f\u3060\u3055\u3044"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.88f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
         System.out.println("DEBUG JAPANESE CONTEXT: " + context);
         assertTrue(context.contains("\u706b\u707d"));
         assertTrue(context.contains("\u907f\u96e3\u3057\u3066\u304f\u3060\u3055\u3044"));
@@ -86,8 +86,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("اتصل بالإسعاف", "ابق هادئا"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.90f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("حالة طبية طارئة"));
         assertTrue(context.contains("اتصل بالإسعاف"));
@@ -102,8 +102,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("एम्बुलेंस बुलाओ", "शांत रहो"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.92f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("आपातकालीन चिकित्सा"));
         assertTrue(context.contains("एम्बुलेंस बुलाओ"));
@@ -118,8 +118,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("撥打120", "保持冷靜"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.95f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("緊急救援"));
         assertTrue(context.contains("撥打120"));
@@ -134,8 +134,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Вызовите скорую", "Сохраняйте спокойствие"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.91f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Скорая помощь"));
         assertTrue(context.contains("Вызовите скорую"));
@@ -144,13 +144,13 @@ class InferenceEngineTest {
     @Test
     @DisplayName("Contextual Query Preparation: Multilingual")
     void testPrepareContextualQuery() {
-        InferenceEngine engine = new InferenceEngine(null, null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
         com.soteria.core.domain.chat.ChatSession session = new com.soteria.core.domain.chat.ChatSession();
         
         // Spanish context turn
         session.getCategorizedContext().put("MEDICAL", new java.util.ArrayList<>(List.of("Me duele el pecho")));
         
-        String query = engine.prepareContextualQuery("I am dizzy", session);
+        String query = builder.prepareContextualQuery("I am dizzy", session);
         
         assertTrue(query.contains("Me duele el pecho"));
         assertTrue(query.contains("I am dizzy"));
@@ -159,7 +159,7 @@ class InferenceEngineTest {
     @Test
     @DisplayName("History Filtering Logic")
     void testFilterRelevantHistory() {
-        InferenceEngine engine = new InferenceEngine(null, null, null);
+        HistoryManager historyManager = new HistoryManager();
         com.soteria.core.domain.chat.ChatSession session = new com.soteria.core.domain.chat.ChatSession();
         
         List<com.soteria.core.domain.chat.ChatMessage> history = List.of(
@@ -170,8 +170,8 @@ class InferenceEngineTest {
             com.soteria.core.domain.chat.ChatMessage.user("Temple area")
         );
         
-        // Should keep recent turns (last 4 messages by default in InferenceEngine)
-        List<com.soteria.core.domain.chat.ChatMessage> filtered = engine.filterRelevantHistory(history, "Temple area", session);
+        // Should keep recent turns (last 4 messages by default)
+        List<com.soteria.core.domain.chat.ChatMessage> filtered = historyManager.filterRelevantHistory(history, "Temple area", session);
         
         // "Greeting" and its response should be filtered out if they are not in relevantTurns
         assertFalse(filtered.stream().anyMatch(m -> m.content().equals("Greeting")));
@@ -188,8 +188,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Ondoka kwenye jengo", "Piga simu ya zimamoto"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.95f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Dharura ya Moto"));
         assertTrue(context.contains("Ondoka kwenye jengo"));
@@ -204,8 +204,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Sakin kal\u0131n", "Ambulans \u00e7a\u011fr\u0131n"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "CLASSIFIER", 0.92f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Kalp Krizi"));
         assertTrue(context.contains("Sakin kal\u0131n"));
@@ -220,8 +220,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("G\u1ecdi s\u1ed1 115", "Th\u1ef1c hi\u1ec7n h\u00f4 h\u1ea5p nh\u00e2n t\u1ea1o"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.85f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("C\u1ea5p c\u1ee9u"));
         assertTrue(context.contains("G\u1ecdi s\u1ed1 115"));
@@ -236,8 +236,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("119\uc5d0 \uc804\ud654\ud558\uc138\uc694", "\uc2ec\ud3d0\uc18c\uc0dd\uc220 \uc2e4\uc2dc"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.99f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("\uc751\uae09 \uc0c1\ud669"));
         assertTrue(context.contains("119\uc5d0 \uc804\ud654\ud558\uc138\uc694"));
@@ -252,8 +252,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("অ্যাম্বুলেন্স ডাকুন", "শান্ত থাকুন"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.95f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("জরুরি অবস্থা"));
         assertTrue(context.contains("অ্যাম্বুলেন্স ডাকুন"));
@@ -268,8 +268,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Ligue para o 112", "Mantenha a calma"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "CLASSIFIER", 0.98f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Emergência Médica"));
         assertTrue(context.contains("Ligue para o 112"));
@@ -284,8 +284,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("అంబులెన్స్‌ను పిలవండి", "ప్రశాంతంగా ఉండండి"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.90f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("అత్యవసర పరిస్థితి"));
         assertTrue(context.contains("అంబులెన్స్‌ను పిలవండి"));
@@ -300,8 +300,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("አምቡላንስ ይደውሉ", "ተረጋጋ"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.92f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("አስቸኳይ ሁኔታ"));
         assertTrue(context.contains("አምቡላንስ ይደውሉ"));
@@ -316,8 +316,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Soita hätänumeroon", "Pysy rauhallisena"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.94f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Hätätilanne"));
         assertTrue(context.contains("Soita hätänumeroon"));
@@ -332,8 +332,8 @@ class InferenceEngineTest {
         p.setSteps(List.of("Καλέστε το 166", "Μείνετε ψύχραιμοι"));
 
         KnowledgeBase.ProtocolMatch match = new KnowledgeBase.ProtocolMatch(p, "VECTOR", 0.96f);
-        InferenceEngine engine = new InferenceEngine(null, null, null);
-        String context = engine.buildProtocolManifest(List.of(match), null, null);
+        RAGContextBuilder builder = new RAGContextBuilder(null);
+        String context = builder.buildProtocolManifest(List.of(match), null, null);
 
         assertTrue(context.contains("Επείγουσα κατάσταση"));
         assertTrue(context.contains("Καλέστε το 166"));
