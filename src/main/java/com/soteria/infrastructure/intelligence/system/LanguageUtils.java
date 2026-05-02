@@ -30,7 +30,27 @@ public class LanguageUtils {
             Map.entry("italiano", "it"),
             Map.entry("portuguese", "pt"),
             Map.entry("português", "pt"),
-            Map.entry("portugués", "pt")
+            Map.entry("portugués", "pt"),
+            Map.entry("english", "en"),
+            Map.entry("romanian", "ro"),
+            Map.entry("română", "ro"),
+            Map.entry("romana", "ro"),
+            Map.entry("valencian", "ca"),
+            Map.entry("valencià", "ca"),
+            Map.entry("catalan", "ca"),
+            Map.entry("català", "ca"),
+            Map.entry("catala", "ca"),
+            Map.entry("chinese", "zh"),
+            Map.entry("mandarin", "zh"),
+            Map.entry("中文", "zh"),
+            Map.entry("russian", "ru"),
+            Map.entry("русский", "ru"),
+            Map.entry("arabic", "ar"),
+            Map.entry("árabe", "ar"),
+            Map.entry("العربية", "ar"),
+            Map.entry("japanese", "ja"),
+            Map.entry("japonés", "ja"),
+            Map.entry("日本語", "ja")
     );
 
     /**
@@ -44,19 +64,31 @@ public class LanguageUtils {
             return "";
         }
 
-        String lower = lang.toLowerCase().trim();
+        String lower = lang.toLowerCase(Locale.ROOT).trim();
 
         // 1. Check direct map
         if (LANG_CODE_MAP.containsKey(lower)) {
             return LANG_CODE_MAP.get(lower);
         }
 
-        // 2. If it's already a 2-letter code, return it
+        // 2. BCP 47: use primary language subtag (e.g. zh-cn -> zh)
+        int sep = lower.indexOf('-');
+        if (sep < 0) {
+            sep = lower.indexOf('_');
+        }
+        if (sep > 0) {
+            String primary = lower.substring(0, sep);
+            if (primary.length() == 2) {
+                return primary;
+            }
+        }
+
+        // 3. If it's already a 2-letter code, return it
         if (lower.length() == 2) {
             return lower;
         }
 
-        // 3. Try to match using Java Locales
+        // 4. Try to match using Java Locales
         for (Locale locale : Locale.getAvailableLocales()) {
             if (lower.equalsIgnoreCase(locale.getDisplayLanguage(Locale.ENGLISH)) ||
                 lower.equalsIgnoreCase(locale.getDisplayLanguage(locale)) ||

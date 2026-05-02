@@ -5,6 +5,7 @@ import javafx.application.Platform;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,7 +30,9 @@ final class ChatSTTListenerFactory {
             AtomicBoolean haltedAssistantOnPartial,
             Runnable stopRecording,
             Runnable interruptOngoingGeneration,
-            Consumer<String> onTranscriptAccepted) {
+            Consumer<String> onTranscriptAccepted,
+            Supplier<String> subtitleListening,
+            java.util.function.Function<Throwable, String> micErrorSubtitle) {
     }
 
     private ChatSTTListenerFactory() {
@@ -83,7 +86,7 @@ final class ChatSTTListenerFactory {
                 if (text != null && !text.isBlank() && p.haltedAssistantOnPartial().compareAndSet(false, true)) {
                     p.interruptOngoingGeneration().run();
                     p.face().setState(SoterIAFace.State.LISTENING);
-                    p.viewManager().setSubtitle("Escuchando…");
+                    p.viewManager().setSubtitle(p.subtitleListening().get());
                     p.logger().log(Level.INFO,
                             "[{0}] STT partial: interrupted assistant TTS / streaming inference.",
                             p.instanceId());
@@ -96,7 +99,7 @@ final class ChatSTTListenerFactory {
         public void onError(Throwable t) {
             Platform.runLater(() -> {
                 p.stopRecording().run();
-                p.viewManager().setSubtitle("Error del micro: " + t.getMessage());
+                p.viewManager().setSubtitle(p.micErrorSubtitle().apply(t));
             });
         }
     }

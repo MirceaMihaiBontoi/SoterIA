@@ -2,6 +2,7 @@ package com.soteria.ui.chat;
 
 import com.soteria.core.port.AlertService;
 import com.soteria.core.port.KnowledgeBase;
+import com.soteria.core.port.LocalizationService;
 import com.soteria.core.port.LocationProvider;
 import com.soteria.core.port.STT;
 import com.soteria.core.port.TTS;
@@ -10,6 +11,7 @@ import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
+import com.soteria.ui.i18n.UiLocales;
 import com.soteria.ui.view.SoterIAFace;
 import com.soteria.core.model.UserData;
 import com.soteria.infrastructure.persistence.ProfileRepository;
@@ -18,6 +20,9 @@ import com.soteria.application.chat.InferenceEngine;
 import com.soteria.ui.view.SessionCoordinator;
 
 import com.soteria.ui.onboarding.OnboardingLanguageCatalog;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -34,6 +39,8 @@ import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -50,13 +57,21 @@ import java.util.logging.Logger;
 public class ChatController {
     private static final Logger logger = Logger.getLogger(ChatController.class.getName());
     private final String instanceId = "ChatController-" + java.util.UUID.randomUUID().toString().substring(0, 8);
-    private static final String PROMPT_READY = "Pulsa el micro para hablar";
     private static final String STATUS_READY = "ready";
     private static final String STATUS_WARMING = "warming";
     private static final String STATUS_OFFLINE = "offline";
     private static final String STATUS_ALERT = "alert";
+    /** Bundle key last shown on the AI status pill (kept in sync when runtime language changes). */
+    private volatile String trackedAiPillKey = "chat.status.preparing_ai";
+    private volatile String trackedAiPillDot = STATUS_WARMING;
+    /** Bundle key: idle mic hint (also used after AI becomes ready). */
+    private static final String KEY_SUBTITLE_READY = "chat.subtitle.ready";
+    private static final String KEY_SUBTITLE_LISTENING = "chat.subtitle.listening";
 
+    @FXML
+    private ResourceBundle resources;
     @FXML private StackPane faceHolder;
+    @FXML private Label brandLabel;
     @FXML private Label subtitleLabel;
     @FXML private Label partialTranscriptLabel;
     @FXML private Label aiStatusLabel;
@@ -82,13 +97,23 @@ public class ChatController {
     @FXML private Label settingsSpeechRateLabel;
     @FXML private Label settingsModelLabel;
     @FXML private CheckBox settingsWakeToggle;
+    @FXML private Label chatSheetTitleLabel;
+    @FXML private Label historyTitleLabel;
+    @FXML private Button sidebarSettingsButton;
+    @FXML private Button sidebarNewEmergencyButton;
+    @FXML private Label settingsHeaderTitleLabel;
+    @FXML private Label settingsThemeSectionLabel;
+    @FXML private Label settingsLanguageSectionLabel;
+    @FXML private Label settingsSpeechSectionLabel;
+    @FXML private Label settingsModelSectionLabel;
+    @FXML private Label settingsWakeSectionLabel;
+
     private SoterIAFace face;
     private UserData currentUser;
     private ChatSession activeSession;
 
     private STT sttService;
     private TTS ttsService;
-    private KnowledgeBase knowledgeBase;
     private final LocationProvider locationProvider = new SystemGPSLocation();
     private final AlertService alertService = new NotificationAlertService();
 
@@ -98,6 +123,7 @@ public class ChatController {
     private com.soteria.infrastructure.intelligence.kws.WakeWordService wakeWordService;
     private ChatInferenceUiBridge inferenceUi;
     private ProfileRepository profileRepository;
+    private LocalizationService localization;
 
     private boolean aiAvailable = false;
     private boolean isRecording = false;
@@ -107,7 +133,58 @@ public class ChatController {
     /** Matches default {@code speechRate} in {@link com.soteria.infrastructure.intelligence.tts.SherpaTTSService}. */
     private float currentSpeechRate = 1.44f;
     private boolean wakeWordEnabled = true;
-    private boolean syncingSettingsUi;
+
+    private static final String SETTINGS_SYNC_PROP = "soteria.settingsUiSync";
+
+    private AtomicBoolean settingsSyncFlag() {
+        var props = settingsOverlay.getProperties();
+        Object v = props.get(SETTINGS_SYNC_PROP);
+        if (v instanceof AtomicBoolean existing) {
+            return existing;
+        }
+        AtomicBoolean created = new AtomicBoolean(false);
+        props.put(SETTINGS_SYNC_PROP, created);
+        return created;
+    }
+
+    /** Used for the history sidebar session row (date = second row in UI). */
+    private static final DateTimeFormatter SESSION_LIST_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private void stampSessionListTitle() {
+        if (activeSession == null) {
+            return;
+        }
+        String date = LocalDateTime.now().format(SESSION_LIST_DATE);
+        if (localization != null) {
+            activeSession.setTitle(localization.formatMessage("chat.session.list_title", date));
+        } else if (resources != null) {
+            activeSession.setTitle(MessageFormat.format(resources.getString("chat.session.list_title"), date));
+        } else {
+            activeSession.setTitle(date);
+        }
+        sessionCoordinator.saveCurrentSession();
+    }
+
+    private String profileDisplayNameForWelcome(UserData profile) {
+        String n = profile.fullName();
+        if (n == null || n.isBlank() || UserData.INCOMPLETE_NAME.equals(n)) {
+            if (localization != null) {
+                return localization.getMessage("chat.welcome.default_name");
+            }
+            if (resources != null) {
+                return resources.getString("chat.welcome.default_name");
+            }
+            return "friend";
+        }
+        return n;
+    }
+
+    private void injectWelcomeMessage(UserData profile) {
+        String welcome = localization.formatMessage("chat.welcome", profileDisplayNameForWelcome(profile));
+        viewManager.addBotMessage(welcome);
+        activeSession.addMessage(ChatMessage.model(welcome));
+        sessionCoordinator.saveCurrentSession();
+    }
 
     private final AtomicLong inferenceGeneration = new AtomicLong(0);
     private final ChatTTSIdleChain ttsIdleChain = new ChatTTSIdleChain();
@@ -125,24 +202,30 @@ public class ChatController {
         viewManager = new ChatViewManager(ui);
         sessionCoordinator = new SessionCoordinator(sessionList, historySidebar);
 
-        viewManager.setSubtitle(PROMPT_READY);
-        viewManager.setAiStatusPill("Preparando IA", STATUS_WARMING);
+        viewManager.setSubtitle(msg(KEY_SUBTITLE_READY));
+        setAiStatusI18n("chat.status.preparing_ai", STATUS_WARMING);
         setInputLocked(true);
         setupSettingsUi();
         handleNewChat();
     }
 
     public void init(UserData profile, BootstrapService bootstrap, ProfileRepository profiles) {
+        this.localization = bootstrap.localizationService();
+        this.localization.setLocale(UiLocales.fromPreferredLanguage(profile.preferredLanguage()));
+        this.sessionCoordinator.setLocalizationService(localization);
+        applyChatChromeI18n();
+
         this.currentUser = profile;
         this.profileRepository = profiles;
         if (profile.preferredLanguage() != null) {
             this.currentLanguage = profile.preferredLanguage();
         }
 
-        viewManager.addBotMessage("Hola " + profile.fullName() + ". Soy SoterIA. "
-                + "Pulsa el micro y cuéntame qué pasa, o escribe si no puedes hablar.");
+        stampSessionListTitle();
+        injectWelcomeMessage(profile);
+        refreshSessionList();
 
-        viewManager.setAiStatusPill("Cargando", STATUS_WARMING);
+        setAiStatusI18n("chat.status.loading", STATUS_WARMING);
 
         String initialStatus = bootstrap.statusProperty().get();
         if (initialStatus != null && !initialStatus.isBlank()) {
@@ -155,50 +238,53 @@ public class ChatController {
             }
         });
 
-        bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> {
-            if (err != null) {
-                logger.log(Level.SEVERE, "[{0}] Bootstrap failed: {1}", new Object[]{instanceId, err.getMessage()});
-                viewManager.setAiStatusPill("IA offline", STATUS_OFFLINE);
-                viewManager.setSubtitle("No puedo escucharte ahora. Usa el botón SOS si es urgente.");
-                face.setState(SoterIAFace.State.IDLE);
-                return;
-            }
-            logger.log(Level.INFO, "[{0}] ready() complete. Configuring services...", instanceId);
-            this.sttService = bootstrap.sttService();
-            this.ttsService = bootstrap.ttsService();
-            this.knowledgeBase = bootstrap.knowledgeBase();
-            this.inferenceEngine = new InferenceEngine(bootstrap.triageService(), bootstrap.brainService(), knowledgeBase);
-            this.wakeWordService = bootstrap.wakeWordService();
-            this.inferenceUi = new ChatInferenceUiBridge(
-                    viewManager,
-                    sessionCoordinator,
-                    face,
-                    safetyContainer,
-                    knowledgeBase,
-                    ttsIdleChain,
-                    logger,
-                    PROMPT_READY,
-                    STATUS_READY,
-                    STATUS_ALERT,
-                    () -> activeSession,
-                    () -> ttsEnabled,
-                    () -> ttsService);
-            this.aiAvailable = true;
+        bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> applyBootstrapResult(bootstrap, err)));
+    }
 
-            if (this.ttsService != null) {
-                this.ttsService.setLanguage(currentLanguage);
-                this.ttsService.setSpeechRate(currentSpeechRate);
-            }
+    private void applyBootstrapResult(BootstrapService bootstrap, Throwable err) {
+        if (err != null) {
+            logger.log(Level.SEVERE, "[{0}] Bootstrap failed: {1}", new Object[]{instanceId, err.getMessage()});
+            setAiStatusI18n("chat.status.ai_offline", STATUS_OFFLINE);
+            viewManager.setSubtitle(msg("chat.subtitle.bootstrap_offline"));
+            face.setState(SoterIAFace.State.IDLE);
+            return;
+        }
+        logger.log(Level.INFO, "[{0}] ready() complete. Configuring services...", instanceId);
+        this.sttService = bootstrap.sttService();
+        this.ttsService = bootstrap.ttsService();
+        KnowledgeBase kb = bootstrap.knowledgeBase();
+        this.inferenceEngine = new InferenceEngine(bootstrap.triageService(), bootstrap.brainService(), kb);
+        this.wakeWordService = bootstrap.wakeWordService();
+        this.inferenceUi = new ChatInferenceUiBridge(
+                viewManager,
+                sessionCoordinator,
+                face,
+                safetyContainer,
+                kb,
+                ttsIdleChain,
+                logger,
+                () -> msg(KEY_SUBTITLE_READY),
+                STATUS_READY,
+                STATUS_ALERT,
+                this::setAiStatusI18n,
+                () -> activeSession,
+                () -> ttsEnabled,
+                () -> ttsService);
+        this.aiAvailable = true;
 
-            if (this.wakeWordService != null && wakeWordEnabled) {
-                logger.log(Level.INFO, "[{0}] Registering wake-word listener.", instanceId);
-                this.wakeWordService.startListening(this::onWakeWordDetected);
-            }
+        if (this.ttsService != null) {
+            this.ttsService.setLanguage(currentLanguage);
+            this.ttsService.setSpeechRate(currentSpeechRate);
+        }
 
-            viewManager.setAiStatusPill("IA lista", STATUS_READY);
-            viewManager.setSubtitle(PROMPT_READY);
-            setInputLocked(false);
-        }));
+        if (this.wakeWordService != null && wakeWordEnabled) {
+            logger.log(Level.INFO, "[{0}] Registering wake-word listener.", instanceId);
+            this.wakeWordService.startListening(this::onWakeWordDetected);
+        }
+
+        setAiStatusI18n("chat.status.ai_ready", STATUS_READY);
+        viewManager.setSubtitle(msg(KEY_SUBTITLE_READY));
+        setInputLocked(false);
     }
 
     private void interruptOngoingGeneration() {
@@ -246,7 +332,7 @@ public class ChatController {
     @FXML
     private void handleVoiceInput() {
         if (!aiAvailable) {
-            viewManager.setSubtitle("La IA aún se está preparando. Espera unos segundos.");
+            viewManager.setSubtitle(msg("chat.subtitle.ai_warming"));
             return;
         }
 
@@ -261,8 +347,7 @@ public class ChatController {
     private void beginVoiceCapture() {
         if (sttService == null) {
             logger.log(Level.WARNING, "[{0}] beginVoiceCapture: STT null.", instanceId);
-            viewManager.setSubtitle(
-                    "Reconocimiento de voz no disponible. Intenta escribir el mensaje.");
+            viewManager.setSubtitle(msg("chat.subtitle.stt_unavailable"));
             return;
         }
         isRecording = true;
@@ -273,7 +358,7 @@ public class ChatController {
         micButton.getStyleClass().add("mic-fab-active");
         if (micIcon != null) micIcon.setIconLiteral("mdmz-stop");
         face.setState(SoterIAFace.State.LISTENING);
-        viewManager.setSubtitle("Escuchando…");
+        viewManager.setSubtitle(msg(KEY_SUBTITLE_LISTENING));
         viewManager.setPartialTranscript("");
         sttService.startListening(ChatSTTListenerFactory.create(new ChatSTTListenerFactory.Params(
                 instanceId,
@@ -288,7 +373,10 @@ public class ChatController {
                     stopRecording();
                     viewManager.addUserMessage(text);
                     processMessage(text);
-                })));
+                },
+                () -> msg(KEY_SUBTITLE_LISTENING),
+                t -> msg("chat.error.mic") + ": " + (t.getMessage() != null ? t.getMessage() : t.getClass().getSimpleName())
+        )));
     }
 
     private void stopRecording() {
@@ -316,7 +404,7 @@ public class ChatController {
         final long correlationId = inferenceGeneration.get();
         activeSession.addMessage(ChatMessage.user(message));
         face.setState(SoterIAFace.State.THINKING);
-        viewManager.setSubtitle("Pensando…");
+        viewManager.setSubtitle(msg("chat.subtitle.thinking"));
         viewManager.setPartialTranscript(message);
         viewManager.showThinkingIndicator();
 
@@ -329,13 +417,13 @@ public class ChatController {
 
     @FXML
     private void handleEmergencyButton() {
-        handleEmergencyAlert("Botón SOS pulsado manualmente");
+        handleEmergencyAlert(msg("chat.alert.reason_manual"));
     }
 
     private void handleEmergencyAlert(String reason) {
         face.setState(SoterIAFace.State.ALERT);
-        viewManager.setAiStatusPill("Alerta activa", STATUS_ALERT);
-        viewManager.setSubtitle("Enviando alerta…");
+        setAiStatusI18n("chat.status.alert_active", STATUS_ALERT);
+        viewManager.setSubtitle(msg("chat.alert.sending"));
         ChatEmergencyDispatch.start(
                 reason,
                 locationProvider,
@@ -344,22 +432,21 @@ public class ChatController {
                 new ChatEmergencyDispatch.Callbacks() {
                     @Override
                     public void onSuccess(String location) {
-                        viewManager.addBotMessage("Alerta enviada. Ubicación detectada: " + location
-                                + ". La ayuda está en camino — mantén la calma.");
-                        viewManager.setSubtitle("Alerta enviada. Mantente en la línea.");
+                        viewManager.addBotMessage(localization.formatMessage("chat.alert.sent_ok", location));
+                        viewManager.setSubtitle(msg("chat.alert.sent_subtitle"));
                     }
 
                     @Override
                     public void onSendFailed() {
-                        viewManager.addBotMessage("No pude enviar la alerta automática. Llama al 112/911 ahora.");
-                        viewManager.setSubtitle("Llama al 112 directamente.");
-                        viewManager.setAiStatusPill("Alerta falló", STATUS_OFFLINE);
+                        viewManager.addBotMessage(msg("chat.alert.send_failed"));
+                        viewManager.setSubtitle(msg("chat.alert.call_direct"));
+                        setAiStatusI18n("chat.status.alert_failed", STATUS_OFFLINE);
                     }
 
                     @Override
                     public void onDispatchError() {
-                        viewManager.setSubtitle("Error al enviar alerta.");
-                        viewManager.setAiStatusPill("Alerta falló", STATUS_OFFLINE);
+                        viewManager.setSubtitle(msg("chat.alert.dispatch_error_subtitle"));
+                        setAiStatusI18n("chat.status.alert_failed", STATUS_OFFLINE);
                     }
                 });
     }
@@ -372,7 +459,12 @@ public class ChatController {
     private void handleNewChat() {
         this.activeSession = sessionCoordinator.startNewSession();
         viewManager.clearMessages();
-        if (aiAvailable) viewManager.addBotMessage("Nueva sesión de emergencia iniciada. Dime qué sucede.");
+        stampSessionListTitle();
+        if (aiAvailable) {
+            viewManager.addBotMessage(msg("chat.session.new"));
+            activeSession.addMessage(ChatMessage.model(msg("chat.session.new")));
+            sessionCoordinator.saveCurrentSession();
+        }
         refreshSessionList();
     }
 
@@ -422,13 +514,13 @@ public class ChatController {
     }
 
     private void setupSettingsUi() {
-        settingsThemeCombo.getItems().setAll("Oscuro");
+        settingsThemeCombo.getItems().setAll(resources.getString("ui.settings.theme.dark"));
         settingsThemeCombo.getSelectionModel().selectFirst();
         settingsThemeCombo.setDisable(true);
 
         settingsLanguageCombo.getItems().setAll(OnboardingLanguageCatalog.SUPPORTED);
         settingsLanguageCombo.valueProperty().addListener((obs, oldV, newV) -> {
-            if (syncingSettingsUi || newV == null) {
+            if (settingsSyncFlag().get() || newV == null) {
                 return;
             }
             currentLanguage = newV;
@@ -449,13 +541,13 @@ public class ChatController {
             if (settingsSpeechRateLabel != null) {
                 settingsSpeechRateLabel.setText(String.format("%.2f×", v));
             }
-            if (!syncingSettingsUi && ttsService != null) {
+            if (!settingsSyncFlag().get() && ttsService != null) {
                 ttsService.setSpeechRate(v);
             }
         });
 
         settingsWakeToggle.selectedProperty().addListener((obs, oldV, newV) -> {
-            if (syncingSettingsUi) {
+            if (settingsSyncFlag().get()) {
                 return;
             }
             wakeWordEnabled = newV;
@@ -480,6 +572,11 @@ public class ChatController {
         try {
             profileRepository.save(updated);
             currentUser = updated;
+            if (localization != null) {
+                localization.setLocale(UiLocales.fromPreferredLanguage(currentLanguage));
+                applyChatChromeI18n();
+                refreshSessionList();
+            }
         } catch (IOException e) {
             logger.log(Level.WARNING, "[{0}] Failed to save language preference", instanceId);
             logger.log(Level.FINE, "Profile save failed", e);
@@ -504,7 +601,8 @@ public class ChatController {
     }
 
     private void openSettingsOverlay() {
-        syncingSettingsUi = true;
+        AtomicBoolean syncing = settingsSyncFlag();
+        syncing.set(true);
         try {
             settingsLanguageCombo.setValue(OnboardingLanguageCatalog.matchOrDefault(currentLanguage));
             settingsSpeechRateSlider.setValue(currentSpeechRate);
@@ -516,7 +614,7 @@ public class ChatController {
             settingsWakeToggle.setDisable(!wakeAvailable);
             settingsWakeToggle.setSelected(wakeAvailable && wakeWordEnabled);
         } finally {
-            syncingSettingsUi = false;
+            syncing.set(false);
         }
         settingsOverlay.setVisible(true);
         settingsOverlay.setManaged(true);
@@ -526,6 +624,88 @@ public class ChatController {
     private void closeSettings() {
         settingsOverlay.setVisible(false);
         settingsOverlay.setManaged(false);
+    }
+
+    private void setAiStatusI18n(String messageKey, String dotClass) {
+        trackedAiPillKey = messageKey;
+        trackedAiPillDot = dotClass;
+        viewManager.setAiStatusPill(msg(messageKey), dotClass);
+    }
+
+    /** Re-applies AI pill + subtitle strings that depend on {@link #localization} (e.g. after runtime language change). */
+    private void refreshLiveHudForLocale() {
+        if (viewManager == null || face == null) {
+            return;
+        }
+        viewManager.setAiStatusPill(msg(trackedAiPillKey), trackedAiPillDot);
+        SoterIAFace.State fs = face.getState();
+        if (fs == SoterIAFace.State.SPEAKING || fs == SoterIAFace.State.ALERT) {
+            return;
+        }
+        if (fs == SoterIAFace.State.IDLE && !isRecording) {
+            viewManager.setSubtitle(msg(KEY_SUBTITLE_READY));
+        } else if (fs == SoterIAFace.State.LISTENING) {
+            viewManager.setSubtitle(msg(KEY_SUBTITLE_LISTENING));
+        } else if (fs == SoterIAFace.State.THINKING) {
+            viewManager.setSubtitle(msg("chat.subtitle.thinking"));
+        }
+    }
+
+    private String msg(String key) {
+        if (localization != null) {
+            return localization.getMessage(key);
+        }
+        return resources != null ? resources.getString(key) : key;
+    }
+
+    private void applyChatChromeI18n() {
+        if (localization == null) {
+            return;
+        }
+        if (brandLabel != null) {
+            brandLabel.setText(localization.getMessage("ui.chat.brand"));
+        }
+        if (chatSheetTitleLabel != null) {
+            chatSheetTitleLabel.setText(localization.getMessage("ui.chat.sheet.title"));
+        }
+        if (historyTitleLabel != null) {
+            historyTitleLabel.setText(localization.getMessage("ui.chat.history.title"));
+        }
+        if (sidebarSettingsButton != null) {
+            sidebarSettingsButton.setText(localization.getMessage("ui.chat.history.settings"));
+        }
+        if (sidebarNewEmergencyButton != null) {
+            sidebarNewEmergencyButton.setText(localization.getMessage("ui.chat.history.new_emergency"));
+        }
+        if (messageInput != null) {
+            messageInput.setPromptText(localization.getMessage("ui.chat.input.prompt"));
+        }
+        if (settingsHeaderTitleLabel != null) {
+            settingsHeaderTitleLabel.setText(localization.getMessage("ui.settings.title"));
+        }
+        if (settingsThemeSectionLabel != null) {
+            settingsThemeSectionLabel.setText(localization.getMessage("ui.settings.theme"));
+        }
+        if (settingsLanguageSectionLabel != null) {
+            settingsLanguageSectionLabel.setText(localization.getMessage("ui.settings.language"));
+        }
+        if (settingsSpeechSectionLabel != null) {
+            settingsSpeechSectionLabel.setText(localization.getMessage("ui.settings.speech_rate"));
+        }
+        if (settingsModelSectionLabel != null) {
+            settingsModelSectionLabel.setText(localization.getMessage("ui.settings.ai_model"));
+        }
+        if (settingsWakeSectionLabel != null) {
+            settingsWakeSectionLabel.setText(localization.getMessage("ui.settings.wake"));
+        }
+        if (settingsWakeToggle != null) {
+            settingsWakeToggle.setText(localization.getMessage("ui.settings.wake.checkbox"));
+        }
+        if (settingsThemeCombo != null) {
+            settingsThemeCombo.getItems().setAll(localization.getMessage("ui.settings.theme.dark"));
+            settingsThemeCombo.getSelectionModel().selectFirst();
+        }
+        refreshLiveHudForLocale();
     }
 
     private void setInputLocked(boolean locked) {

@@ -2,6 +2,8 @@ package com.soteria.infrastructure.intelligence.llm;
 
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.model.UserData;
+import com.soteria.infrastructure.intelligence.system.LanguageUtils;
+
 import java.util.List;
 
 /**
@@ -29,8 +31,23 @@ public class GemmaPromptBuilder {
                 2. **STAY IN CHARACTER**: Talk like a real person on a phone call. Be supportive, empathetic, and direct.
                 3. **USE THE PROTOCOL**: Use the provided protocol as your technical knowledge base. Don't mention "steps" or "protocols". Just use the information to give the best advice for the situation.
                 4. **BREVITY**: Keep your response to 1 or 2 natural sentences. Focus on the immediate action the user should take.
+                5. **NO PARENTHESES**: Do not use `(` or `)` anywhere in your reply. No asides, translations, pronunciation hints, alternate wording, or English glosses in parentheses—only plain spoken lines.
                 """;
-        return staticPrompt.replace("[TARGET_LANG]", targetLanguage);
+        staticPrompt = staticPrompt.replace("[TARGET_LANG]", targetLanguage);
+        if (isChineseTarget(targetLanguage)) {
+            staticPrompt += """
+                    
+                    6. **CHINESE SCRIPT ONLY**: Use Chinese characters (汉字) only. No pinyin, romanization, or Latin/English mixed into the answer.
+                    """;
+        }
+        return staticPrompt;
+    }
+
+    private static boolean isChineseTarget(String targetLanguage) {
+        if (targetLanguage == null || targetLanguage.isBlank()) {
+            return false;
+        }
+        return "zh".equals(LanguageUtils.isoCode(targetLanguage));
     }
 
     private String buildDynamicContext(String profileContext, String context) {
@@ -67,7 +84,7 @@ public class GemmaPromptBuilder {
 
             if (i == lastIndex && "user".equals(msg.role())) {
                 sb.append(msg.content())
-                  .append("\n\n(Respond in ").append(targetLanguage).append(". 1-2 natural sentences.)")
+                  .append("\n\nReply in ").append(targetLanguage).append(" only. One or two short sentences; no parentheses.")
                   .append("<end_of_turn>\n");
             } else {
                 sb.append(msg.content()).append("<end_of_turn>\n");

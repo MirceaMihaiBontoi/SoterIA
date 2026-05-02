@@ -4,6 +4,8 @@ import com.soteria.core.domain.emergency.Protocol;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.core.port.KnowledgeBase;
 
+import java.util.function.BiConsumer;
+
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
@@ -27,7 +29,8 @@ final class ChatSafetyProtocolBinder {
             String protocolId,
             String status,
             String pillReadyToken,
-            String pillAlertToken) {
+            String pillAlertToken,
+            BiConsumer<String, String> applyAiStatusI18n) {
     }
 
     private ChatSafetyProtocolBinder() {
@@ -39,7 +42,7 @@ final class ChatSafetyProtocolBinder {
                 r.activeSession().setActiveEmergencyId(null);
                 r.activeSession().setProtocolLocked(false);
                 r.activeSession().getProtocolProgress().clear();
-                r.viewManager().setAiStatusPill("Sistema Listo", r.pillReadyToken());
+                r.applyAiStatusI18n().accept("chat.status.ai_ready", r.pillReadyToken());
             }
             r.safetyContainer().setVisible(false);
             r.safetyContainer().setManaged(false);
@@ -69,7 +72,7 @@ final class ChatSafetyProtocolBinder {
 
         if ("ACTIVE".equals(r.status())) {
             r.activeSession().setActiveEmergencyId(r.protocolId());
-            r.viewManager().setAiStatusPill("Emergencia Activa", r.pillAlertToken());
+            r.applyAiStatusI18n().accept("chat.status.alert_active", r.pillAlertToken());
             r.face().setState(SoterIAFace.State.ALERT);
         }
     }

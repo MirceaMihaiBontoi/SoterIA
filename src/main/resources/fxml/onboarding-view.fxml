@@ -3,95 +3,91 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.image.ImageView?>
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.soteria.ui.onboarding.OnboardingController"
       styleClass="onboarding-root" alignment="TOP_CENTER" spacing="18">
 
     <padding><Insets top="30" right="48" bottom="28" left="48"/></padding>
 
-    <Label text="SoterIA Setup" styleClass="onboarding-title"/>
+    <Label fx:id="onboardingTitleLabel" text="%onboarding.title" styleClass="onboarding-title"/>
     
     <StackPane fx:id="wizardStack" VBox.vgrow="ALWAYS">
-        <!-- Step 1: Brain & Language Settings -->
         <VBox fx:id="step1Container" spacing="16" alignment="TOP_CENTER">
-            <Label text="Step 1: AI Model &amp; Language" styleClass="onboarding-subtitle"/>
+            <Label fx:id="step1SubtitleLabel" text="%onboarding.step1" styleClass="onboarding-subtitle"/>
             
             <VBox spacing="6" maxWidth="460">
-                <Label text="Select AI Model" styleClass="field-label"/>
+                <Label fx:id="modelFieldLabel" text="%onboarding.model.label" styleClass="field-label"/>
                 <ComboBox fx:id="modelComboBox" maxWidth="Infinity" styleClass="input-field"/>
                 
                 <VBox spacing="4">
-                    <Label text="Custom GGUF URL (Overrides selection)" styleClass="field-label" style="-fx-font-size: 11px;"/>
+                    <Label fx:id="customUrlFieldLabel" text="%onboarding.model.custom_url" styleClass="field-label" style="-fx-font-size: 11px;"/>
                     <TextField fx:id="customModelField" promptText="https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf" 
                                maxWidth="Infinity" styleClass="input-field" style="-fx-font-size: 10px;"/>
                 </VBox>
             </VBox>
 
             <VBox spacing="6" maxWidth="460">
-                <Label text="Language" styleClass="field-label"/>
+                <Label fx:id="languageFieldLabel" text="%onboarding.language" styleClass="field-label"/>
                 <ComboBox fx:id="languageComboBox" maxWidth="Infinity" styleClass="input-field"/>
-                <Label fx:id="locationLabel" text="Detecting location..." styleClass="caption-label"/>
+                <Label fx:id="locationLabel" text="%onboarding.location.detecting" styleClass="caption-label"/>
             </VBox>
 
             <Label fx:id="step1ErrorLabel" styleClass="error-label" wrapText="true" maxWidth="460"/>
             <Region VBox.vgrow="ALWAYS"/>
-            <Button fx:id="continueButton" text="Continue" onAction="#goToStep2" styleClass="primary-button" maxWidth="460"/>
+            <Button fx:id="continueButton" text="%onboarding.continue" onAction="#goToStep2" styleClass="primary-button" maxWidth="460"/>
         </VBox>
 
-        <!-- Step 2: User Profile -->
         <VBox fx:id="step2Container" spacing="16" alignment="TOP_CENTER" visible="false">
-            <Label text="Step 2: Emergency Profile" styleClass="onboarding-subtitle"/>
+            <Label fx:id="step2SubtitleLabel" text="%onboarding.step2" styleClass="onboarding-subtitle"/>
             
             <VBox spacing="12" maxWidth="460">
                 <VBox spacing="4">
-                    <Label text="Full Name" styleClass="field-label"/>
-                    <TextField fx:id="nameField" promptText="Jane Doe" styleClass="input-field"/>
+                    <Label fx:id="fullNameFieldLabel" text="%onboarding.field.full_name" styleClass="field-label"/>
+                    <TextField fx:id="nameField" promptText="%onboarding.field.name_prompt" styleClass="input-field"/>
                 </VBox>
 
                 <HBox spacing="12">
                     <VBox spacing="4" HBox.hgrow="ALWAYS">
-                        <Label text="Gender" styleClass="field-label"/>
+                        <Label fx:id="genderFieldLabel" text="%onboarding.field.gender" styleClass="field-label"/>
                         <ComboBox fx:id="genderComboBox" maxWidth="Infinity" styleClass="input-field"/>
                     </VBox>
                     <VBox spacing="4" HBox.hgrow="ALWAYS">
-                        <Label text="Birth Date" styleClass="field-label"/>
+                        <Label fx:id="birthDateFieldLabel" text="%onboarding.field.birth_date" styleClass="field-label"/>
                         <DatePicker fx:id="birthDatePicker" maxWidth="Infinity" styleClass="input-field"/>
                     </VBox>
                 </HBox>
 
                 <VBox spacing="4">
-                    <Label text="Emergency Contact Phone" styleClass="field-label"/>
-                    <TextField fx:id="contactField" promptText="Phone of partner / family / friend" styleClass="input-field"/>
+                    <Label fx:id="contactFieldLabel" text="%onboarding.field.emergency_contact" styleClass="field-label"/>
+                    <TextField fx:id="contactField" promptText="%onboarding.field.contact_prompt" styleClass="input-field"/>
                 </VBox>
 
                 <VBox spacing="4">
-                    <Label text="Medical Info (Optional)" styleClass="field-label"/>
+                    <Label fx:id="medicalFieldLabel" text="%onboarding.field.medical" styleClass="field-label"/>
                     <TextArea fx:id="medicalField" prefRowCount="3" wrapText="true" styleClass="input-field" 
-                               promptText="Allergies, conditions, medication… anything a paramedic should know."/>
+                               promptText="%onboarding.field.medical_prompt"/>
                 </VBox>
             </VBox>
 
             <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
             <HBox spacing="10" alignment="CENTER" maxWidth="460">
-                <Button text="Back" onAction="#goToStep1" styleClass="flat-button"/>
-                <Button fx:id="finishButton" text="Finish Setup" onAction="#handleStart" 
+                <Button fx:id="backButton" text="%onboarding.action.back" onAction="#goToStep1" styleClass="flat-button"/>
+                <Button fx:id="finishButton" text="%onboarding.action.finish" onAction="#handleStart" 
                         styleClass="success-button" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             </HBox>
         </VBox>
 
-        <!-- Step 3: Installation Screen (Overlay) -->
         <VBox fx:id="installationOverlay" spacing="24" alignment="CENTER" visible="false" style="-fx-background-color: -color-bg-default;">
-            <Label text="Installing SoterIA" styleClass="title-2"/>
-            <Label text="Downloading neural weights and speech engines. This may take a few minutes depending on your connection."
+            <Label fx:id="installTitleLabel" text="%onboarding.install.title" styleClass="title-2"/>
+            <Label fx:id="installBodyLabel" text="%onboarding.install.body"
                    wrapText="true" alignment="CENTER" styleClass="onboarding-subtitle" maxWidth="400"/>
             
             <VBox spacing="8" alignment="CENTER" maxWidth="400">
-                <Label fx:id="bootStatusLabel" text="Provisioning..." styleClass="caption-label"/>
+                <Label fx:id="bootStatusLabel" text="%onboarding.install.boot_default" styleClass="caption-label"/>
                 <ProgressBar fx:id="bootProgress" progress="0.0" maxWidth="Infinity" prefHeight="10"/>
             </VBox>
             
-            <Label text="Do not close the application." styleClass="caption-label" style="-fx-font-style: italic;"/>
+            <Label fx:id="installHoldLabel" text="%onboarding.install.hold" styleClass="caption-label" style="-fx-font-style: italic;"/>
         </VBox>
     </StackPane>
 

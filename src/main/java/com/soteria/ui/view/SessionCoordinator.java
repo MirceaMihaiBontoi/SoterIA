@@ -1,6 +1,7 @@
 package com.soteria.ui.view;
 
 import com.soteria.core.domain.chat.ChatSession;
+import com.soteria.core.port.LocalizationService;
 import com.soteria.infrastructure.persistence.ChatSessionRepository;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -22,6 +23,18 @@ public class SessionCoordinator {
     private final VBox historySidebar;
     private final ChatSessionRepository repository = ChatSessionRepository.getInstance();
     private ChatSession activeSession;
+    private LocalizationService localizationService;
+
+    public void setLocalizationService(LocalizationService localizationService) {
+        this.localizationService = localizationService;
+    }
+
+    private String untitledSessionTitle() {
+        if (localizationService != null) {
+            return localizationService.getMessage("ui.session.untitled");
+        }
+        return "Untitled session";
+    }
 
     public SessionCoordinator(VBox sessionList, VBox historySidebar) {
         this.sessionList = sessionList;
@@ -75,7 +88,7 @@ public class SessionCoordinator {
                 VBox textCol = new VBox(2);
                 HBox.setHgrow(textCol, Priority.ALWAYS);
 
-                Label title = new Label(s.getTitle() != null ? s.getTitle() : "Sesión sin título");
+                Label title = new Label(s.getTitle() != null ? s.getTitle() : untitledSessionTitle());
                 title.getStyleClass().add("session-title");
                 title.setMaxWidth(Double.MAX_VALUE);
 

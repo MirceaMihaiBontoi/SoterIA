@@ -1,5 +1,7 @@
 package com.soteria.ui.onboarding;
 
+import com.soteria.core.port.LocalizationService;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -33,21 +35,21 @@ final class OnboardingCustomUrlVerifier {
      * @param url non-empty trimmed URL from the user
      * @return user-facing error message, or {@code null} if syntax is acceptable
      */
-    static String validateSyntax(String url) {
+    static String validateSyntax(String url, LocalizationService loc) {
         if (url.length() > MAX_URL_LENGTH) {
-            return "Custom URL is too long.";
+            return loc.getMessage("onboarding.url.error.too_long");
         }
         String lower = url.toLowerCase(Locale.ROOT);
         if (!lower.startsWith("https://")) {
-            return "Custom URL must use https://.";
+            return loc.getMessage("onboarding.url.error.https_required");
         }
         if (!lower.endsWith(".gguf")) {
-            return "Custom URL must point to a .gguf file.";
+            return loc.getMessage("onboarding.url.error.gguf_required");
         }
         try {
             URI.create(url).toURL();
         } catch (IllegalArgumentException | java.net.MalformedURLException _) {
-            return "Custom URL is malformed.";
+            return loc.getMessage("onboarding.url.error.malformed");
         }
         return null;
     }
@@ -58,7 +60,7 @@ final class OnboardingCustomUrlVerifier {
      * @param url syntactically valid HTTPS GGUF URL
      * @return {@code null} on success, otherwise a message suitable for a UI label
      */
-    static String probe(String url) {
+    static String probe(String url, LocalizationService loc) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(CONNECT_TIMEOUT)
                 .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -76,28 +78,29 @@ final class OnboardingCustomUrlVerifier {
                 return null;
             }
             if (code == 405) {
-                return probeWithRange(client, url);
+                return probeWithRange(client, url, loc);
             }
-            return "Server responded with HTTP " + code + " — check the URL.";
+            return loc.formatMessage("onboarding.url.probe.http_status", code);
         } catch (HttpTimeoutException _) {
-            return "The server took too long to respond. Try again.";
+            return loc.getMessage("onboarding.url.probe.timeout");
         } catch (java.net.ConnectException _) {
-            return "Could not reach the server. Check your internet connection.";
+            return loc.getMessage("onboarding.url.probe.connection");
         } catch (java.net.UnknownHostException _) {
-            return "Unknown host. Check the URL spelling.";
+            return loc.getMessage("onboarding.url.probe.unknown_host");
         } catch (InterruptedException _) {
             Thread.currentThread().interrupt();
-            return "URL verification was interrupted.";
+            return loc.getMessage("onboarding.url.probe.interrupted");
         } catch (Exception e) {
             log.log(Level.FINE, "URL probe failed", e);
-            return "Could not verify URL: " + e.getMessage();
+            return loc.formatMessage("onboarding.url.probe.failed", e.getMessage());
         }
     }
 
     /**
      * Hugging Face CDNs sometimes return 405 for HEAD; mirrors the downloader pattern with a 1-byte Range GET.
      */
-    private static String probeWithRange(HttpClient client, String url) throws IOException, InterruptedException {
+    private static String probeWithRange(HttpClient client, String url, LocalizationService loc)
+            throws IOException, InterruptedException {
         HttpRequest get = HttpRequest.newBuilder(URI.create(url))
                 .timeout(REQUEST_TIMEOUT)
                 .header("User-Agent", "SoterIA/1.0 (url-probe)")
@@ -109,6 +112,6 @@ final class OnboardingCustomUrlVerifier {
         if (code == 200 || code == 206) {
             return null;
         }
-        return "Server responded with HTTP " + code + " — check the URL.";
+        return loc.formatMessage("onboarding.url.probe.http_status", code);
     }
 }

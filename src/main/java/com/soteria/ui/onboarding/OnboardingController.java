@@ -7,6 +7,7 @@ import com.soteria.infrastructure.persistence.ProfileRepository;
 import com.soteria.infrastructure.sensor.DevicePhoneDetector;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
 import com.soteria.ui.MainApp;
+import com.soteria.ui.i18n.UiLocales;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -45,6 +46,39 @@ public class OnboardingController {
     @FXML
     private VBox installationOverlay;
 
+    @FXML
+    private Label onboardingTitleLabel;
+    @FXML
+    private Label step1SubtitleLabel;
+    @FXML
+    private Label modelFieldLabel;
+    @FXML
+    private Label customUrlFieldLabel;
+    @FXML
+    private Label languageFieldLabel;
+    @FXML
+    private Label step2SubtitleLabel;
+    @FXML
+    private Label fullNameFieldLabel;
+    @FXML
+    private Label genderFieldLabel;
+    @FXML
+    private Label birthDateFieldLabel;
+    @FXML
+    private Label contactFieldLabel;
+    @FXML
+    private Label medicalFieldLabel;
+    @FXML
+    private Button backButton;
+    @FXML
+    private Button finishButton;
+    @FXML
+    private Label installTitleLabel;
+    @FXML
+    private Label installBodyLabel;
+    @FXML
+    private Label installHoldLabel;
+
     // Step 1
     @FXML
     private ComboBox<SystemCapability.AIModelProfile> modelComboBox;
@@ -63,7 +97,7 @@ public class OnboardingController {
     @FXML
     private TextField nameField;
     @FXML
-    private ComboBox<String> genderComboBox;
+    private ComboBox<GenderOption> genderComboBox;
     @FXML
     private DatePicker birthDatePicker;
     @FXML
@@ -83,8 +117,26 @@ public class OnboardingController {
     private ProfileRepository profiles;
     private MainApp mainApp;
 
+    /** Set when geolocation returns; drives localized location line. */
+    private String lastLocationDescription;
+
     /** Cached once so auto-detection does not run twice. */
     private String devicePhone = DevicePhoneDetector.UNKNOWN;
+
+    private enum GenderOption {
+        MALE("Male", "onboarding.gender.male"),
+        FEMALE("Female", "onboarding.gender.female"),
+        OTHER("Other", "onboarding.gender.other"),
+        PREFER_NOT("Prefer not to say", "onboarding.gender.prefer_not");
+
+        private final String persisted;
+        private final String messageKey;
+
+        GenderOption(String persisted, String messageKey) {
+            this.persisted = persisted;
+            this.messageKey = messageKey;
+        }
+    }
 
     public void init(BootstrapService bootstrap, ProfileRepository profiles, MainApp mainApp) {
         this.bootstrap = bootstrap;
@@ -93,6 +145,16 @@ public class OnboardingController {
 
         setupModelComboBox();
         setupLanguageAndGender();
+        syncLocaleFromLanguageCombo();
+        applyOnboardingFormI18n();
+        languageComboBox.valueProperty().addListener((obs, previous, selected) -> {
+            if (selected == null) {
+                return;
+            }
+            syncLocaleFromLanguageCombo();
+            applyOnboardingFormI18n();
+        });
+
         detectLocation();
         detectDevicePhone();
 
@@ -110,8 +172,12 @@ public class OnboardingController {
     private void setupModelComboBox() {
         modelComboBox.setItems(FXCollections.observableArrayList(SystemCapability.AIModelProfile.values()));
         modelComboBox.setValue(bootstrap.capability().getRecommendedProfile());
+        configureModelComboFactories();
+    }
 
-        Callback<ListView<SystemCapability.AIModelProfile>, ListCell<SystemCapability.AIModelProfile>> cellFactory = lv -> new ModelCell();
+    private void configureModelComboFactories() {
+        Callback<ListView<SystemCapability.AIModelProfile>, ListCell<SystemCapability.AIModelProfile>> cellFactory =
+                lv -> new ModelCell();
         modelComboBox.setCellFactory(cellFactory);
         modelComboBox.setButtonCell(cellFactory.call(null));
     }
@@ -121,7 +187,7 @@ public class OnboardingController {
      */
     private final class ModelCell extends ListCell<SystemCapability.AIModelProfile> {
         private final Label name = new Label();
-        private final Label recommended = new Label("Recommended");
+        private final Label recommended = new Label();
         private final Label size = new Label();
         private final HBox row;
 
@@ -144,6 +210,7 @@ public class OnboardingController {
             }
             name.setText(item.getDisplayName());
             size.setText(String.format(Locale.ROOT, "%.1f GB", item.getSizeGB()));
+            recommended.setText(loc().getMessage("onboarding.model.recommended"));
             recommended.setVisible(item == bootstrap.capability().getRecommendedProfile());
             recommended.setManaged(recommended.isVisible());
             setText(null);
@@ -154,29 +221,95 @@ public class OnboardingController {
     private void setupLanguageAndGender() {
         languageComboBox.setItems(FXCollections.observableArrayList(OnboardingLanguageCatalog.SUPPORTED));
         languageComboBox.setValue(OnboardingLanguageCatalog.DEFAULT);
-        genderComboBox.setItems(FXCollections.observableArrayList("Male", "Female", "Other", "Prefer not to say"));
+        genderComboBox.setItems(FXCollections.observableArrayList(GenderOption.values()));
+        configureGenderComboFactories();
         genderComboBox.getSelectionModel().selectFirst();
+    }
+
+    private void configureGenderComboFactories() {
+        Callback<ListView<GenderOption>, ListCell<GenderOption>> genderCellFactory =
+                lv -> new ListCell<>() {
+                    @Override
+                    protected void updateItem(GenderOption item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(empty || item == null ? null : loc().getMessage(item.messageKey));
+                    }
+                };
+        genderComboBox.setCellFactory(genderCellFactory);
+        genderComboBox.setButtonCell(genderCellFactory.call(null));
+    }
+
+    private com.soteria.core.port.LocalizationService loc() {
+        return bootstrap.localizationService();
+    }
+
+    private void syncLocaleFromLanguageCombo() {
+        String lang = languageComboBox.getValue();
+        if (lang == null) {
+            return;
+        }
+        bootstrap.localizationService().setLocale(UiLocales.fromPreferredLanguage(lang));
+    }
+
+    private void applyOnboardingFormI18n() {
+        var localization = loc();
+        onboardingTitleLabel.setText(localization.getMessage("onboarding.title"));
+        step1SubtitleLabel.setText(localization.getMessage("onboarding.step1"));
+        modelFieldLabel.setText(localization.getMessage("onboarding.model.label"));
+        customUrlFieldLabel.setText(localization.getMessage("onboarding.model.custom_url"));
+        languageFieldLabel.setText(localization.getMessage("onboarding.language"));
+        continueButton.setText(localization.getMessage("onboarding.continue"));
+        step2SubtitleLabel.setText(localization.getMessage("onboarding.step2"));
+        fullNameFieldLabel.setText(localization.getMessage("onboarding.field.full_name"));
+        nameField.setPromptText(localization.getMessage("onboarding.field.name_prompt"));
+        genderFieldLabel.setText(localization.getMessage("onboarding.field.gender"));
+        birthDateFieldLabel.setText(localization.getMessage("onboarding.field.birth_date"));
+        contactFieldLabel.setText(localization.getMessage("onboarding.field.emergency_contact"));
+        contactField.setPromptText(localization.getMessage("onboarding.field.contact_prompt"));
+        medicalFieldLabel.setText(localization.getMessage("onboarding.field.medical"));
+        medicalField.setPromptText(localization.getMessage("onboarding.field.medical_prompt"));
+        backButton.setText(localization.getMessage("onboarding.action.back"));
+        finishButton.setText(localization.getMessage("onboarding.action.finish"));
+        installTitleLabel.setText(localization.getMessage("onboarding.install.title"));
+        installBodyLabel.setText(localization.getMessage("onboarding.install.body"));
+        installHoldLabel.setText(localization.getMessage("onboarding.install.hold"));
+        if (lastLocationDescription != null && !lastLocationDescription.isBlank()) {
+            locationLabel.setText(localization.formatMessage("onboarding.location.format", lastLocationDescription));
+        } else {
+            locationLabel.setText(localization.getMessage("onboarding.location.detecting"));
+        }
+        configureGenderComboFactories();
+        configureModelComboFactories();
     }
 
     private void restoreDraftIfExists() {
         profiles.load().ifPresent(profile -> {
-            if (!profile.isComplete()) {
-                log.info("Restoring draft profile from previous session...");
-                if (profile.preferredModel() != null) {
-                    try {
-                        modelComboBox.setValue(SystemCapability.AIModelProfile.valueOf(profile.preferredModel()));
-                    } catch (IllegalArgumentException _) {
-                        /* fall back to recommended */ }
-                }
-                if (profile.preferredLanguage() != null) {
-                    selectLanguageSafely(profile.preferredLanguage());
-                }
-                if (profile.customModelUrl() != null) {
-                    customModelField.setText(profile.customModelUrl());
-                }
-                Platform.runLater(this::advanceToStep2);
+            if (profile.isComplete()) {
+                return;
             }
+            applyDraftFromProfile(profile);
         });
+    }
+
+    private void applyDraftFromProfile(UserData profile) {
+        log.info("Restoring draft profile from previous session...");
+        if (profile.preferredModel() != null) {
+            try {
+                modelComboBox.setValue(SystemCapability.AIModelProfile.valueOf(profile.preferredModel()));
+            } catch (IllegalArgumentException _) {
+                /* fall back to recommended */
+            }
+        }
+        if (profile.preferredLanguage() != null) {
+            selectLanguageSafely(profile.preferredLanguage());
+        }
+        if (profile.customModelUrl() != null) {
+            customModelField.setText(profile.customModelUrl());
+        }
+        if (profile.gender() != null) {
+            selectGenderSafely(profile.gender());
+        }
+        Platform.runLater(this::advanceToStep2);
     }
 
     private void detectLocation() {
@@ -185,8 +318,8 @@ public class OnboardingController {
             String lang = detector.detectPrimaryLanguage();
             String desc = detector.getLocationDescription();
             Platform.runLater(() -> {
+                lastLocationDescription = desc;
                 selectLanguageSafely(lang);
-                locationLabel.setText("Location: " + desc);
             });
         }, "soteria-geo-detect");
         t.setDaemon(true);
@@ -208,6 +341,20 @@ public class OnboardingController {
         languageComboBox.setValue(OnboardingLanguageCatalog.matchOrDefault(lang));
     }
 
+    private void selectGenderSafely(String persistedGender) {
+        if (persistedGender == null || persistedGender.isBlank()) {
+            genderComboBox.getSelectionModel().selectFirst();
+            return;
+        }
+        for (GenderOption g : GenderOption.values()) {
+            if (g.persisted.equals(persistedGender)) {
+                genderComboBox.setValue(g);
+                return;
+            }
+        }
+        genderComboBox.getSelectionModel().selectFirst();
+    }
+
     @FXML
     private void goToStep2() {
         step1ErrorLabel.setText("");
@@ -216,19 +363,21 @@ public class OnboardingController {
             advanceToStep2();
             return;
         }
-        String syntaxError = OnboardingCustomUrlVerifier.validateSyntax(url);
+        String syntaxError = OnboardingCustomUrlVerifier.validateSyntax(url, loc());
         if (syntaxError != null) {
             step1ErrorLabel.setText(syntaxError);
             return;
         }
 
-        step1ErrorLabel.setText("Verifying URL…");
+        step1ErrorLabel.setText(loc().getMessage("onboarding.url.verifying"));
         continueButton.setDisable(true);
         CompletableFuture
-                .supplyAsync(() -> OnboardingCustomUrlVerifier.probe(url))
+                .supplyAsync(() -> OnboardingCustomUrlVerifier.probe(url, loc()))
                 .whenComplete((err, ex) -> Platform.runLater(() -> {
                     continueButton.setDisable(false);
-                    String finalMsg = (ex != null) ? ("Could not verify URL: " + ex.getMessage()) : err;
+                    String finalMsg = (ex != null)
+                            ? loc().formatMessage("onboarding.url.verify_failed", ex.getMessage())
+                            : err;
                     if (finalMsg != null) {
                         step1ErrorLabel.setText(finalMsg);
                     } else {
@@ -258,7 +407,7 @@ public class OnboardingController {
 
         try {
             UserData draft = new UserData(
-                    UserData.INCOMPLETE_NAME, devicePhone, "Other", UNKNOWN,
+                    UserData.INCOMPLETE_NAME, devicePhone, GenderOption.OTHER.persisted, UNKNOWN,
                     "", "Pending Setup",
                     selectedProfile.name(),
                     selectedLang,
@@ -278,7 +427,7 @@ public class OnboardingController {
         String contact = contactField.getText().trim();
 
         if (name.isEmpty() || contact.isEmpty()) {
-            errorLabel.setText("Name and Emergency Contact are required.");
+            errorLabel.setText(loc().getMessage("onboarding.error.name_contact"));
             return;
         }
         errorLabel.setText("");
@@ -294,7 +443,7 @@ public class OnboardingController {
             UserData profile = new UserData(
                     name,
                     devicePhone,
-                    genderComboBox.getValue(),
+                    genderComboBox.getValue().persisted,
                     birthDatePicker.getValue() != null
                             ? birthDatePicker.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE)
                             : UNKNOWN,
@@ -315,7 +464,7 @@ public class OnboardingController {
 
         } catch (Exception e) {
             log.log(Level.SEVERE, "Failed to finish onboarding", e);
-            errorLabel.setText("Error saving profile: " + e.getMessage());
+            errorLabel.setText(loc().formatMessage("onboarding.error.save", e.getMessage()));
         }
     }
 }

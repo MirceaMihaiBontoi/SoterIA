@@ -27,13 +27,18 @@ public class BootstrapState {
         Runnable updateTask = () -> {
             status.set(text);
             progress.set(pct);
-            if (pct >= 1.0 && "Ready".equals(text)) {
-                java.util.logging.Logger.getLogger(BootstrapState.class.getName()).info("BootstrapState: pct >= 1.0 and text is 'Ready'. Setting readyToChat to true.");
-                readyToChat.set(true);
-            }
         };
 
         executeInFxThread(updateTask);
+    }
+
+    /** Marks provisioning finished: localized status line, full progress, chat unlocked. */
+    public void signalProvisioningComplete(String localizedStatusText) {
+        executeInFxThread(() -> {
+            status.set(localizedStatusText);
+            progress.set(1.0);
+            readyToChat.set(true);
+        });
     }
 
     public void setReadyToChat(boolean ready) {

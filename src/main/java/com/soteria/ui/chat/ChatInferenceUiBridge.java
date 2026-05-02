@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.scene.layout.VBox;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -29,9 +30,10 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
     private final KnowledgeBase knowledgeBase;
     private final ChatTTSIdleChain ttsIdleChain;
     private final Logger logger;
-    private final String promptReady;
+    private final Supplier<String> promptReady;
     private final String pillReadyToken;
     private final String pillAlertToken;
+    private final BiConsumer<String, String> applyAiStatusI18n;
     private final Supplier<ChatSession> activeSession;
     private final BooleanSupplier ttsEnabled;
     private final Supplier<TTS> ttsService;
@@ -47,9 +49,10 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
             KnowledgeBase knowledgeBase,
             ChatTTSIdleChain ttsIdleChain,
             Logger logger,
-            String promptReady,
+            Supplier<String> promptReady,
             String pillReadyToken,
             String pillAlertToken,
+            BiConsumer<String, String> applyAiStatusI18n,
             Supplier<ChatSession> activeSession,
             BooleanSupplier ttsEnabled,
             Supplier<TTS> ttsService) {
@@ -63,6 +66,7 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
         this.promptReady = promptReady;
         this.pillReadyToken = pillReadyToken;
         this.pillAlertToken = pillAlertToken;
+        this.applyAiStatusI18n = applyAiStatusI18n;
         this.activeSession = activeSession;
         this.ttsEnabled = ttsEnabled;
         this.ttsService = ttsService;
@@ -111,7 +115,7 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
                 face.setState(SoterIAFace.State.IDLE);
             }
 
-            viewManager.setSubtitle(promptReady);
+            viewManager.setSubtitle(promptReady.get());
         });
     }
 
@@ -121,7 +125,7 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
             TTS tts = ttsService.get();
             if (tts != null) {
                 tts.setLanguage(language);
-                tts.speakQueued(sentence);
+                tts.speakQueued(sentence, language);
             }
         }
     }
@@ -137,6 +141,7 @@ final class ChatInferenceUiBridge implements InferenceEngine.UIUpdateListener {
                 protocolId,
                 status,
                 pillReadyToken,
-                pillAlertToken)));
+                pillAlertToken,
+                applyAiStatusI18n)));
     }
 }

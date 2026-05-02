@@ -27,8 +27,7 @@ public class ChatSession {
     public ChatSession() {
         this.id = UUID.randomUUID().toString();
         this.timestamp = System.currentTimeMillis();
-        this.title = "Emergencia - " + java.time.LocalDateTime.now()
-                .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        this.title = null;
         this.messages = new ArrayList<>();
         this.rejectedProtocolIds = new HashSet<>();
         this.contextualExtensions = "";

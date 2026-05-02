@@ -14,11 +14,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.IOException;
 
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
+import com.soteria.ui.i18n.UiLocales;
 
 /**
  * JavaFX entry point. Decides between onboarding (first run) and chat
@@ -29,6 +32,7 @@ import com.soteria.infrastructure.intelligence.system.SystemCapability;
 public class MainApp extends Application {
 
     private Stage primaryStage;
+    private boolean chatScreenVisible;
     private final BootstrapService bootstrap = new BootstrapService();
     private final ProfileRepository profiles = new ProfileRepository();
     private static final Logger log = Logger.getLogger(MainApp.class.getName());
@@ -107,7 +111,11 @@ public class MainApp extends Application {
     }
 
     private void showOnboarding() throws IOException {
+        Locale locale = Locale.getDefault();
+        bootstrap.localizationService().setLocale(locale);
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/onboarding-view.fxml"));
+        loader.setResources(bundle);
         Parent root = loader.load();
         OnboardingController controller = loader.getController();
         controller.init(bootstrap, profiles, this);
@@ -115,6 +123,7 @@ public class MainApp extends Application {
         Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
         primaryStage.setScene(scene);
+        chatScreenVisible = false;
 
         // Navigation is now handled by the global readyProperty listener in start()
     }
@@ -148,7 +157,7 @@ public class MainApp extends Application {
         log.info(() -> "Profile is complete for user: " + p.fullName() + ". Swapping to chat screen.");
         Platform.runLater(() -> {
             try {
-                if (isAlreadyInChat()) {
+                if (chatScreenVisible) {
                     log.info("Already in chat screen, skipping.");
                     return;
                 }
@@ -159,13 +168,12 @@ public class MainApp extends Application {
         });
     }
 
-    private boolean isAlreadyInChat() {
-        String title = primaryStage.getTitle();
-        return title != null && title.startsWith("SoterIA — ");
-    }
-
     void showChatScreen(UserData profile) throws IOException {
+        Locale locale = UiLocales.fromPreferredLanguage(profile.preferredLanguage());
+        bootstrap.localizationService().setLocale(locale);
+        ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/chat-view.fxml"));
+        loader.setResources(bundle);
         Parent root = loader.load();
         ChatController controller = loader.getController();
         controller.init(profile, bootstrap, profiles);
@@ -173,7 +181,12 @@ public class MainApp extends Application {
         Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());
         primaryStage.setScene(scene);
-        primaryStage.setTitle("SoterIA — " + profile.fullName());
+        String windowName = profile.fullName();
+        if (windowName == null || windowName.isBlank() || UserData.INCOMPLETE_NAME.equals(windowName)) {
+            windowName = bootstrap.localizationService().getMessage("ui.session.untitled");
+        }
+        primaryStage.setTitle(bootstrap.localizationService().formatMessage("app.title", windowName));
+        chatScreenVisible = true;
     }
 
     @Override

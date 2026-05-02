@@ -59,19 +59,24 @@ public class BootstrapService {
     public void preInitialize() {
         try {
             log.info("Starting pre-initialization...");
-            state.update("Detecting hardware...", 0.10);
+            localizationService = new ResourceLocalizationService();
+            state.update(localizationService.getMessage("onboarding.bootstrap.detecting_hardware"), 0.10);
             capability = new SystemCapability();
             modelManager = new ModelManager(capability);
-            localizationService = new ResourceLocalizationService();
 
-            state.update("Building knowledge base...", 0.30);
+            state.update(localizationService.getMessage("onboarding.bootstrap.building_knowledge"), 0.30);
             knowledgeBase = new EmergencyKnowledgeBase(PROTOCOLS_PATH, modelManager.getKBIndexPath(), capability);
 
-            state.update("System ready for setup", 1.0);
+            state.update(localizationService.getMessage("onboarding.bootstrap.system_ready_setup"), 1.0);
             log.info("Pre-initialization complete.");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Pre-initialization failed", e);
-            state.update("Init Error: " + e.getMessage(), 0.0);
+            String err = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            if (localizationService != null) {
+                state.update(localizationService.formatMessage("onboarding.bootstrap.init_error", err), 0.0);
+            } else {
+                state.update("Init Error: " + err, 0.0);
+            }
         }
     }
 

@@ -21,6 +21,14 @@ public interface TTS {
     }
 
     /**
+     * Queues speech; {@code sanitizeLanguageHint} selects strict text filtering (e.g. CJK) for this chunk.
+     * Implementations that ignore hints may use {@link #speakQueued(String)} only.
+     */
+    default void speakQueued(String text, String sanitizeLanguageHint) {
+        speakQueued(text);
+    }
+
+    /**
      * Stops any ongoing speech.
      */
     void stop();
