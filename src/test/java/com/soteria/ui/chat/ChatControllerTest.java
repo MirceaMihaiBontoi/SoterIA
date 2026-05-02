@@ -1,4 +1,4 @@
-package com.soteria.ui.controller;
+package com.soteria.ui.chat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

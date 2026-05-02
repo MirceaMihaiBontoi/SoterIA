@@ -4,8 +4,8 @@ import atlantafx.base.theme.PrimerDark;
 import com.soteria.core.model.UserData;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
 import com.soteria.infrastructure.persistence.ProfileRepository;
-import com.soteria.ui.controller.ChatController;
-import com.soteria.ui.controller.OnboardingController;
+import com.soteria.ui.chat.ChatController;
+import com.soteria.ui.onboarding.OnboardingController;
 
 import javafx.application.Application;
 import javafx.application.Platform;

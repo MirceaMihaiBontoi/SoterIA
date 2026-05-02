@@ -6,7 +6,7 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.soteria.ui.controller.ChatController"
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.soteria.ui.chat.ChatController"
            styleClass="voice-shell">
 
     <!-- Voice-first shell: top bar + centered face + mic FAB row -->

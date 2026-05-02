@@ -1,4 +1,4 @@
-package com.soteria.ui.controller;
+package com.soteria.ui.onboarding;
 
 import com.soteria.core.model.UserData;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
@@ -19,13 +19,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
-import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -33,22 +26,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Multi-step setup wizard. Step 1 picks model + language and kicks off the
- * downloads in the background; step 2 collects the emergency profile while
- * those downloads run; the installation overlay shows if the user finishes
- * the form before provisioning does.
+ * Multi-step setup wizard for first launch.
+ *
+ * <p>Step 1 chooses the on-device model profile, UI language, and optional custom GGUF URL (verified
+ * asynchronously via {@link OnboardingCustomUrlVerifier}). Step 2 collects the emergency profile while
+ * {@link BootstrapService#startProvisioning} runs. If the user finishes before downloads complete, the
+ * installation overlay reflects {@link BootstrapService} progress.</p>
  */
 public class OnboardingController {
 
     private static final Logger log = Logger.getLogger(OnboardingController.class.getName());
     private static final String UNKNOWN = "Unknown";
-    private static final String DEFAULT_LANGUAGE = "English";
-    private static final java.util.List<String> SUPPORTED_LANGUAGES = java.util.List.of(
-        DEFAULT_LANGUAGE, "Spanish", "French", "German", "Italian", "Portuguese"
-    );
-    private static final int CUSTOM_URL_MAX_LEN = 500;
-    private static final Duration PROBE_CONNECT_TIMEOUT = Duration.ofSeconds(5);
-    private static final Duration PROBE_REQUEST_TIMEOUT = Duration.ofSeconds(8);
 
     @FXML
     private VBox step1Container;
@@ -95,7 +83,7 @@ public class OnboardingController {
     private ProfileRepository profiles;
     private MainApp mainApp;
 
-    // Cached once so auto-detection doesn't run twice.
+    /** Cached once so auto-detection does not run twice. */
     private String devicePhone = DevicePhoneDetector.UNKNOWN;
 
     public void init(BootstrapService bootstrap, ProfileRepository profiles, MainApp mainApp) {
@@ -128,7 +116,9 @@ public class OnboardingController {
         modelComboBox.setButtonCell(cellFactory.call(null));
     }
 
-    /** Cell layout: [model name] [Recommended?] ---spacer--- [x.x GB] */
+    /**
+     * Cell layout: [model name] [Recommended?] --- spacer --- [x.x GB]
+     */
     private final class ModelCell extends ListCell<SystemCapability.AIModelProfile> {
         private final Label name = new Label();
         private final Label recommended = new Label("Recommended");
@@ -162,8 +152,8 @@ public class OnboardingController {
     }
 
     private void setupLanguageAndGender() {
-        languageComboBox.setItems(FXCollections.observableArrayList(SUPPORTED_LANGUAGES));
-        languageComboBox.setValue(DEFAULT_LANGUAGE);
+        languageComboBox.setItems(FXCollections.observableArrayList(OnboardingLanguageCatalog.SUPPORTED));
+        languageComboBox.setValue(OnboardingLanguageCatalog.DEFAULT);
         genderComboBox.setItems(FXCollections.observableArrayList("Male", "Female", "Other", "Prefer not to say"));
         genderComboBox.getSelectionModel().selectFirst();
     }
@@ -215,22 +205,7 @@ public class OnboardingController {
     }
 
     private void selectLanguageSafely(String lang) {
-        if (lang == null) {
-            languageComboBox.setValue(DEFAULT_LANGUAGE);
-            return;
-        }
-        
-        // Try to find a match (case-insensitive)
-        String match = SUPPORTED_LANGUAGES.stream()
-                .filter(s -> s.equalsIgnoreCase(lang))
-                .findFirst()
-                .orElse(null);
-        
-        if (match != null) {
-            languageComboBox.setValue(match);
-        } else {
-            languageComboBox.setValue(DEFAULT_LANGUAGE);
-        }
+        languageComboBox.setValue(OnboardingLanguageCatalog.matchOrDefault(lang));
     }
 
     @FXML
@@ -241,17 +216,16 @@ public class OnboardingController {
             advanceToStep2();
             return;
         }
-        String syntaxError = validateCustomUrlSyntax(url);
+        String syntaxError = OnboardingCustomUrlVerifier.validateSyntax(url);
         if (syntaxError != null) {
             step1ErrorLabel.setText(syntaxError);
             return;
         }
 
-        // Real blindaje: probe the server before letting the user move on.
         step1ErrorLabel.setText("Verifying URL…");
         continueButton.setDisable(true);
         CompletableFuture
-                .supplyAsync(() -> probeCustomUrl(url))
+                .supplyAsync(() -> OnboardingCustomUrlVerifier.probe(url))
                 .whenComplete((err, ex) -> Platform.runLater(() -> {
                     continueButton.setDisable(false);
                     String finalMsg = (ex != null) ? ("Could not verify URL: " + ex.getMessage()) : err;
@@ -343,85 +317,5 @@ public class OnboardingController {
             log.log(Level.SEVERE, "Failed to finish onboarding", e);
             errorLabel.setText("Error saving profile: " + e.getMessage());
         }
-    }
-
-    /**
-     * Cheap syntactic check; reject obviously-wrong inputs before hitting the
-     * network.
-     */
-    private String validateCustomUrlSyntax(String url) {
-        if (url.length() > CUSTOM_URL_MAX_LEN) {
-            return "Custom URL is too long.";
-        }
-        String lower = url.toLowerCase(Locale.ROOT);
-        if (!lower.startsWith("https://")) {
-            return "Custom URL must use https://.";
-        }
-        if (!lower.endsWith(".gguf")) {
-            return "Custom URL must point to a .gguf file.";
-        }
-        try {
-            URI.create(url).toURL();
-        } catch (IllegalArgumentException | java.net.MalformedURLException _) {
-            return "Custom URL is malformed.";
-        }
-        return null;
-    }
-
-    /**
-     * Real server reachability check: HEAD with short timeouts, redirects followed.
-     * Returns null on success, or a user-facing error string. Runs on a worker
-     * thread — never call from the FX thread.
-     *
-     * Huggingface CDNs occasionally return 405 for HEAD on the redirected
-     * object; in that case we fall back to a 1-byte Range GET, which is the
-     * exact request pattern the downloader uses anyway.
-     */
-    private String probeCustomUrl(String url) {
-        HttpClient client = HttpClient.newBuilder()
-                .connectTimeout(PROBE_CONNECT_TIMEOUT)
-                .followRedirects(HttpClient.Redirect.ALWAYS)
-                .build();
-        try {
-            HttpRequest head = HttpRequest.newBuilder(URI.create(url))
-                    .timeout(PROBE_REQUEST_TIMEOUT)
-                    .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                    .header("User-Agent", "SoterIA/1.0 (url-probe)")
-                    .header("Accept", "*/*")
-                    .build();
-            HttpResponse<Void> resp = client.send(head, HttpResponse.BodyHandlers.discarding());
-            int code = resp.statusCode();
-            if (code >= 200 && code < 300)
-                return null;
-            if (code == 405)
-                return probeWithRange(client, url);
-            return "Server responded with HTTP " + code + " — check the URL.";
-        } catch (HttpTimeoutException _) {
-            return "The server took too long to respond. Try again.";
-        } catch (java.net.ConnectException _) {
-            return "Could not reach the server. Check your internet connection.";
-        } catch (java.net.UnknownHostException _) {
-            return "Unknown host. Check the URL spelling.";
-        } catch (InterruptedException _) {
-            Thread.currentThread().interrupt();
-            return "URL verification was interrupted.";
-        } catch (Exception e) {
-            log.log(Level.FINE, "URL probe failed", e);
-            return "Could not verify URL: " + e.getMessage();
-        }
-    }
-
-    private String probeWithRange(HttpClient client, String url) throws IOException, InterruptedException {
-        HttpRequest get = HttpRequest.newBuilder(URI.create(url))
-                .timeout(PROBE_REQUEST_TIMEOUT)
-                .header("User-Agent", "SoterIA/1.0 (url-probe)")
-                .header("Range", "bytes=0-0")
-                .GET()
-                .build();
-        HttpResponse<Void> resp = client.send(get, HttpResponse.BodyHandlers.discarding());
-        int code = resp.statusCode();
-        if (code == 200 || code == 206)
-            return null;
-        return "Server responded with HTTP " + code + " — check the URL.";
     }
 }
