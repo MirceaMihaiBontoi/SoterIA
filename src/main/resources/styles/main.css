@@ -531,6 +531,75 @@
     -fx-text-fill: -soteria-bg;
 }
 
+.sidebar-settings-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -soteria-fg;
+    -fx-border-color: -soteria-border;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8px;
+    -fx-content-display: LEFT;
+}
+
+.sidebar-settings-button:hover {
+    -fx-background-color: -soteria-bg-subtle;
+    -fx-border-color: -soteria-accent-strong;
+}
+
+.settings-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.55);
+    -fx-padding: 16px;
+    -fx-alignment: center;
+}
+
+.settings-card {
+    -fx-background-color: -soteria-bg-elevated;
+    -fx-background-radius: 14px;
+    -fx-border-color: -soteria-border;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 20, 0.15, 0, 6);
+}
+
+.settings-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -soteria-fg;
+}
+
+.settings-section-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -soteria-fg-muted;
+}
+
+.settings-body-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -soteria-fg;
+}
+
+.settings-value-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -soteria-accent;
+}
+
+.settings-scroll,
+.settings-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.settings-check {
+    -fx-text-fill: -soteria-fg;
+}
+
+.settings-check .box {
+    -fx-background-color: -soteria-bg-subtle;
+    -fx-border-color: -soteria-border;
+}
+
 .session-item {
     -fx-padding: 12px;
     -fx-background-radius: 8px;
@@ -545,6 +614,25 @@
     -fx-background-color: -soteria-bg-subtle;
     -fx-border-color: -soteria-accent;
     -fx-border-width: 0 0 0 3px;
+}
+
+.session-delete-button {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 8px;
+    -fx-cursor: hand;
+    -fx-background-radius: 8px;
+}
+
+.session-delete-button:hover {
+    -fx-background-color: -soteria-danger-soft;
+}
+
+.session-delete-icon {
+    -fx-icon-color: -soteria-fg-muted;
+}
+
+.session-delete-button:hover .session-delete-icon {
+    -fx-icon-color: -soteria-danger;
 }
 
 .session-title {

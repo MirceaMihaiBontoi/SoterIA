@@ -5,11 +5,11 @@ import java.util.List;
 /**
  * Display names for the onboarding language combo box and safe resolution from detected or persisted strings.
  */
-final class OnboardingLanguageCatalog {
+public final class OnboardingLanguageCatalog {
 
-    static final String DEFAULT = "English";
+    public static final String DEFAULT = "English";
 
-    static final List<String> SUPPORTED = List.of(
+    public static final List<String> SUPPORTED = List.of(
             DEFAULT, "Spanish", "French", "German", "Italian", "Portuguese");
 
     private OnboardingLanguageCatalog() {
@@ -21,7 +21,7 @@ final class OnboardingLanguageCatalog {
      * @param lang value from GPS heuristics, saved draft, or {@code null}
      * @return the matching supported label, or {@link #DEFAULT}
      */
-    static String matchOrDefault(String lang) {
+    public static String matchOrDefault(String lang) {
         if (lang == null) {
             return DEFAULT;
         }

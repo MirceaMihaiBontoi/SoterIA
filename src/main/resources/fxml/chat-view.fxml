@@ -99,6 +99,14 @@
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="✕" onAction="#toggleHistorySidebar" styleClass="sheet-close"/>
         </HBox>
+        <Button text="Ajustes" onAction="#openSettingsFromSidebar" styleClass="sidebar-settings-button" maxWidth="Infinity">
+            <graphic>
+                <FontIcon iconLiteral="mdmz-settings" iconSize="18" styleClass="fab-icon-alt"/>
+            </graphic>
+            <VBox.margin>
+                <Insets left="14" right="14" bottom="8"/>
+            </VBox.margin>
+        </Button>
         <Button text="+ Nueva Emergencia" onAction="#handleNewChat" styleClass="new-chat-button" maxWidth="Infinity">
             <VBox.margin><Insets left="14" right="14" bottom="10"/></VBox.margin>
         </Button>
@@ -107,6 +115,43 @@
                 <padding><Insets left="10" right="10"/></padding>
             </VBox>
         </ScrollPane>
+    </VBox>
+
+    <!-- Settings overlay: opened from history sidebar -->
+    <VBox fx:id="settingsOverlay" styleClass="settings-overlay" StackPane.alignment="CENTER"
+          visible="false" managed="false" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER">
+        <VBox styleClass="settings-card" maxWidth="380" maxHeight="520" spacing="10">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Ajustes" styleClass="settings-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeSettings" styleClass="sheet-close"/>
+            </HBox>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="settings-scroll">
+                <VBox spacing="14">
+                    <padding>
+                        <Insets top="4" right="4" bottom="8" left="4"/>
+                    </padding>
+                    <Label text="Tema" styleClass="settings-section-label"/>
+                    <ComboBox fx:id="settingsThemeCombo" maxWidth="Infinity"/>
+                    <Label text="Idioma (voz e IA)" styleClass="settings-section-label"/>
+                    <ComboBox fx:id="settingsLanguageCombo" maxWidth="Infinity"/>
+                    <Label text="Velocidad de voz" styleClass="settings-section-label"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Slider fx:id="settingsSpeechRateSlider" HBox.hgrow="ALWAYS" showTickMarks="false"/>
+                        <Label fx:id="settingsSpeechRateLabel" text="1,44×" styleClass="settings-value-label"
+                               minWidth="36"/>
+                    </HBox>
+                    <Label text="Modelo IA" styleClass="settings-section-label"/>
+                    <Label fx:id="settingsModelLabel" wrapText="true" styleClass="settings-body-label"/>
+                    <Label text="Palabra de activación" styleClass="settings-section-label"/>
+                    <CheckBox fx:id="settingsWakeToggle" text="Escuchar «wake word» en segundo plano"
+                              wrapText="true" styleClass="settings-check"/>
+                </VBox>
+            </ScrollPane>
+        </VBox>
     </VBox>
 
 </StackPane>

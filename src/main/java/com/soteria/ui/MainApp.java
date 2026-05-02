@@ -168,7 +168,7 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/chat-view.fxml"));
         Parent root = loader.load();
         ChatController controller = loader.getController();
-        controller.init(profile, bootstrap);
+        controller.init(profile, bootstrap, profiles);
 
         Scene scene = new Scene(root, MOBILE_WIDTH, MOBILE_HEIGHT);
         scene.getStylesheets().add(getClass().getResource(MAIN_CSS).toExternalForm());

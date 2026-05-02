@@ -12,21 +12,28 @@ import com.soteria.infrastructure.notification.NotificationAlertService;
 import com.soteria.infrastructure.sensor.SystemGPSLocation;
 import com.soteria.ui.view.SoterIAFace;
 import com.soteria.core.model.UserData;
+import com.soteria.infrastructure.persistence.ProfileRepository;
 import com.soteria.ui.view.ChatViewManager;
 import com.soteria.application.chat.InferenceEngine;
 import com.soteria.ui.view.SessionCoordinator;
 
+import com.soteria.ui.onboarding.OnboardingLanguageCatalog;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -68,6 +75,13 @@ public class ChatController {
     @FXML private VBox historySidebar;
     @FXML private VBox sessionList;
     @FXML private VBox safetyContainer;
+    @FXML private VBox settingsOverlay;
+    @FXML private ComboBox<String> settingsThemeCombo;
+    @FXML private ComboBox<String> settingsLanguageCombo;
+    @FXML private Slider settingsSpeechRateSlider;
+    @FXML private Label settingsSpeechRateLabel;
+    @FXML private Label settingsModelLabel;
+    @FXML private CheckBox settingsWakeToggle;
     private SoterIAFace face;
     private UserData currentUser;
     private ChatSession activeSession;
@@ -83,12 +97,17 @@ public class ChatController {
     private SessionCoordinator sessionCoordinator;
     private com.soteria.infrastructure.intelligence.kws.WakeWordService wakeWordService;
     private ChatInferenceUiBridge inferenceUi;
+    private ProfileRepository profileRepository;
 
     private boolean aiAvailable = false;
     private boolean isRecording = false;
     private final AtomicBoolean haltedAssistantOnPartial = new AtomicBoolean(false);
     private boolean ttsEnabled = true;
     private String currentLanguage = "English";
+    /** Matches default {@code speechRate} in {@link com.soteria.infrastructure.intelligence.tts.SherpaTTSService}. */
+    private float currentSpeechRate = 1.44f;
+    private boolean wakeWordEnabled = true;
+    private boolean syncingSettingsUi;
 
     private final AtomicLong inferenceGeneration = new AtomicLong(0);
     private final ChatTTSIdleChain ttsIdleChain = new ChatTTSIdleChain();
@@ -109,11 +128,13 @@ public class ChatController {
         viewManager.setSubtitle(PROMPT_READY);
         viewManager.setAiStatusPill("Preparando IA", STATUS_WARMING);
         setInputLocked(true);
+        setupSettingsUi();
         handleNewChat();
     }
 
-    public void init(UserData profile, BootstrapService bootstrap) {
+    public void init(UserData profile, BootstrapService bootstrap, ProfileRepository profiles) {
         this.currentUser = profile;
+        this.profileRepository = profiles;
         if (profile.preferredLanguage() != null) {
             this.currentLanguage = profile.preferredLanguage();
         }
@@ -164,7 +185,12 @@ public class ChatController {
                     () -> ttsService);
             this.aiAvailable = true;
 
-            if (this.wakeWordService != null) {
+            if (this.ttsService != null) {
+                this.ttsService.setLanguage(currentLanguage);
+                this.ttsService.setSpeechRate(currentSpeechRate);
+            }
+
+            if (this.wakeWordService != null && wakeWordEnabled) {
                 logger.log(Level.INFO, "[{0}] Registering wake-word listener.", instanceId);
                 this.wakeWordService.startListening(this::onWakeWordDetected);
             }
@@ -273,7 +299,7 @@ public class ChatController {
         micButton.getStyleClass().remove("mic-fab-active");
         if (micIcon != null) micIcon.setIconLiteral("mdmz-mic");
 
-        if (wakeWordService != null) {
+        if (wakeWordService != null && wakeWordEnabled) {
             wakeWordService.startListening(this::onWakeWordDetected);
         }
         face.setState(SoterIAFace.State.IDLE);
@@ -347,6 +373,7 @@ public class ChatController {
         this.activeSession = sessionCoordinator.startNewSession();
         viewManager.clearMessages();
         if (aiAvailable) viewManager.addBotMessage("Nueva sesión de emergencia iniciada. Dime qué sucede.");
+        refreshSessionList();
     }
 
     @FXML
@@ -361,7 +388,14 @@ public class ChatController {
     }
 
     private void refreshSessionList() {
-        sessionCoordinator.refreshSessionList(activeSession, this::loadSession);
+        sessionCoordinator.refreshSessionList(activeSession, this::loadSession, this::handleSessionDeletedFromList);
+    }
+
+    private void handleSessionDeletedFromList(ChatSession deleted) {
+        if (activeSession != null && deleted.getId().equals(activeSession.getId())) {
+            handleNewChat();
+        }
+        refreshSessionList();
     }
 
     private void loadSession(ChatSession session) {
@@ -372,6 +406,126 @@ public class ChatController {
             if ("user".equals(msg.role())) viewManager.addUserMessage(msg.content());
             else viewManager.addBotMessage(msg.content());
         }
+    }
+
+    private void refreshSettingsModelLabel() {
+        if (settingsModelLabel == null || currentUser == null) {
+            return;
+        }
+        String model = currentUser.preferredModel() != null ? currentUser.preferredModel() : "—";
+        String url = currentUser.customModelUrl();
+        if (url != null && !url.isBlank()) {
+            settingsModelLabel.setText(model + "\n" + url);
+        } else {
+            settingsModelLabel.setText(model);
+        }
+    }
+
+    private void setupSettingsUi() {
+        settingsThemeCombo.getItems().setAll("Oscuro");
+        settingsThemeCombo.getSelectionModel().selectFirst();
+        settingsThemeCombo.setDisable(true);
+
+        settingsLanguageCombo.getItems().setAll(OnboardingLanguageCatalog.SUPPORTED);
+        settingsLanguageCombo.valueProperty().addListener((obs, oldV, newV) -> {
+            if (syncingSettingsUi || newV == null) {
+                return;
+            }
+            currentLanguage = newV;
+            if (ttsService != null) {
+                ttsService.setLanguage(newV);
+            }
+            persistProfileLanguage();
+        });
+
+        settingsSpeechRateSlider.setMin(0.5);
+        settingsSpeechRateSlider.setMax(2.0);
+        settingsSpeechRateSlider.setValue(currentSpeechRate);
+        settingsSpeechRateSlider.setMajorTickUnit(0.5);
+        settingsSpeechRateSlider.setMinorTickCount(0);
+        settingsSpeechRateSlider.valueProperty().addListener((obs, oldV, newV) -> {
+            float v = newV.floatValue();
+            currentSpeechRate = v;
+            if (settingsSpeechRateLabel != null) {
+                settingsSpeechRateLabel.setText(String.format("%.2f×", v));
+            }
+            if (!syncingSettingsUi && ttsService != null) {
+                ttsService.setSpeechRate(v);
+            }
+        });
+
+        settingsWakeToggle.selectedProperty().addListener((obs, oldV, newV) -> {
+            if (syncingSettingsUi) {
+                return;
+            }
+            wakeWordEnabled = newV;
+            applyWakeWordPreference();
+        });
+    }
+
+    private void persistProfileLanguage() {
+        if (profileRepository == null || currentUser == null) {
+            return;
+        }
+        UserData updated = new UserData(
+                currentUser.fullName(),
+                currentUser.phoneNumber(),
+                currentUser.gender(),
+                currentUser.birthDate(),
+                currentUser.medicalInfo(),
+                currentUser.emergencyContact(),
+                currentUser.preferredModel(),
+                currentLanguage,
+                currentUser.customModelUrl());
+        try {
+            profileRepository.save(updated);
+            currentUser = updated;
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "[{0}] Failed to save language preference", instanceId);
+            logger.log(Level.FINE, "Profile save failed", e);
+        }
+    }
+
+    private void applyWakeWordPreference() {
+        if (wakeWordService == null) {
+            return;
+        }
+        if (!wakeWordEnabled) {
+            wakeWordService.stopListening();
+        } else if (!isRecording) {
+            wakeWordService.startListening(this::onWakeWordDetected);
+        }
+    }
+
+    @FXML
+    private void openSettingsFromSidebar() {
+        sessionCoordinator.closeHistorySidebar();
+        openSettingsOverlay();
+    }
+
+    private void openSettingsOverlay() {
+        syncingSettingsUi = true;
+        try {
+            settingsLanguageCombo.setValue(OnboardingLanguageCatalog.matchOrDefault(currentLanguage));
+            settingsSpeechRateSlider.setValue(currentSpeechRate);
+            if (settingsSpeechRateLabel != null) {
+                settingsSpeechRateLabel.setText(String.format("%.2f×", currentSpeechRate));
+            }
+            refreshSettingsModelLabel();
+            boolean wakeAvailable = wakeWordService != null;
+            settingsWakeToggle.setDisable(!wakeAvailable);
+            settingsWakeToggle.setSelected(wakeAvailable && wakeWordEnabled);
+        } finally {
+            syncingSettingsUi = false;
+        }
+        settingsOverlay.setVisible(true);
+        settingsOverlay.setManaged(true);
+    }
+
+    @FXML
+    private void closeSettings() {
+        settingsOverlay.setVisible(false);
+        settingsOverlay.setManaged(false);
     }
 
     private void setInputLocked(boolean locked) {

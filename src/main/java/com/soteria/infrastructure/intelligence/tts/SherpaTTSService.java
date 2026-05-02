@@ -94,7 +94,8 @@ public class SherpaTTSService implements TTS, AutoCloseable {
         try {
             String trimmedText = text.trim();
             float currentSpeechRate = calculateSpeechRate(trimmedText);
-            
+
+            modelManager.ensureEngineLanguage(this.language);
             GeneratedAudio audio = modelManager.generate(text, this.cachedSpeakerId, currentSpeechRate);
 
             if (audio != null && audio.getSamples() != null && audio.getSamples().length > 0) {
@@ -209,6 +210,7 @@ public class SherpaTTSService implements TTS, AutoCloseable {
     public void setLanguage(String language) {
         this.language = language;
         this.cachedSpeakerId = resolveSpeakerId(language);
+        modelManager.ensureEngineLanguage(language);
     }
 
     public void setMuted(boolean muted) {
