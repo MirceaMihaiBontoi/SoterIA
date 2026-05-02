@@ -28,6 +28,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,8 +84,22 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
     private boolean aiAvailable = false;
     private boolean botMessageStarted = false;
     private boolean isRecording = false;
+    /** After the first meaningful partial for this mic turn, assistant output has already been cut. */
+    private boolean haltedAssistantOnPartial = false;
     private boolean ttsEnabled = true;
     private String currentLanguage = "English";
+
+    /** Bumped whenever a turn is invalidated (barge-in / cancel); inference UI respects only matching correlation IDs. */
+    private final AtomicLong inferenceGeneration = new AtomicLong(0);
+
+    /** Serialized wait for overlapping TTS completions so IDLE is not raced by multiple waiter threads. */
+    private CompletableFuture<Void> ttsIdleChainTail = CompletableFuture.completedFuture(null);
+    private final Object ttsIdleChainLock = new Object();
+
+    private String lastDedupedOutboundText = "";
+    private long lastDedupedOutboundAtMs;
+
+    private static final long DUPLICATE_CHAT_SUBMIT_GUARD_MS = 450;
 
     @FXML
     private void initialize() {
@@ -153,7 +170,9 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         }));
     }
 
-    private void prepareForInput() {
+    /** Stops TTS and signals the brain to abandon the current generation (voice or text bump-in). */
+    private void interruptOngoingGeneration() {
+        inferenceGeneration.incrementAndGet();
         if (ttsService != null) {
             ttsService.stop();
         }
@@ -161,6 +180,10 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
             inferenceEngine.cancel();
         }
         botMessageStarted = false;
+    }
+
+    private void prepareForInput() {
+        interruptOngoingGeneration();
         viewManager.setPartialTranscript("");
         face.setState(SoterIAFace.State.LISTENING);
     }
@@ -169,14 +192,25 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         logger.log(Level.INFO, "[{0}] Wake-word callback received by active controller", instanceId);
         Platform.runLater(() -> {
             prepareForInput();
-            startRecording();
+            beginVoiceCapture();
         });
     }
 
     @FXML
     private void handleSendMessage() {
         String message = messageInput.getText().trim();
-        if (message.isEmpty()) return;
+        if (message.isEmpty()) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        String dedupKey = normalizeForDedupeGuard(message);
+        if (dedupKey.equals(lastDedupedOutboundText) && now - lastDedupedOutboundAtMs < DUPLICATE_CHAT_SUBMIT_GUARD_MS) {
+            logger.log(Level.FINE, "[{0}] Send ignored — duplicate rapid submit.", instanceId);
+            return;
+        }
+        lastDedupedOutboundText = dedupKey;
+        lastDedupedOutboundAtMs = now;
+
         viewManager.addUserMessage(message);
         messageInput.clear();
         processMessage(message);
@@ -191,14 +225,21 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
         if (!isRecording) {
             prepareForInput();
-            startRecording();
+            beginVoiceCapture();
         } else {
             stopRecording();
         }
     }
 
-    private void startRecording() {
+    private void beginVoiceCapture() {
+        if (sttService == null) {
+            logger.log(Level.WARNING, "[{0}] beginVoiceCapture: STT null.", instanceId);
+            viewManager.setSubtitle(
+                    "Reconocimiento de voz no disponible. Intenta escribir el mensaje.");
+            return;
+        }
         isRecording = true;
+        haltedAssistantOnPartial = false;
         if (wakeWordService != null) {
             wakeWordService.stopListening(); // Pause wake-word to free mic
         }
@@ -221,6 +262,17 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
                     }
 
                     Platform.runLater(() -> {
+                        long now = System.currentTimeMillis();
+                        String dedupKey = normalizeForDedupeGuard(text);
+                        if (dedupKey.equals(lastDedupedOutboundText)
+                                && now - lastDedupedOutboundAtMs < DUPLICATE_CHAT_SUBMIT_GUARD_MS) {
+                            stopRecording();
+                            logger.log(Level.FINE, "[{0}] Ignored STT duplicate submit.", instanceId);
+                            return;
+                        }
+                        lastDedupedOutboundText = dedupKey;
+                        lastDedupedOutboundAtMs = now;
+
                         logger.log(Level.INFO, "[{0}] Processing message: ''{1}''", new Object[]{instanceId, text});
                         stopRecording();
                         viewManager.addUserMessage(text);
@@ -233,7 +285,18 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
             }
             @Override
             public void onPartialResult(String text) {
-                viewManager.setPartialTranscript(text);
+                Platform.runLater(() -> {
+                    if (text != null && !text.isBlank() && !haltedAssistantOnPartial) {
+                        haltedAssistantOnPartial = true;
+                        interruptOngoingGeneration();
+                        face.setState(SoterIAFace.State.LISTENING);
+                        viewManager.setSubtitle("Escuchando…");
+                        logger.log(Level.INFO,
+                                "[{0}] STT partial: interrupted assistant TTS/streaming inference.",
+                                instanceId);
+                    }
+                    viewManager.setPartialTranscript(text != null ? text : "");
+                });
             }
             @Override
             public void onError(Throwable t) {
@@ -247,7 +310,9 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
 
     private void stopRecording() {
         isRecording = false;
-        sttService.stopListening();
+        if (sttService != null) {
+            sttService.stopListening();
+        }
         micButton.getStyleClass().remove("mic-fab-active");
         if (micIcon != null) micIcon.setIconLiteral("mdmz-mic");
         
@@ -265,16 +330,18 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         }
 
         logger.log(Level.INFO, "[{0}] processMessage: ''{1}''", new Object[]{instanceId, message});
+        interruptOngoingGeneration();
+        final long correlationId = inferenceGeneration.get();
         activeSession.addMessage(ChatMessage.user(message));
         face.setState(SoterIAFace.State.THINKING);
         viewManager.setSubtitle("Pensando…");
         viewManager.setPartialTranscript(message); // Keep the transcribed text visible under the face
         viewManager.showThinkingIndicator();
-        botMessageStarted = false;
 
         new Thread(() -> {
             logger.log(Level.INFO, "[{0}] Starting inference thread.", instanceId);
-            inferenceEngine.runInference(message, activeSession, currentUser, currentLanguage, this);
+            inferenceEngine.runInference(message, activeSession, currentUser, currentLanguage,
+                    this, inferenceGeneration, correlationId);
         }, "soteria-inference").start();
     }
 
@@ -302,41 +369,62 @@ public class ChatController implements InferenceEngine.UIUpdateListener {
         Platform.runLater(() -> {
             updateActiveSession(finalMessage, query);
             sessionCoordinator.saveCurrentSession();
-            viewManager.updateBotMessage(finalMessage); 
-            
+            viewManager.updateBotMessage(finalMessage);
+
             if (ttsEnabled && ttsService != null && ttsService.isSpeaking()) {
-                handleTTSCompletion();
+                waitForSpeechSilenceThen(() -> face.setState(SoterIAFace.State.IDLE));
             } else {
                 face.setState(SoterIAFace.State.IDLE);
             }
-            
+
             viewManager.setSubtitle(PROMPT_READY);
         });
+    }
+
+    /** Chains sequential background waits while {@link #ttsIdleChainTail} drains speaking state. */
+    private void waitForSpeechSilenceThen(Runnable javafxWork) {
+        synchronized (ttsIdleChainLock) {
+            ttsIdleChainTail = ttsIdleChainTail
+                    .handle((ok, err) -> null)
+                    .thenRunAsync(() -> {
+                        TTS tts = ttsService;
+                        if (tts == null) {
+                            return;
+                        }
+                        try {
+                            while (tts.isSpeaking()) {
+                                Thread.sleep(80);
+                            }
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    })
+                    .thenRun(() -> Platform.runLater(javafxWork))
+                    .whenComplete((r, err) -> {
+                        if (err != null) {
+                            logger.log(Level.FINE, "TTS idle chain step failed (ignored)", err.getCause());
+                        }
+                    });
+        }
+    }
+
+    /** Collapses whitespace for trivial duplicate submits (rapid double Enter / echoes). */
+    private static String normalizeForDedupeGuard(String text) {
+        if (text == null || text.isBlank()) {
+            return "";
+        }
+        return text.trim().toLowerCase().replaceAll("\\s+", " ");
     }
 
     private void updateActiveSession(String finalMessage, String query) {
         activeSession.addMessage(ChatMessage.model(finalMessage));
         activeSession.setTimestamp(System.currentTimeMillis());
-        
+
         if (activeSession.getMessages().size() <= 2) {
             String title = query.substring(0, Math.min(query.length(), 25));
             if (query.length() > 25) title += "...";
             activeSession.setTitle(title);
         }
-    }
-
-    private void handleTTSCompletion() {
-        new Thread(() -> {
-            while (ttsService.isSpeaking()) {
-                try { 
-                    Thread.sleep(100); 
-                } catch (InterruptedException _) { 
-                    Thread.currentThread().interrupt();
-                    break; 
-                }
-            }
-            Platform.runLater(() -> face.setState(SoterIAFace.State.IDLE));
-        }, "soteria-tts-wait").start();
     }
 
     @Override

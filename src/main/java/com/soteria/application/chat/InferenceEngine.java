@@ -11,6 +11,7 @@ import javafx.application.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,6 +46,18 @@ public class InferenceEngine {
         this.historyManager = new HistoryManager();
     }
 
+    /**
+     * @param inferenceGeneration incremented on bump-in / cancel — callbacks are dropped once it changes
+     * @param correlationId       value observed after scheduling this run ({@code inferenceGeneration#get()})
+     */
+    public void runInference(String message, ChatSession session, UserData user, String language,
+            UIUpdateListener listener, AtomicLong inferenceGeneration, long correlationId) {
+        UIUpdateListener gated = InferenceUiGate.gate(listener, inferenceGeneration, correlationId);
+        runInferenceFlowInternal(message, session, user, language, gated, 1);
+    }
+
+    /** @deprecated Prefer {@link #runInference(String, ChatSession, UserData, String, UIUpdateListener, AtomicLong, long)}. */
+    @Deprecated(forRemoval = false)
     public void runInference(String message, ChatSession session, UserData user, String language,
             UIUpdateListener listener) {
         runInferenceFlowInternal(message, session, user, language, listener, 1);
@@ -196,6 +209,56 @@ public class InferenceEngine {
     public void cancel() {
         if (this.brainService != null) {
             this.brainService.cancel();
+        }
+    }
+
+    /**
+     * Drops UI updates emitted after inference was superseded ({@link ChatController}'s inference generation bumped).
+     */
+    private static final class InferenceUiGate {
+        private InferenceUiGate() {}
+
+        static UIUpdateListener gate(UIUpdateListener inner, AtomicLong inferenceGeneration, long correlationId) {
+            return new UIUpdateListener() {
+                private boolean dropped() {
+                    return correlationId != inferenceGeneration.get();
+                }
+
+                @Override
+                public void onSubtitleUpdate(String text) {
+                    if (!dropped()) {
+                        inner.onSubtitleUpdate(text);
+                    }
+                }
+
+                @Override
+                public void onFaceStateChange(String state) {
+                    if (!dropped()) {
+                        inner.onFaceStateChange(state);
+                    }
+                }
+
+                @Override
+                public void onResponseFinalized(String finalMessage, String query) {
+                    if (!dropped()) {
+                        inner.onResponseFinalized(finalMessage, query);
+                    }
+                }
+
+                @Override
+                public void onSafetyBoxUpdate(String protocolId, String status) {
+                    if (!dropped()) {
+                        inner.onSafetyBoxUpdate(protocolId, status);
+                    }
+                }
+
+                @Override
+                public void onSpeakSentence(String sentence, String language) {
+                    if (!dropped()) {
+                        inner.onSpeakSentence(sentence, language);
+                    }
+                }
+            };
         }
     }
 }

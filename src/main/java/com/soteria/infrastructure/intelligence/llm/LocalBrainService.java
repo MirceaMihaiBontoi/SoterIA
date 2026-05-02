@@ -185,6 +185,10 @@ public class LocalBrainService implements AutoCloseable, Brain {
     }
 
     private void finalizeResponse(String finalResult, boolean rejected, InferenceListener listener) {
+        if (isCancelled) {
+            logger.info("Skipping inference finalize callbacks (cancelled mid-stream).");
+            return;
+        }
         if (rejected) {
             int rejectIdx = finalResult.toUpperCase().indexOf("REJECT:");
             String reason = finalResult.substring(rejectIdx + 7).split("\n")[0].trim();

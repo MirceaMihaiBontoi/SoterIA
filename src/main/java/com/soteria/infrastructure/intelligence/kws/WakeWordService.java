@@ -63,7 +63,7 @@ public class WakeWordService implements AutoCloseable {
         OnlineTransducerModelConfig transducerConfig = OnlineTransducerModelConfig.builder()
                 .setEncoder(modelPath.resolve("encoder-epoch-13-avg-2-chunk-16-left-64.onnx").toString())
                 .setDecoder(modelPath.resolve("decoder-epoch-13-avg-2-chunk-16-left-64.onnx").toString())
-                .setJoiner(modelPath.resolve("joiner-epoch-13-avg-2-chunk-8-left-64.onnx").toString())
+                .setJoiner(modelPath.resolve("joiner-epoch-13-avg-2-chunk-16-left-64.onnx").toString())
                 .build();
 
         OnlineModelConfig modelConfig = OnlineModelConfig.builder()
@@ -126,7 +126,7 @@ public class WakeWordService implements AutoCloseable {
                 normalizer.normalize(buffer, bytesRead);
 
                 float maxAmp = convertToFloat(buffer, bytesRead, floatBuffer);
-                
+
                 stream.acceptWaveform(floatBuffer, 16000);
                 while (spotter.isReady(stream)) {
                     spotter.decode(stream);
