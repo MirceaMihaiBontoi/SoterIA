@@ -18,22 +18,37 @@ class SystemCapabilityTest {
     }
 
     @Test
-    @DisplayName("Umbral STABLE (< 12GB)")
-    void balancedThreshold() {
-        // 2GB (Now falls back to STABLE)
-        SystemCapability capability2 = new SystemCapability(2L * 1024 * 1024 * 1024);
-        assertEquals(SystemCapability.AIModelProfile.STABLE, capability2.getRecommendedProfile());
-        
-        // 8GB
-        SystemCapability capability8 = new SystemCapability(8L * 1024 * 1024 * 1024);
-        assertEquals(SystemCapability.AIModelProfile.STABLE, capability8.getRecommendedProfile());
+    @DisplayName("Perfil persistido E2B (legado) se mapea a LITE")
+    void legacyE2BNameMapsToLite() {
+        assertEquals(SystemCapability.AIModelProfile.LITE, SystemCapability.parseStoredProfile("E2B"));
     }
 
+    @Test
+    @DisplayName("Umbral LITE / Gemma 4 E2B (< 6GB)")
+    void liteThreshold() {
+        SystemCapability cap2 = new SystemCapability(2L * 1024 * 1024 * 1024);
+        assertEquals(SystemCapability.AIModelProfile.LITE, cap2.getRecommendedProfile());
+
+        SystemCapability cap5 = new SystemCapability(5L * 1024 * 1024 * 1024);
+        assertEquals(SystemCapability.AIModelProfile.LITE, cap5.getRecommendedProfile());
+    }
+
+    @Test
+    @DisplayName("Umbral STABLE E4B Q4 (6–12GB)")
+    void stableThreshold() {
+        SystemCapability cap6 = new SystemCapability(6L * 1024 * 1024 * 1024);
+        assertEquals(SystemCapability.AIModelProfile.STABLE, cap6.getRecommendedProfile());
+
+        SystemCapability cap8 = new SystemCapability(8L * 1024 * 1024 * 1024);
+        assertEquals(SystemCapability.AIModelProfile.STABLE, cap8.getRecommendedProfile());
+
+        SystemCapability cap11 = new SystemCapability(11L * 1024 * 1024 * 1024);
+        assertEquals(SystemCapability.AIModelProfile.STABLE, cap11.getRecommendedProfile());
+    }
 
     @Test
     @DisplayName("Umbral EXPERT (>= 12GB)")
-    void ultraThreshold() {
-        // 16GB
+    void expertThreshold() {
         SystemCapability capability = new SystemCapability(16L * 1024 * 1024 * 1024);
         assertEquals(SystemCapability.AIModelProfile.EXPERT, capability.getRecommendedProfile());
         assertFalse(capability.isLowPowerDevice());
@@ -42,11 +57,9 @@ class SystemCapabilityTest {
     @Test
     @DisplayName("Cálculo de hilos óptimos para evitar lag")
     void idealThreadCount() {
-        // Simulamos un perfil potente (ULTRA)
         SystemCapability capability = new SystemCapability(32L * 1024 * 1024 * 1024);
         int logicalCores = Runtime.getRuntime().availableProcessors();
         
-        // El punto dulce es la mitad (asumiendo SMT)
         int expected = Math.max(1, logicalCores / 2);
         assertEquals(expected, capability.getIdealThreadCount());
     }
@@ -54,11 +67,9 @@ class SystemCapabilityTest {
     @Test
     @DisplayName("Cálculo de hilos para dispositivos de baja potencia")
     void idealThreadCountLowPower() {
-        // Perfil bajo (1GB RAM - still STABLE now)
         SystemCapability capability = new SystemCapability(1L * 1024 * 1024 * 1024);
         int logicalCores = Runtime.getRuntime().availableProcessors();
         
-        // En dispositivos móviles se capa más agresivamente
         int expected = Math.clamp(logicalCores / 2, 1, 4);
         assertEquals(expected, capability.getIdealThreadCount());
     }

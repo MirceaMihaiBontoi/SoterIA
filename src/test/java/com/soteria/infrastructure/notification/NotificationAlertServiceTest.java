@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("NotificationAlertService Tests")
 class NotificationAlertServiceTest {
 
+    private static final String ASSERT_MISSING_PREFIX = "Missing ";
+
     @TempDir
     Path tempDir;
 
@@ -27,7 +29,7 @@ class NotificationAlertServiceTest {
         Path logFile = tempDir.resolve("alerts.log");
         NotificationAlertService service = new NotificationAlertService(logFile);
         
-        UserData user = new UserData("Juan Perez", "+34600000000", "Male", "1980-01-01", "Allergies", "Maria +34611111111", "BALANCED", "Spanish", "");
+        UserData user = new UserData("Juan Perez", "+34600000000", "Male", "1980-01-01", "Allergies", "Maria +34611111111", "STABLE", "Spanish", null, null);
         EmergencyEvent event = new EmergencyEvent(
                 "Cardiac Arrest", "Madrid, Center", 9, LocalDateTime.now(), user.toString());
 
@@ -65,7 +67,7 @@ class NotificationAlertServiceTest {
         // Should handle null/empty without exceptions
         assertDoesNotThrow(() -> service.notifyContacts(null, null));
         
-        UserData emptyUser = new UserData("", "", "", "", "", "", "", "", "");
+        UserData emptyUser = new UserData("", "", "", "", "", "", "", "", null, null);
         assertDoesNotThrow(() -> service.notifyContacts(emptyUser, null));
     }
 
@@ -93,9 +95,9 @@ class NotificationAlertServiceTest {
             service.send(event);
             
             String content = Files.readString(logFile);
-            assertTrue(content.contains(type), "Missing " + c[0] + " type");
-            assertTrue(content.contains(loc), "Missing " + c[0] + " location");
-            assertTrue(content.contains(name), "Missing " + c[0] + " name");
+            assertTrue(content.contains(type), ASSERT_MISSING_PREFIX + c[0] + " type");
+            assertTrue(content.contains(loc), ASSERT_MISSING_PREFIX + c[0] + " location");
+            assertTrue(content.contains(name), ASSERT_MISSING_PREFIX + c[0] + " name");
         }
     }
 }

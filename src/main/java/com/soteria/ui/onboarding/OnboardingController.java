@@ -22,15 +22,13 @@ import javafx.util.Callback;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Multi-step setup wizard for first launch.
  *
- * <p>Step 1 chooses the on-device model profile, UI language, and optional custom GGUF URL (verified
- * asynchronously via {@link OnboardingCustomUrlVerifier}). Step 2 collects the emergency profile while
+ * <p>Step 1 chooses the on-device Gemma 4 model profile and UI language. Step 2 collects the emergency profile while
  * {@link BootstrapService#startProvisioning} runs. If the user finishes before downloads complete, the
  * installation overlay reflects {@link BootstrapService} progress.</p>
  */
@@ -52,8 +50,6 @@ public class OnboardingController {
     private Label step1SubtitleLabel;
     @FXML
     private Label modelFieldLabel;
-    @FXML
-    private Label customUrlFieldLabel;
     @FXML
     private Label languageFieldLabel;
     @FXML
@@ -82,8 +78,6 @@ public class OnboardingController {
     // Step 1
     @FXML
     private ComboBox<SystemCapability.AIModelProfile> modelComboBox;
-    @FXML
-    private TextField customModelField;
     @FXML
     private ComboBox<String> languageComboBox;
     @FXML
@@ -208,7 +202,7 @@ public class OnboardingController {
                 setGraphic(null);
                 return;
             }
-            name.setText(item.getDisplayName());
+            name.setText(loc().getMessage(item.getMessageKey()));
             size.setText(String.format(Locale.ROOT, "%.1f GB", item.getSizeGB()));
             recommended.setText(loc().getMessage("onboarding.model.recommended"));
             recommended.setVisible(item == bootstrap.capability().getRecommendedProfile());
@@ -256,7 +250,6 @@ public class OnboardingController {
         onboardingTitleLabel.setText(localization.getMessage("onboarding.title"));
         step1SubtitleLabel.setText(localization.getMessage("onboarding.step1"));
         modelFieldLabel.setText(localization.getMessage("onboarding.model.label"));
-        customUrlFieldLabel.setText(localization.getMessage("onboarding.model.custom_url"));
         languageFieldLabel.setText(localization.getMessage("onboarding.language"));
         continueButton.setText(localization.getMessage("onboarding.continue"));
         step2SubtitleLabel.setText(localization.getMessage("onboarding.step2"));
@@ -294,17 +287,13 @@ public class OnboardingController {
     private void applyDraftFromProfile(UserData profile) {
         log.info("Restoring draft profile from previous session...");
         if (profile.preferredModel() != null) {
-            try {
-                modelComboBox.setValue(SystemCapability.AIModelProfile.valueOf(profile.preferredModel()));
-            } catch (IllegalArgumentException _) {
-                /* fall back to recommended */
+            SystemCapability.AIModelProfile p = SystemCapability.parseStoredProfile(profile.preferredModel());
+            if (p != null) {
+                modelComboBox.setValue(p);
             }
         }
         if (profile.preferredLanguage() != null) {
             selectLanguageSafely(profile.preferredLanguage());
-        }
-        if (profile.customModelUrl() != null) {
-            customModelField.setText(profile.customModelUrl());
         }
         if (profile.gender() != null) {
             selectGenderSafely(profile.gender());
@@ -358,33 +347,7 @@ public class OnboardingController {
     @FXML
     private void goToStep2() {
         step1ErrorLabel.setText("");
-        String url = customModelField.getText().trim();
-        if (url.isEmpty()) {
-            advanceToStep2();
-            return;
-        }
-        String syntaxError = OnboardingCustomUrlVerifier.validateSyntax(url, loc());
-        if (syntaxError != null) {
-            step1ErrorLabel.setText(syntaxError);
-            return;
-        }
-
-        step1ErrorLabel.setText(loc().getMessage("onboarding.url.verifying"));
-        continueButton.setDisable(true);
-        CompletableFuture
-                .supplyAsync(() -> OnboardingCustomUrlVerifier.probe(url, loc()))
-                .whenComplete((err, ex) -> Platform.runLater(() -> {
-                    continueButton.setDisable(false);
-                    String finalMsg = (ex != null)
-                            ? loc().formatMessage("onboarding.url.verify_failed", ex.getMessage())
-                            : err;
-                    if (finalMsg != null) {
-                        step1ErrorLabel.setText(finalMsg);
-                    } else {
-                        step1ErrorLabel.setText("");
-                        advanceToStep2();
-                    }
-                }));
+        advanceToStep2();
     }
 
     private void advanceToStep2() {
@@ -402,8 +365,6 @@ public class OnboardingController {
     private void triggerProvisioning() {
         SystemCapability.AIModelProfile selectedProfile = modelComboBox.getValue();
         String selectedLang = languageComboBox.getValue();
-        String customUrl = customModelField.getText().trim();
-        String finalUrl = customUrl.isEmpty() ? null : customUrl;
 
         try {
             UserData draft = new UserData(
@@ -411,14 +372,15 @@ public class OnboardingController {
                     "", "Pending Setup",
                     selectedProfile.name(),
                     selectedLang,
-                    finalUrl);
+                    null,
+                    null);
             profiles.save(draft);
         } catch (Exception e) {
             log.log(Level.WARNING, "Failed to save draft profile", e);
         }
 
         log.info(() -> "Triggering provisioning for profile: " + selectedProfile + ", lang: " + selectedLang);
-        bootstrap.startProvisioning(selectedProfile, selectedLang, finalUrl);
+        bootstrap.startProvisioning(selectedProfile, selectedLang);
     }
 
     @FXML
@@ -435,8 +397,6 @@ public class OnboardingController {
         try {
             triggerProvisioning(); // idempotent — same key returns early
 
-            String customUrl = customModelField.getText().trim();
-            boolean isCustom = !customUrl.isEmpty();
             SystemCapability.AIModelProfile selectedProfile = modelComboBox.getValue();
             String selectedLang = languageComboBox.getValue();
 
@@ -451,7 +411,8 @@ public class OnboardingController {
                     contact,
                     selectedProfile.name(),
                     selectedLang,
-                    isCustom ? customUrl : null);
+                    null,
+                    null);
             log.info("User clicked Finish. Saving complete profile...");
             profiles.save(profile);
 

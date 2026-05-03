@@ -30,21 +30,13 @@ class ModelManagerTest {
     @DisplayName("Should resolve correct brain model path for profile")
     void brainModelPathResolution() {
         ModelManager manager = new ModelManager(capability, tempDir);
-        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE, null);
+        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE);
         
-        assertTrue(path.toString().contains("gemma-3-4b-it-Q4_K_M.gguf"));
+        assertTrue(path.toString().contains("gemma-4-E4B-it-Q4_K_M.gguf"));
         assertEquals(tempDir, path.getParent());
-    }
 
-    @Test
-    @DisplayName("Should resolve custom brain model path from URL")
-    void customBrainModelPath() {
-        ModelManager manager = new ModelManager(capability, tempDir);
-        String customUrl = "https://example.com/model.gguf";
-        Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE, customUrl);
-        
-        assertTrue(path.getFileName().toString().startsWith("custom-"));
-        assertTrue(path.getFileName().toString().endsWith(".gguf"));
+        Path lite = manager.getBrainModelPath(SystemCapability.AIModelProfile.LITE);
+        assertTrue(lite.toString().contains("gemma-4-E2B-it-Q4_K_M.gguf"));
     }
 
     @Test

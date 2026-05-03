@@ -84,13 +84,13 @@ public class BootstrapService {
      * Starts model downloads and engine initialization based on user preferences.
      * This ensures that only ONE provisioning process is active.
      */
-    public void startProvisioning(SystemCapability.AIModelProfile profile, String language, String customUrl) {
+    public void startProvisioning(SystemCapability.AIModelProfile profile, String language) {
         if (modelManager == null) {
             log.info("startProvisioning called before preInitialize. Triggering auto-init...");
             preInitialize();
         }
         log.info(() -> "BootstrapService: starting provisioning for " + profile + " in " + language);
-        provisioningManager.start(state, this, profile, language, customUrl);
+        provisioningManager.start(state, this, profile, language);
     }
 
     public CompletableFuture<Void> ready() {

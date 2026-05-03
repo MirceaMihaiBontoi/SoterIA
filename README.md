@@ -23,8 +23,8 @@ Critical infrastructure services are consumed through interfaces so backends can
 ### 3. Intelligence Layer (RAG Pipeline)
 Offline reasoning is delivered by three coordinated components under `com.soteria.infrastructure.intelligence`:
 - **MedicalKnowledgeBase**: Lucene BM25 retrieval + JGraphT relationship graph over `medical_protocols.json`.
-- **LocalBrainService**: GGUF LLM inference via `de.kherud:llama` (llama.cpp JNI).
-- **VoskSTTService**: Offline speech-to-text with hardware-appropriate model size.
+- **LocalBrainService**: GGUF LLM inference via the **MirceaMihaiBontoi/java-llama.cpp** fork (JNI + Maven Java API `de.kherud:llama`; native from `lib/` or `vendor/java-llama.cpp` build — see `lib/GEMMA4_JLLAMA.txt`).
+- **SherpaSTTService**: Offline speech-to-text via **Sherpa-ONNX** (Whisper Small ASR + Silero VAD), same stack for every LLM profile.
 
 ### 4. Infrastructure Layer (System Implementation)
 Handles the technical details of the environment:
@@ -35,29 +35,33 @@ Handles the technical details of the environment:
 
 ### 5. UI Layer (Reactive Interface)
 JavaFX + **AtlantaFX PrimerDark** theme with a thin overrides stylesheet (`main.css`). No login screen — SoterIA is single-user by design:
-- **Onboarding wizard** (`OnboardingController` + `onboarding-view.fxml`): step 1 picks AI model (with RAM-based *Recommended* tag and weight in GB) and language (pre-selected from GPS/locale, English fallback) plus an optional custom GGUF URL that is verified against the server before letting the user continue. Step 2 captures the emergency profile. An installation overlay covers the gap if downloads aren't finished when the user submits.
+- **Onboarding wizard** (`OnboardingController` + `onboarding-view.fxml`): step 1 picks the on-device Gemma 4 profile (RAM-based *Recommended* tag and weight in GB) and language (pre-selected from GPS/locale, English fallback). Step 2 captures the emergency profile. An installation overlay covers the gap if downloads aren't finished when the user submits.
 - **Chat screen** (`ChatController` + `chat-view.fxml`): conversation with text + voice input, rendered as custom bubbles on top of the PrimerDark base.
 - **Asynchronous Execution**: All I/O and LLM/STT calls run on worker threads; the FX thread only touches the scene graph.
 
 ## Key Features and Capabilities
 
 ### 🧠 Hardware-Aware Native Intelligence (SoterIA 2.0)
-SoterIA 2.0 introduces a state-of-the-art **Tiered Scaling Architecture** that dynamically provisions AI resources based on the device's physical hardware. All LLMs are shipped as **GGUF** single-file bundles for reproducible, dependency-free deployment.
+SoterIA 2.0 picks among **three LLM profiles** from installed RAM (`SystemCapability`). All LLMs ship as **GGUF** bundles. **STT is not tied to the profile**: one shared **Sherpa-ONNX** Whisper Small model is provisioned for every configuration.
 
-#### RAM-Based 5-Tier Scaling (GGUF via llama.cpp):
-- **Ultra-Lite (< 3GB)**: Gemma 3 1B-it Q4_K_M + Vosk Small.
-- **Lite (3 - 4GB)**: Gemma 3 1B-it Q8_0 + Vosk Small.
-- **Balanced (4 - 6GB)**: Gemma 3 4B-it Q4_K_M + Vosk Standard.
-- **Performance (6 - 12GB)**: Gemma 3 4B-it Q4_K_M + Vosk Standard.
-- **Ultra (≥ 12GB)**: Gemma 3 4B-it Q8_0 + Vosk Standard.
+#### Three LLM profiles (GGUF via llama.cpp)
+RAM thresholds in code: **&lt; 6 GB** → Lite; **6–12 GB** → Balanced; **≥ 12 GB** → Expert (defaults; the user can override in onboarding).
 
-> **Roadmap**: upgrade a Gemma 4 (E2B/E4B) pendiente de `de.kherud:llama` >= 4.3.0 con soporte nativo para la arquitectura `gemma4`.
+| Profile (enum) | Bundle role | Typical GGUF |
+|----------------|-------------|--------------|
+| **Lite** | Smallest weights | Gemma 4 **E2B** Q4 — `unsloth/gemma-4-E2B-it-GGUF` |
+| **Balanced** | Default mid tier | Gemma 4 **E4B** Q4 — `unsloth/gemma-4-E4B-it-GGUF` |
+| **Expert** | Highest quality | Gemma 4 **E4B** Q8 — same repo slug, heavier quant |
+
+**STT/TTS**: **Sherpa-ONNX** end to end — `sherpa-onnx-whisper-small` for STT; **Kokoro** (`kokoro-multi-lang-v1_0`) for TTS via `SherpaTTSService`.
+
+> **Gemma 4 & JNI**: use a `jllama` built from **[MirceaMihaiBontoi/java-llama.cpp](https://github.com/MirceaMihaiBontoi/java-llama.cpp)** (same tree as `vendor/java-llama.cpp`) and place it under `lib/` (see `lib/GEMMA4_JLLAMA.txt`). The Java entrypoint remains `de.kherud.llama`; `LlamaNativeBootstrap` selects `lib/` when appropriate.
 
 ### 🏥 100% Offline RAG Pipeline
 Survival-critical reliability via a local **Retrieval-Augmented Generation** pipeline:
 - **Apache Lucene (BM25)**: In-memory text index over medical protocols (`title` + `keywords`), ranked by relevance.
 - **JGraphT**: Undirected knowledge graph linking protocols by shared category or cross-references in their steps. The top Lucene hit is enriched with its graph neighbors before being passed to the LLM.
-- **llama.cpp (via `de.kherud:llama`)**: Native execution of GGUF LLMs with CPU, Metal (macOS/iOS) and Vulkan (Android) backends.
+- **llama.cpp (Java bindings)**: JNI + GGUF via the fork above; `de.kherud:llama` carries the Java API, **`jllama` must match the fork build** in `lib/` (see `lib/GEMMA4_JLLAMA.txt`).
 
 ### 🌍 English-Core Multilingual Strategy
 Using an "English-Core" reasoning approach for maximum precision:
@@ -73,7 +77,7 @@ Using an "English-Core" reasoning approach for maximum precision:
 
 ### Multimodal Input Handling
 - **Conversational Synthesis**: A guided UX that asks the right questions based on the detected emergency type.
-- **Voice-to-Action**: Real-time native voice processing (Vosk) allows hands-free reporting.
+- **Voice-to-Action**: Real-time offline speech through **Sherpa-ONNX** (mic → VAD → Whisper) for hands-free reporting.
 
 ### Operational Logging
 Every dispatched alert is appended to `logs/emergency_alerts.log` as a plain-text audit trail. The file is created lazily on first alert.
@@ -109,7 +113,7 @@ com.soteria.ui
 ### System Requirements
 - **Java Runtime**: JDK 25 or higher.
 - **Build Tool**: Apache Maven 3.9.x.
-- **Desktop**: Windows, macOS, Linux (native llama.cpp binaries bundled via `de.kherud:llama`).
+- **Desktop**: Windows, macOS, Linux. **LLM**: Gemma 4 E4B GGUF (`unsloth/gemma-4-E4B-it-GGUF`); use a recent `jllama` native (`lib/`, see `lib/GEMMA4_JLLAMA.txt`).
 - **Android**: GluonFX build pipeline + `libllama.so` compiled for `arm64-v8a` (Vulkan backend recommended).
 - **iOS**: planned as a separate native Swift app leveraging CoreML + llama.cpp Swift bindings; shares `medical_protocols.json` and data contracts with the Java core.
 

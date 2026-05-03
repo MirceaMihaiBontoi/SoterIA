@@ -45,18 +45,11 @@ public class ModelPathResolver {
         return modelBasePath;
     }
 
-    public String getCustomFileName(String url) {
-        return "custom-" + Integer.toHexString(url.hashCode()) + ".gguf";
-    }
-
     public Path getBrainModelPath() {
-        return getBrainModelPath(capability.getRecommendedProfile(), null);
+        return getBrainModelPath(capability.getRecommendedProfile());
     }
 
-    public Path getBrainModelPath(SystemCapability.AIModelProfile profile, String customUrl) {
-        if (customUrl != null && !customUrl.isBlank()) {
-            return modelBasePath.resolve(getCustomFileName(customUrl));
-        }
+    public Path getBrainModelPath(SystemCapability.AIModelProfile profile) {
         return modelBasePath.resolve(getBrainModelFileName(profile));
     }
 
@@ -94,8 +87,8 @@ public class ModelPathResolver {
         return indexPath;
     }
 
-    public boolean isBrainModelReady(SystemCapability.AIModelProfile profile, String customUrl) {
-        return Files.exists(getBrainModelPath(profile, customUrl));
+    public boolean isBrainModelReady(SystemCapability.AIModelProfile profile) {
+        return Files.exists(getBrainModelPath(profile));
     }
 
     public boolean isSTTModelReady() {
@@ -141,9 +134,9 @@ public class ModelPathResolver {
 
     public String getBrainModelFileName(SystemCapability.AIModelProfile profile) {
         return switch (profile) {
-            case STABLE -> "gemma-3-4b-it-Q4_K_M.gguf";
-            case EXPERT -> "gemma-3-4b-it-Q8_0.gguf";
-            default -> "gemma-3-4b-it-Q4_K_M.gguf";
+            case LITE -> "gemma-4-E2B-it-Q4_K_M.gguf";
+            case STABLE -> "gemma-4-E4B-it-Q4_K_M.gguf";
+            case EXPERT -> "gemma-4-E4B-it-Q8_0.gguf";
         };
     }
 }

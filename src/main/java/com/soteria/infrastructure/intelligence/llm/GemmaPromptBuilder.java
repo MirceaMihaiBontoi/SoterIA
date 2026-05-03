@@ -7,9 +7,25 @@ import com.soteria.infrastructure.intelligence.system.LanguageUtils;
 import java.util.List;
 
 /**
- * Handles the construction of prompts following the Gemma-3 turn-based format.
+ * Builds prompts for Gemma 4 instruction-tuned models: explicit {@code system} turn, then
+ * {@code user} / {@code model} turns with {@code <start_of_turn>} / {@code <end_of_turn>}
+ * (see Google / HF chat template for Gemma 4).
  */
 public class GemmaPromptBuilder {
+
+    private static final String END_OF_TURN = "<end_of_turn>\n";
+
+    /** Delimits the caller's words from injected situational data in the final user turn. */
+    private static final String USER_MESSAGE_HEADING = "# USER_MESSAGE";
+
+    /**
+     * Substrings that must terminate assistant decoding for Gemma chat-tuned models (llama.cpp {@code stop}).
+     * Include variants the tokenizer may emit so generation stops before they appear in user-visible output.
+     */
+    protected static final String[] GEMMA_ASSISTANT_STOP_SEQUENCES = {
+            "<end_of_turn>",
+            "\\end_of_turn>",
+    };
 
     public String preparePrompt(List<ChatMessage> history, String context, String targetLanguage, UserData profile) {
         String profileContext = (profile != null)
@@ -60,34 +76,41 @@ public class GemmaPromptBuilder {
         return template.replace("[PROFILE]", profileContext).replace("[MANIFEST]", context);
     }
 
+    /**
+     * Gemma 4 layout: system turn first, then alternating user/model turns; generation after final
+     * {@code <start_of_turn>model} with no closing {@code <end_of_turn>}.
+     */
     public String buildGemmaPrompt(String staticSystem, String dynamicContext, List<ChatMessage> history, String targetLanguage) {
         StringBuilder sb = new StringBuilder();
-        int lastIndex = history.size() - 1;
+        sb.append("<start_of_turn>system\n")
+                .append(staticSystem.stripTrailing());
+        if (history.size() > 1) {
+            sb.append("\n\n## Conversation history");
+        }
+        sb.append(END_OF_TURN);
 
+        int lastIndex = history.size() - 1;
         for (int i = 0; i <= lastIndex; i++) {
             ChatMessage msg = history.get(i);
-            sb.append("<start_of_turn>").append(msg.role()).append('\n');
-
-            if (i == 0 && "user".equals(msg.role())) {
-                sb.append("## SYSTEM_INSTRUCTIONS\n")
-                        .append(staticSystem)
-                        .append("\n\n");
-            }
-
-            if (i == lastIndex && "user".equals(msg.role())) {
-                sb.append("## SITUATIONAL_CONTEXT\n")
-                        .append(dynamicContext)
-                        .append("\n\n## USER_INPUT\n");
-            } else if (i == 0 && "user".equals(msg.role())) {
-                sb.append("## FIRST_USER_MESSAGE\n");
-            }
-
-            if (i == lastIndex && "user".equals(msg.role())) {
+            if ("user".equals(msg.role())) {
+                sb.append("<start_of_turn>user\n");
+                if (i == lastIndex) {
+                    sb.append(dynamicContext.stripTrailing())
+                            .append("\n\n")
+                            .append(USER_MESSAGE_HEADING)
+                            .append("\n\n")
+                            .append(msg.content())
+                            .append("\n\nReply in ")
+                            .append(targetLanguage)
+                            .append(" only. One or two short sentences; no parentheses.")
+                            .append(END_OF_TURN);
+                } else {
+                    sb.append(msg.content()).append(END_OF_TURN);
+                }
+            } else if ("model".equals(msg.role())) {
+                sb.append("<start_of_turn>model\n");
                 sb.append(msg.content())
-                  .append("\n\nReply in ").append(targetLanguage).append(" only. One or two short sentences; no parentheses.")
-                  .append("<end_of_turn>\n");
-            } else {
-                sb.append(msg.content()).append("<end_of_turn>\n");
+                        .append(END_OF_TURN);
             }
         }
 

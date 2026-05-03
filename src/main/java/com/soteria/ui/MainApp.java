@@ -20,6 +20,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.soteria.infrastructure.intelligence.llm.LlamaNativeBootstrap;
 import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.ui.i18n.UiLocales;
 
@@ -84,7 +85,7 @@ public class MainApp extends Application {
                     ? profile.preferredLanguage()
                     : "English";
 
-            bootstrap.startProvisioning(profileType, lang, profile.customModelUrl());
+            bootstrap.startProvisioning(profileType, lang);
         } catch (Exception e) {
             log.log(Level.SEVERE, "Session initialization failed", e);
         }
@@ -95,11 +96,8 @@ public class MainApp extends Application {
         if (modelName == null || modelName.isBlank()) {
             return capabilities.getRecommendedProfile();
         }
-        try {
-            return SystemCapability.AIModelProfile.valueOf(modelName);
-        } catch (IllegalArgumentException _) {
-            return capabilities.getRecommendedProfile();
-        }
+        SystemCapability.AIModelProfile parsed = SystemCapability.parseStoredProfile(modelName);
+        return parsed != null ? parsed : capabilities.getRecommendedProfile();
     }
 
     private void launchOnboardingQuietly() {
@@ -195,6 +193,7 @@ public class MainApp extends Application {
     }
 
     public static void main(String[] args) {
+        LlamaNativeBootstrap.applyIfNeeded();
         launch(args);
     }
 }

@@ -13,23 +13,52 @@ public class SystemCapability {
     private static final Logger logger = Logger.getLogger(SystemCapability.class.getName());
 
     // Thresholds for choosing between models (GB)
-    private static final long T4_THRESHOLD_GB = 12; // Threshold for ULTRA (Q8)
+    /** Below this RAM: recommend the smallest bundled GGUF (LITE / Gemma 4 E2B). */
+    private static final long LITE_RAM_THRESHOLD_GB = 6;
+    private static final long E4B_Q8_THRESHOLD_GB = 12;
     private static final long BYTES_IN_GB = 1024L * 1024L * 1024L;
 
-    public enum AIModelProfile {
-        STABLE("gemma-3-4b-it-q4_k_m.gguf", 2.7),
-        EXPERT("gemma-3-4b-it-q8_0.gguf", 4.6);
+    /**
+     * Resolves a profile id from persisted user data. Accepts legacy {@code E2B} (old enum name).
+     *
+     * @return matching profile, or {@code null} if unknown
+     */
+    public static AIModelProfile parseStoredProfile(String persistedName) {
+        if (persistedName == null || persistedName.isBlank()) {
+            return null;
+        }
+        try {
+            return AIModelProfile.valueOf(persistedName);
+        } catch (IllegalArgumentException _) {
+            if ("E2B".equals(persistedName)) {
+                return AIModelProfile.LITE;
+            }
+            if ("BALANCED".equalsIgnoreCase(persistedName)) {
+                return AIModelProfile.STABLE;
+            }
+            return null;
+        }
+    }
 
-        private final String displayName;
+    public enum AIModelProfile {
+        /** Smallest Unsloth bundle: {@code gemma-4-E2B-it-GGUF}. */
+        LITE("onboarding.model.profile.lite", 1.9),
+        /** E4B Q4. */
+        STABLE("onboarding.model.profile.stable", 3.2),
+        /** E4B Q8. */
+        EXPERT("onboarding.model.profile.expert", 6.0);
+
+        private final String messageKey;
         private final double sizeGB;
 
-        AIModelProfile(String displayName, double sizeGB) {
-            this.displayName = displayName;
+        AIModelProfile(String messageKey, double sizeGB) {
+            this.messageKey = messageKey;
             this.sizeGB = sizeGB;
         }
 
-        public String getDisplayName() {
-            return displayName;
+        /** Resource bundle key for localized UI labels (not user-facing text by itself). */
+        public String getMessageKey() {
+            return messageKey;
         }
 
         public double getSizeGB() {
@@ -98,7 +127,9 @@ public class SystemCapability {
 
         long ramInGB = totalMemory / BYTES_IN_GB;
 
-        if (ramInGB < T4_THRESHOLD_GB) {
+        if (ramInGB < LITE_RAM_THRESHOLD_GB) {
+            this.recommendedProfile = AIModelProfile.LITE;
+        } else if (ramInGB < E4B_Q8_THRESHOLD_GB) {
             this.recommendedProfile = AIModelProfile.STABLE;
         } else {
             this.recommendedProfile = AIModelProfile.EXPERT;
@@ -121,12 +152,11 @@ public class SystemCapability {
      */
     public int getIdealThreadCount() {
         if (isLowPowerDevice()) {
-            // Android/Tablet logic: big.LITTLE architecture and thermal constraints
+            // Android/tablet: big.LITTLE and thermal constraints
             return Math.clamp(availableProcessors / 2, 1, 4);
         }
-        // Desktop logic: USAR SOLO NÚCLEOS FÍSICOS.
-        // Llama.cpp en CPU rinde MUCHO mejor sin Hyperthreading/SMT.
-        // En una CPU de 12 hilos (Ryzen 5500), 6 hilos es el punto dulce.
+        // Desktop: avoid using every logical CPU; llama.cpp on CPU often does better
+        // without leaning on all SMT pairs (e.g. ~half of logical cores).
         return Math.max(1, availableProcessors / 2);
     }
 
@@ -143,6 +173,7 @@ public class SystemCapability {
     }
 
     public boolean isLowPowerDevice() {
-        return recommendedProfile == AIModelProfile.STABLE && totalMemory / BYTES_IN_GB < 4;
+        long ramGb = totalMemory / BYTES_IN_GB;
+        return recommendedProfile == AIModelProfile.LITE || ramGb < 4;
     }
 }

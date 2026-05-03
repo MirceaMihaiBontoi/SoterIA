@@ -15,9 +15,10 @@ public final class ModelAssets {
     public static final String STT_MODEL_NAME = "sherpa-onnx-whisper-small";
     public static final String STT_MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.tar.bz2";
 
-    // Brain (LLM) — GGUFs published by unsloth on HuggingFace.
-    public static final String LLM_STABLE_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf";
-    public static final String LLM_PRO_URL = "https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf";
+    // Brain (LLM) — Gemma 4 GGUF (Unsloth): LITE = E2B, STABLE/EXPERT = E4B
+    public static final String LLM_LITE_URL = "https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf";
+    public static final String LLM_STABLE_URL = "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf";
+    public static final String LLM_PRO_URL = "https://huggingface.co/unsloth/gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q8_0.gguf";
 
     // Triage (Intent) Model — Specialized crisis/emergency classifier (Local)
     public static final String TRIAGE_MODEL_NAME = "soteria-triage-v1.gguf";

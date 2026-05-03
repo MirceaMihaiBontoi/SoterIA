@@ -59,9 +59,10 @@ class ProfileRepositoryTest {
             "1985-05-20", 
             "Diabetic", 
             "Maria 611 222 333", 
-            "BALANCED", 
+            "STABLE", 
             "Spanish", 
-            null
+            1.44f,
+            true
         );
     }
 }

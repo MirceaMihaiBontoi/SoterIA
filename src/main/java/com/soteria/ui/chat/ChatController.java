@@ -7,6 +7,7 @@ import com.soteria.core.port.LocationProvider;
 import com.soteria.core.port.STT;
 import com.soteria.core.port.TTS;
 import com.soteria.infrastructure.bootstrap.BootstrapService;
+import com.soteria.infrastructure.intelligence.system.SystemCapability;
 import com.soteria.core.domain.chat.ChatMessage;
 import com.soteria.core.domain.chat.ChatSession;
 import com.soteria.infrastructure.notification.NotificationAlertService;
@@ -31,15 +32,20 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.collections.FXCollections;
 import javafx.scene.layout.StackPane;
+import javafx.util.Callback;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -61,6 +67,7 @@ public class ChatController {
     private static final String STATUS_WARMING = "warming";
     private static final String STATUS_OFFLINE = "offline";
     private static final String STATUS_ALERT = "alert";
+    private static final String SPEECH_RATE_LABEL_FORMAT = "%.2f×";
     /** Bundle key last shown on the AI status pill (kept in sync when runtime language changes). */
     private volatile String trackedAiPillKey = "chat.status.preparing_ai";
     private volatile String trackedAiPillDot = STATUS_WARMING;
@@ -95,7 +102,7 @@ public class ChatController {
     @FXML private ComboBox<String> settingsLanguageCombo;
     @FXML private Slider settingsSpeechRateSlider;
     @FXML private Label settingsSpeechRateLabel;
-    @FXML private Label settingsModelLabel;
+    @FXML private ComboBox<SystemCapability.AIModelProfile> settingsModelCombo;
     @FXML private CheckBox settingsWakeToggle;
     @FXML private Label chatSheetTitleLabel;
     @FXML private Label historyTitleLabel;
@@ -124,6 +131,7 @@ public class ChatController {
     private ChatInferenceUiBridge inferenceUi;
     private ProfileRepository profileRepository;
     private LocalizationService localization;
+    private BootstrapService bootstrap;
 
     private boolean aiAvailable = false;
     private boolean isRecording = false;
@@ -210,6 +218,7 @@ public class ChatController {
     }
 
     public void init(UserData profile, BootstrapService bootstrap, ProfileRepository profiles) {
+        this.bootstrap = bootstrap;
         this.localization = bootstrap.localizationService();
         this.localization.setLocale(UiLocales.fromPreferredLanguage(profile.preferredLanguage()));
         this.sessionCoordinator.setLocalizationService(localization);
@@ -220,6 +229,23 @@ public class ChatController {
         if (profile.preferredLanguage() != null) {
             this.currentLanguage = profile.preferredLanguage();
         }
+
+        this.currentSpeechRate = profile.effectiveTtsSpeechRate();
+        this.wakeWordEnabled = profile.effectiveWakeWordEnabled();
+        AtomicBoolean syncUi = settingsSyncFlag();
+        syncUi.set(true);
+        try {
+            settingsSpeechRateSlider.setValue(currentSpeechRate);
+            if (settingsSpeechRateLabel != null) {
+                settingsSpeechRateLabel.setText(String.format(Locale.ROOT, SPEECH_RATE_LABEL_FORMAT, currentSpeechRate));
+            }
+        } finally {
+            syncUi.set(false);
+        }
+
+        configureSettingsModelComboCells();
+        syncSettingsModelComboFromProfile();
+        wireSettingsModelComboListener();
 
         stampSessionListTitle();
         injectWelcomeMessage(profile);
@@ -238,7 +264,21 @@ public class ChatController {
             }
         });
 
-        bootstrap.ready().whenComplete((ok, err) -> Platform.runLater(() -> applyBootstrapResult(bootstrap, err)));
+        wireBootstrapLifecycle(bootstrap);
+    }
+
+    private void wireBootstrapLifecycle(BootstrapService bootstrap) {
+        javafx.beans.value.ChangeListener<Boolean> onReady = (obs, oldV, newV) -> {
+            if (!Boolean.TRUE.equals(newV)) {
+                return;
+            }
+            bootstrap.ready().whenComplete((ok, err) ->
+                    Platform.runLater(() -> applyBootstrapResult(bootstrap, err)));
+        };
+        bootstrap.readyProperty().addListener(onReady);
+        if (Boolean.TRUE.equals(bootstrap.readyProperty().get())) {
+            onReady.changed(bootstrap.readyProperty(), false, true);
+        }
     }
 
     private void applyBootstrapResult(BootstrapService bootstrap, Throwable err) {
@@ -247,6 +287,7 @@ public class ChatController {
             setAiStatusI18n("chat.status.ai_offline", STATUS_OFFLINE);
             viewManager.setSubtitle(msg("chat.subtitle.bootstrap_offline"));
             face.setState(SoterIAFace.State.IDLE);
+            setInputLocked(false);
             return;
         }
         logger.log(Level.INFO, "[{0}] ready() complete. Configuring services...", instanceId);
@@ -500,17 +541,61 @@ public class ChatController {
         }
     }
 
-    private void refreshSettingsModelLabel() {
-        if (settingsModelLabel == null || currentUser == null) {
+    private void configureSettingsModelComboCells() {
+        if (settingsModelCombo == null) {
             return;
         }
-        String model = currentUser.preferredModel() != null ? currentUser.preferredModel() : "—";
-        String url = currentUser.customModelUrl();
-        if (url != null && !url.isBlank()) {
-            settingsModelLabel.setText(model + "\n" + url);
-        } else {
-            settingsModelLabel.setText(model);
+        Callback<ListView<SystemCapability.AIModelProfile>, ListCell<SystemCapability.AIModelProfile>> cellFactory =
+                lv -> new ListCell<>() {
+                    @Override
+                    protected void updateItem(SystemCapability.AIModelProfile item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            setText(null);
+                            return;
+                        }
+                        setText(msg(item.getMessageKey()));
+                    }
+                };
+        settingsModelCombo.setButtonCell(cellFactory.call(null));
+        settingsModelCombo.setCellFactory(cellFactory);
+    }
+
+    private void syncSettingsModelComboFromProfile() {
+        if (settingsModelCombo == null || currentUser == null || bootstrap == null) {
+            return;
         }
+        AtomicBoolean syncing = settingsSyncFlag();
+        syncing.set(true);
+        try {
+            SystemCapability.AIModelProfile p = SystemCapability.parseStoredProfile(currentUser.preferredModel());
+            if (p == null) {
+                p = bootstrap.capability().getRecommendedProfile();
+            }
+            settingsModelCombo.setValue(p);
+        } finally {
+            syncing.set(false);
+        }
+    }
+
+    private void wireSettingsModelComboListener() {
+        if (settingsModelCombo == null || bootstrap == null) {
+            return;
+        }
+        settingsModelCombo.valueProperty().addListener((obs, oldV, newV) -> {
+            if (settingsSyncFlag().get() || newV == null) {
+                return;
+            }
+            if (oldV == newV) {
+                return;
+            }
+            interruptOngoingGeneration();
+            setInputLocked(true);
+            viewManager.setSubtitle(msg("chat.subtitle.ai_warming"));
+            setAiStatusI18n("chat.status.loading", STATUS_WARMING);
+            persistProfile(false);
+            bootstrap.startProvisioning(newV, currentLanguage);
+        });
     }
 
     private void setupSettingsUi() {
@@ -519,6 +604,17 @@ public class ChatController {
         settingsThemeCombo.setDisable(true);
 
         settingsLanguageCombo.getItems().setAll(OnboardingLanguageCatalog.SUPPORTED);
+        wireSettingsLanguageComboListener();
+
+        if (settingsModelCombo != null) {
+            settingsModelCombo.setItems(FXCollections.observableArrayList(SystemCapability.AIModelProfile.values()));
+        }
+
+        configureSettingsSpeechRateControls();
+        wireSettingsWakeToggleListener();
+    }
+
+    private void wireSettingsLanguageComboListener() {
         settingsLanguageCombo.valueProperty().addListener((obs, oldV, newV) -> {
             if (settingsSyncFlag().get() || newV == null) {
                 return;
@@ -527,9 +623,11 @@ public class ChatController {
             if (ttsService != null) {
                 ttsService.setLanguage(newV);
             }
-            persistProfileLanguage();
+            persistProfile(true);
         });
+    }
 
+    private void configureSettingsSpeechRateControls() {
         settingsSpeechRateSlider.setMin(0.5);
         settingsSpeechRateSlider.setMax(2.0);
         settingsSpeechRateSlider.setValue(currentSpeechRate);
@@ -539,23 +637,40 @@ public class ChatController {
             float v = newV.floatValue();
             currentSpeechRate = v;
             if (settingsSpeechRateLabel != null) {
-                settingsSpeechRateLabel.setText(String.format("%.2f×", v));
+                settingsSpeechRateLabel.setText(String.format(Locale.ROOT, SPEECH_RATE_LABEL_FORMAT, v));
             }
             if (!settingsSyncFlag().get() && ttsService != null) {
                 ttsService.setSpeechRate(v);
             }
         });
+        settingsSpeechRateSlider.valueChangingProperty().addListener((obs, wasChanging, changing) -> {
+            if (Boolean.FALSE.equals(changing) && !settingsSyncFlag().get()) {
+                persistProfile(false);
+            }
+        });
+    }
 
+    private void wireSettingsWakeToggleListener() {
         settingsWakeToggle.selectedProperty().addListener((obs, oldV, newV) -> {
             if (settingsSyncFlag().get()) {
                 return;
             }
             wakeWordEnabled = newV;
             applyWakeWordPreference();
+            persistProfile(false);
         });
     }
 
-    private void persistProfileLanguage() {
+    private String resolvePreferredModelForSave() {
+        if (settingsModelCombo != null && settingsModelCombo.getValue() != null) {
+            return settingsModelCombo.getValue().name();
+        }
+        return currentUser != null && currentUser.preferredModel() != null
+                ? currentUser.preferredModel()
+                : "STABLE";
+    }
+
+    private void persistProfile(boolean refreshLocale) {
         if (profileRepository == null || currentUser == null) {
             return;
         }
@@ -566,19 +681,20 @@ public class ChatController {
                 currentUser.birthDate(),
                 currentUser.medicalInfo(),
                 currentUser.emergencyContact(),
-                currentUser.preferredModel(),
+                resolvePreferredModelForSave(),
                 currentLanguage,
-                currentUser.customModelUrl());
+                currentSpeechRate,
+                wakeWordEnabled);
         try {
             profileRepository.save(updated);
             currentUser = updated;
-            if (localization != null) {
+            if (refreshLocale && localization != null) {
                 localization.setLocale(UiLocales.fromPreferredLanguage(currentLanguage));
                 applyChatChromeI18n();
                 refreshSessionList();
             }
         } catch (IOException e) {
-            logger.log(Level.WARNING, "[{0}] Failed to save language preference", instanceId);
+            logger.log(Level.WARNING, "[{0}] Failed to save profile", instanceId);
             logger.log(Level.FINE, "Profile save failed", e);
         }
     }
@@ -607,9 +723,13 @@ public class ChatController {
             settingsLanguageCombo.setValue(OnboardingLanguageCatalog.matchOrDefault(currentLanguage));
             settingsSpeechRateSlider.setValue(currentSpeechRate);
             if (settingsSpeechRateLabel != null) {
-                settingsSpeechRateLabel.setText(String.format("%.2f×", currentSpeechRate));
+                settingsSpeechRateLabel.setText(String.format(Locale.ROOT, SPEECH_RATE_LABEL_FORMAT, currentSpeechRate));
             }
-            refreshSettingsModelLabel();
+
+            if (settingsModelCombo != null) {
+                syncSettingsModelComboFromProfile();
+            }
+
             boolean wakeAvailable = wakeWordService != null;
             settingsWakeToggle.setDisable(!wakeAvailable);
             settingsWakeToggle.setSelected(wakeAvailable && wakeWordEnabled);
@@ -622,6 +742,7 @@ public class ChatController {
 
     @FXML
     private void closeSettings() {
+        persistProfile(false);
         settingsOverlay.setVisible(false);
         settingsOverlay.setManaged(false);
     }
@@ -701,6 +822,7 @@ public class ChatController {
         if (settingsWakeToggle != null) {
             settingsWakeToggle.setText(localization.getMessage("ui.settings.wake.checkbox"));
         }
+        configureSettingsModelComboCells();
         if (settingsThemeCombo != null) {
             settingsThemeCombo.getItems().setAll(localization.getMessage("ui.settings.theme.dark"));
             settingsThemeCombo.getSelectionModel().selectFirst();

@@ -12,9 +12,21 @@ public record UserData(
     String emergencyContact,
     String preferredModel,
     String preferredLanguage,
-    String customModelUrl
+    /** Optional; when null, UI uses default TTS speech rate (~1.44). */
+    Float ttsSpeechRate,
+    /** Optional; when null, wake word defaults to on. */
+    Boolean wakeWordEnabled
 ) {
     public static final String INCOMPLETE_NAME = "[INCOMPLETE]";
+
+    public float effectiveTtsSpeechRate() {
+        float v = ttsSpeechRate != null ? ttsSpeechRate : 1.44f;
+        return Math.clamp(v, 0.5f, 2.0f);
+    }
+
+    public boolean effectiveWakeWordEnabled() {
+        return wakeWordEnabled == null || wakeWordEnabled;
+    }
 
     public boolean isComplete() {
         return fullName != null && !fullName.equals(INCOMPLETE_NAME) 
@@ -26,9 +38,11 @@ public record UserData(
     public String toString() {
         return String.format(
             "Name: %s%nPhone: %s%nGender: %s%nBirthDate: %s%nEmergency Contact: %s%nMedical Info: %s%n" +
-            "Language: %s%nModel: %s%nCustom URL: %s",
+            "Language: %s%nModel: %s%nTTS rate: %s%nWake word: %s",
             fullName, phoneNumber, gender, birthDate, emergencyContact, medicalInfo,
-            preferredLanguage, preferredModel, (customModelUrl != null ? customModelUrl : "None")
+            preferredLanguage, preferredModel,
+            ttsSpeechRate != null ? ttsSpeechRate : "default",
+            wakeWordEnabled != null ? wakeWordEnabled : "default"
         );
     }
 }

@@ -18,12 +18,6 @@
             <VBox spacing="6" maxWidth="460">
                 <Label fx:id="modelFieldLabel" text="%onboarding.model.label" styleClass="field-label"/>
                 <ComboBox fx:id="modelComboBox" maxWidth="Infinity" styleClass="input-field"/>
-                
-                <VBox spacing="4">
-                    <Label fx:id="customUrlFieldLabel" text="%onboarding.model.custom_url" styleClass="field-label" style="-fx-font-size: 11px;"/>
-                    <TextField fx:id="customModelField" promptText="https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf" 
-                               maxWidth="Infinity" styleClass="input-field" style="-fx-font-size: 10px;"/>
-                </VBox>
             </VBox>
 
             <VBox spacing="6" maxWidth="460">

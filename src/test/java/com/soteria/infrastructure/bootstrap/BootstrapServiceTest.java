@@ -45,7 +45,7 @@ class BootstrapServiceTest {
             // We just test if startProvisioning accepts the input without throwing
             // as full initialization requires native binaries/models
             assertDoesNotThrow(() -> 
-                bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang, null),
+                bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang),
                 "Failed to initiate bootstrap for " + lang
             );
         }
@@ -67,11 +67,8 @@ class BootstrapServiceTest {
             "Koreanic", "Korean"
         );
 
-        families.forEach((family, lang) -> {
-            assertDoesNotThrow(() -> 
-                bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang, null),
-                "Failed to initiate bootstrap for " + lang + " (" + family + ")"
-            );
-        });
+        families.forEach((family, lang) -> assertDoesNotThrow(
+                () -> bootstrapService.startProvisioning(SystemCapability.AIModelProfile.STABLE, lang),
+                "Failed to initiate bootstrap for " + lang + " (" + family + ")"));
     }
 }

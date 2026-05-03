@@ -139,7 +139,7 @@
                                minWidth="36"/>
                     </HBox>
                     <Label fx:id="settingsModelSectionLabel" text="%ui.settings.ai_model" styleClass="settings-section-label"/>
-                    <Label fx:id="settingsModelLabel" wrapText="true" styleClass="settings-body-label"/>
+                    <ComboBox fx:id="settingsModelCombo" maxWidth="Infinity"/>
                     <Label fx:id="settingsWakeSectionLabel" text="%ui.settings.wake" styleClass="settings-section-label"/>
                     <CheckBox fx:id="settingsWakeToggle" text="%ui.settings.wake.checkbox"
                               wrapText="true" styleClass="settings-check"/>

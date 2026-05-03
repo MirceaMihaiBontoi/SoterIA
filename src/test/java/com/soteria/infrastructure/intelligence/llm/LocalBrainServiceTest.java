@@ -13,6 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("GemmaPromptBuilder Logic Tests")
 class LocalBrainServiceTest {
 
+    private static final String PREFIX_SYSTEM_TURN = "<start_of_turn>system\n";
+    private static final String PREFIX_MODEL_TURN = "<start_of_turn>model\n";
+    private static final String LANG_SPANISH = "Spanish";
+
     private GemmaPromptBuilder promptBuilder;
 
     @BeforeEach
@@ -21,7 +25,7 @@ class LocalBrainServiceTest {
     }
 
     @Test
-    @DisplayName("Should build correct Gemma prompt from history")
+    @DisplayName("Should build correct Gemma 4 prompt from history")
     void buildGemmaPrompt() {
         String system = "Answer in Spanish.";
         List<ChatMessage> history = new ArrayList<>();
@@ -29,29 +33,50 @@ class LocalBrainServiceTest {
         history.add(ChatMessage.model("Yes"));
         history.add(ChatMessage.user("Bleeding"));
 
-        String result = promptBuilder.buildGemmaPrompt(system, "Protocol: NONE", history, "Spanish");
+        String result = promptBuilder.buildGemmaPrompt(system, "Protocol: NONE", history, LANG_SPANISH);
 
-        // Verify role markers and the structured framing the prompt builder applies:
-        // first user turn carries SYSTEM_INSTRUCTIONS + FIRST_USER_MESSAGE,
-        // last user turn carries SITUATIONAL_CONTEXT + USER_INPUT.
-        assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nAnswer in Spanish.\n\n## FIRST_USER_MESSAGE\nHelp me<end_of_turn>"));
-        assertTrue(result.contains("<start_of_turn>model\nYes<end_of_turn>"));
-        assertTrue(result.contains("<start_of_turn>user\n## SITUATIONAL_CONTEXT\nProtocol: NONE\n\n## USER_INPUT\nBleeding\n\n(Respond in Spanish. 1-2 natural sentences.)<end_of_turn>"));
-
-        // Verify final model trigger
-        assertTrue(result.endsWith("<start_of_turn>model\n"));
+        assertTrue(result.startsWith(PREFIX_SYSTEM_TURN));
+        assertTrue(result.contains("Answer in Spanish."));
+        assertTrue(result.contains("Answer in Spanish.\n\n## Conversation history<end_of_turn>\n"),
+                "History heading at end of system when prior turns exist");
+        assertTrue(result.contains("<start_of_turn>user\nHelp me<end_of_turn>"));
+        assertTrue(result.contains(PREFIX_MODEL_TURN + "Yes<end_of_turn>"));
+        assertTrue(result.contains("Protocol: NONE"));
+        assertTrue(result.contains("# USER_MESSAGE\n\nBleeding"));
+        assertTrue(result.contains("Reply in " + LANG_SPANISH + " only."));
+        assertTrue(result.endsWith(PREFIX_MODEL_TURN));
     }
 
     @Test
-    @DisplayName("Should build correct Gemma prompt for single turn")
+    @DisplayName("When history starts with assistant, history heading stays in system turn")
+    void historyHeadingWhenFirstTurnIsModel() {
+        String system = "Sys.";
+        List<ChatMessage> history = new ArrayList<>();
+        history.add(ChatMessage.model("Greeting."));
+        history.add(ChatMessage.user("Hi"));
+        history.add(ChatMessage.user("Fire"));
+
+        String result = promptBuilder.buildGemmaPrompt(system, "CTX", history, LANG_SPANISH);
+
+        assertTrue(result.contains("Sys.\n\n## Conversation history<end_of_turn>\n"));
+        assertTrue(result.contains("<start_of_turn>model\nGreeting.<end_of_turn>"));
+        assertTrue(result.contains("# USER_MESSAGE\n\nFire"));
+    }
+
+    @Test
+    @DisplayName("Should build correct Gemma 4 prompt for single turn")
     void buildGemmaPromptSingleTurn() {
         String system = "Helpful Assistant.";
         List<ChatMessage> history = List.of(ChatMessage.user("Hi"));
 
         String result = promptBuilder.buildGemmaPrompt(system, "No context", history, "English");
 
-        assertTrue(result.contains("<start_of_turn>user\n## SYSTEM_INSTRUCTIONS\nHelpful Assistant.\n\n## SITUATIONAL_CONTEXT\nNo context\n\n## USER_INPUT\nHi\n\n(Respond in English. 1-2 natural sentences.)<end_of_turn>"));
-        assertTrue(result.endsWith("<start_of_turn>model\n"));
+        assertTrue(result.startsWith(PREFIX_SYSTEM_TURN + "Helpful Assistant."));
+        assertFalse(result.contains("## Conversation history"), "No history heading when there is only the current user turn");
+        assertTrue(result.contains("No context"));
+        assertTrue(result.contains("# USER_MESSAGE\n\nHi"));
+        assertTrue(result.contains("Reply in English only."));
+        assertTrue(result.endsWith(PREFIX_MODEL_TURN));
     }
 
     @Test
@@ -60,7 +85,7 @@ class LocalBrainServiceTest {
         String[][] cases = {
             {"English", "I need help", "Emergency: Heart attack"},
             {"Chinese", "我需要帮助", "紧急情况：心脏病发作"},
-            {"Spanish", "Necesito ayuda", "Emergencia: Ataque al corazón"},
+            {LANG_SPANISH, "Necesito ayuda", "Emergencia: Ataque al corazón"},
             {"Arabic", "أحتاج إلى مساعدة", "حالة طوارئ: نوبة قلبية"},
             {"Portuguese", "Preciso de ajuda", "Emergência: Ataque cardíaco"},
             {"French", "J'ai besoin d'aide", "Urgence : Crise cardiaque"},
@@ -75,15 +100,15 @@ class LocalBrainServiceTest {
             String input = c[1];
             String context = c[2];
             String system = "Respond in " + lang;
-            
+
             List<ChatMessage> history = List.of(ChatMessage.user(input));
             String result = promptBuilder.buildGemmaPrompt(system, context, history, lang);
-            
+
             assertTrue(result.contains(lang), "Prompt should contain language instruction for " + lang);
             assertTrue(result.contains(input), "Prompt should contain user input for " + lang);
             assertTrue(result.contains(context), "Prompt should contain situational context for " + lang);
-            assertTrue(result.startsWith("<start_of_turn>user"), "Should start with user turn");
-            assertTrue(result.endsWith("<start_of_turn>model\n"), "Should end with model trigger");
+            assertTrue(result.startsWith(PREFIX_SYSTEM_TURN), "Should start with system turn for " + lang);
+            assertTrue(result.endsWith(PREFIX_MODEL_TURN), "Should end with model trigger for " + lang);
         }
     }
 
@@ -107,14 +132,15 @@ class LocalBrainServiceTest {
             String family = c[0];
             String input = c[1];
             String context = c[2];
-            
+
             List<ChatMessage> history = List.of(ChatMessage.user(input));
             String result = promptBuilder.buildGemmaPrompt("Emergency mode.", context, history, family);
-            
+
             assertNotNull(result);
             assertTrue(result.contains(input), "Should contain " + family + " input");
             assertTrue(result.contains(context), "Should contain " + family + " context");
-            assertTrue(result.contains("<start_of_turn>user"), "Missing turn marker for " + family);
+            assertTrue(result.contains(PREFIX_SYSTEM_TURN), "Missing system turn for " + family);
+            assertTrue(result.contains("<start_of_turn>user\n"), "Missing user turn for " + family);
         }
     }
 }

@@ -206,7 +206,7 @@ public class LocalBrainService implements AutoCloseable, Brain {
                 .setTopP(0.9f)
                 .setRepeatPenalty(1.2f)
                 .setNPredict(128)
-                .setStopStrings("<end_of_turn>");
+                .setStopStrings(GemmaPromptBuilder.GEMMA_ASSISTANT_STOP_SEQUENCES);
     }
 
     @Override

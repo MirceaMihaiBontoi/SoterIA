@@ -39,9 +39,9 @@ public class ProvisioningManager {
     private CompletableFuture<?> activeDownload;
 
     public synchronized void start(BootstrapState state, BootstrapService service,
-                                   SystemCapability.AIModelProfile profile, String language, String customUrl) {
-        
-        String key = profile.name() + "|" + language + "|" + (customUrl == null ? "" : customUrl);
+                                   SystemCapability.AIModelProfile profile, String language) {
+
+        String key = profile.name() + "|" + language;
 
         if (key.equals(lastProvisioningKey)) {
             CompletableFuture<Void> r = state.getReadyFuture();
@@ -60,13 +60,13 @@ public class ProvisioningManager {
         state.resetReadyFuture();
 
         lastProvisioningKey = key;
-        activeProvisioner = new Thread(() -> runProvisioning(state, service, profile, language, customUrl), "soteria-provisioner");
+        activeProvisioner = new Thread(() -> runProvisioning(state, service, profile, language), "soteria-provisioner");
         activeProvisioner.setDaemon(true);
         activeProvisioner.start();
     }
 
     private void runProvisioning(BootstrapState state, BootstrapService service,
-                                 SystemCapability.AIModelProfile profile, String language, String customUrl) {
+                                 SystemCapability.AIModelProfile profile, String language) {
         try {
             long totalStart = System.nanoTime();
             log.info("Starting provisioning sequence...");
@@ -85,7 +85,7 @@ public class ProvisioningManager {
 
             if (isInterrupted()) return;
             stepStart = System.nanoTime();
-            provisionBrainModel(state, service, profile, customUrl);
+            provisionBrainModel(state, service, profile);
             long brainDlMs = (System.nanoTime() - stepStart) / 1_000_000;
             log.info(() -> String.format("[TIMING] Brain model download/check: %d ms", brainDlMs));
 
@@ -109,7 +109,7 @@ public class ProvisioningManager {
 
             if (isInterrupted()) return;
             stepStart = System.nanoTime();
-            initBrainService(state, service, profile, customUrl, language);
+            initBrainService(state, service, profile, language);
             long brainInitMs = (System.nanoTime() - stepStart) / 1_000_000;
             log.info(() -> String.format("[TIMING] Brain init + warmup: %d ms", brainInitMs));
 
@@ -190,14 +190,12 @@ public class ProvisioningManager {
         service.setWakeWordService(kws);
     }
 
-    private void provisionBrainModel(BootstrapState state, BootstrapService service, 
-                                     SystemCapability.AIModelProfile profile, String customUrl) {
-        if (!service.modelManager().isBrainModelReady(profile, customUrl)) {
-            String modelDisplay = (customUrl != null && !customUrl.isBlank())
-                    ? loc(service, "onboarding.provision.brain_custom")
-                    : profile.getDisplayName();
+    private void provisionBrainModel(BootstrapState state, BootstrapService service,
+                                     SystemCapability.AIModelProfile profile) {
+        if (!service.modelManager().isBrainModelReady(profile)) {
+            String modelDisplay = loc(service, profile.getMessageKey());
             state.update(locFmt(service, "onboarding.provision.brain_downloading", modelDisplay), 0.40);
-            activeDownload = service.modelManager().downloadBrainModel(profile, customUrl);
+            activeDownload = service.modelManager().downloadBrainModel(profile);
             activeDownload.join();
         } else {
             state.update(loc(service, "onboarding.provision.brain_model_ready"), 0.60);
@@ -249,13 +247,13 @@ public class ProvisioningManager {
         service.setTtsService(tts);
     }
 
-    private void initBrainService(BootstrapState state, BootstrapService service, 
-                                  SystemCapability.AIModelProfile profile, String customUrl, String language) {
+    private void initBrainService(BootstrapState state, BootstrapService service,
+                                  SystemCapability.AIModelProfile profile, String language) {
         state.update(loc(service, "onboarding.provision.brain_loading"), 0.80);
         if (service.brainServiceImpl() != null) {
             service.brainServiceImpl().close();
         }
-        LocalBrainService brain = new LocalBrainService(service.modelManager().getBrainModelPath(profile, customUrl), service.capability());
+        LocalBrainService brain = new LocalBrainService(service.modelManager().getBrainModelPath(profile), service.capability());
         service.setBrainService(brain);
 
         if (isInterrupted()) return;

@@ -50,8 +50,8 @@ public class ModelManager {
         return pathResolver.getBrainModelPath();
     }
 
-    public Path getBrainModelPath(SystemCapability.AIModelProfile profile, String customUrl) {
-        return pathResolver.getBrainModelPath(profile, customUrl);
+    public Path getBrainModelPath(SystemCapability.AIModelProfile profile) {
+        return pathResolver.getBrainModelPath(profile);
     }
 
     public Path getSTTModelPath() {
@@ -83,11 +83,11 @@ public class ModelManager {
     }
 
     public boolean isBrainModelReady() {
-        return isBrainModelReady(pathResolver.getCapability().getRecommendedProfile(), null);
+        return isBrainModelReady(pathResolver.getCapability().getRecommendedProfile());
     }
 
-    public boolean isBrainModelReady(SystemCapability.AIModelProfile profile, String customUrl) {
-        return pathResolver.isBrainModelReady(profile, customUrl);
+    public boolean isBrainModelReady(SystemCapability.AIModelProfile profile) {
+        return pathResolver.isBrainModelReady(profile);
     }
 
     public boolean isSTTModelReady() {
@@ -115,18 +115,6 @@ public class ModelManager {
     }
 
     public CompletableFuture<Path> downloadBrainModel(SystemCapability.AIModelProfile profile) {
-        return downloadBrainModel(profile, null);
-    }
-
-    public CompletableFuture<Path> downloadBrainModel(SystemCapability.AIModelProfile profile, String customUrl) {
-        if (customUrl != null && !customUrl.isBlank()) {
-            Path target = pathResolver.getBrainModelPath(profile, customUrl);
-            if (Files.exists(target)) {
-                return CompletableFuture.completedFuture(target);
-            }
-            return downloader.downloadFile(customUrl, target);
-        }
-
         String url = downloader.getBrainModelUrl(profile);
         String fileName = pathResolver.getBrainModelFileName(profile);
         Path target = pathResolver.getModelBasePath().resolve(fileName);

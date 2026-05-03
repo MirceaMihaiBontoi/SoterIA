@@ -11,10 +11,12 @@ class UserDataTest {
     private static final String MEDICAL = "Asma";
     private static final String CONTACT = "Luis 600333444";
     private static final String LANG = "Spanish";
+    private static final String PREFERRED_STABLE = "STABLE";
+    private static final String PREFERRED_EXPERT = "EXPERT";
 
     private static UserData sample(String name) {
         return new UserData(name, PHONE, "Female", "1990-01-01",
-                MEDICAL, CONTACT, "BALANCED", LANG, null);
+                MEDICAL, CONTACT, PREFERRED_STABLE, LANG, null, null);
     }
 
     @Test
@@ -27,7 +29,7 @@ class UserDataTest {
         assertEquals("1990-01-01", u.birthDate());
         assertEquals(MEDICAL, u.medicalInfo());
         assertEquals(CONTACT, u.emergencyContact());
-        assertEquals("BALANCED", u.preferredModel());
+        assertEquals(PREFERRED_STABLE, u.preferredModel());
         assertEquals(LANG, u.preferredLanguage());
     }
 
@@ -56,10 +58,10 @@ class UserDataTest {
         assertFalse(sample(null).isComplete());
         
         // Stricter checks
-        UserData missingPhone = new UserData("Ana", "", "F", "1990", "Asthma", "112", "B", "ES", null);
+        UserData missingPhone = new UserData("Ana", "", "F", "1990", "Asthma", "112", PREFERRED_STABLE, "ES", null, null);
         assertFalse(missingPhone.isComplete(), "Should be incomplete without phone");
         
-        UserData missingMedical = new UserData("Ana", "123", "F", "1990", null, "112", "B", "ES", null);
+        UserData missingMedical = new UserData("Ana", "123", "F", "1990", null, "112", PREFERRED_STABLE, "ES", null, null);
         assertFalse(missingMedical.isComplete(), "Should be incomplete without medical info");
     }
 
@@ -80,7 +82,7 @@ class UserDataTest {
             String medical = data.get(1);
             
             UserData u = new UserData(name, PHONE, "Other", "1985-05-05", 
-                                    medical, "Contact 123", "HIGH_PRECISION", lang, null);
+                                    medical, "Contact 123", PREFERRED_EXPERT, lang, null, null);
             
             assertEquals(name, u.fullName(), "Name corruption in " + lang);
             assertEquals(medical, u.medicalInfo(), "Medical info corruption in " + lang);
@@ -94,13 +96,11 @@ class UserDataTest {
     }
 
     @Test
-    @DisplayName("Should persist model configuration correctly")
-    void modelConfigurationPersistence() {
-        String customUrl = "http://local-llm:8080/v1";
-        UserData u = new UserData("Dev", PHONE, "M", "2000-01-01", 
-                                "None", "112", "CUSTOM", "English", customUrl);
-        
-        assertEquals("CUSTOM", u.preferredModel());
-        assertEquals(customUrl, u.customModelUrl());
+    @DisplayName("Should persist preferred model profile name")
+    void preferredModelStored() {
+        UserData u = new UserData("Dev", PHONE, "M", "2000-01-01",
+                "None", "112", PREFERRED_EXPERT, "English", null, null);
+
+        assertEquals(PREFERRED_EXPERT, u.preferredModel());
     }
 }

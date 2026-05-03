@@ -104,9 +104,9 @@ public class ModelFileDownloader {
 
     public String getBrainModelUrl(SystemCapability.AIModelProfile profile) {
         return switch (profile) {
+            case LITE -> LLM_LITE_URL;
             case STABLE -> LLM_STABLE_URL;
             case EXPERT -> LLM_PRO_URL;
-            default -> LLM_STABLE_URL;
         };
     }
 }
