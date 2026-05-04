@@ -134,8 +134,8 @@ public class ModelPathResolver {
 
     public String getBrainModelFileName(SystemCapability.AIModelProfile profile) {
         return switch (profile) {
-            case LITE -> "gemma-4-E2B-it-Q4_K_M.gguf";
-            case STABLE -> "gemma-4-E4B-it-Q4_K_M.gguf";
+            case LITE -> "gemma4-soteria.gguf";  // Fine-tuned E2B for emergency protocols
+            case STABLE -> "gemma4-E4B-soteria.gguf";  // Fine-tuned E4B for emergency protocols
             case EXPERT -> "gemma-4-E4B-it-Q8_0.gguf";
         };
     }

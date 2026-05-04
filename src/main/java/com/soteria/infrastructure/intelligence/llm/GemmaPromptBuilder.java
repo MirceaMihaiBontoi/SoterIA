@@ -70,7 +70,7 @@ public class GemmaPromptBuilder {
         String template = """
                 ### SITUATIONAL_DATA
                 **USER_BACKGROUND_PROFILE (DO NOT MENTION UNLESS RELEVANT)**: [PROFILE]
-                **PROTOCOL**:
+                **EMERGENCY ID**:
                 [MANIFEST]
                 """;
         return template.replace("[PROFILE]", profileContext).replace("[MANIFEST]", context);

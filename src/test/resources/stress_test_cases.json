@@ -35,443 +35,773 @@
     "language": "es"
   },
   {
-    "input": "Hay un perro atropellado en la carretera, me da mucha pena",
-    "expectedId": "TRAF_020",
-    "language": "es"
-  },
-  {
-    "input": "Se me ha parado el coche en mitad de la autopista y sin luces",
-    "expectedId": "TRAF_022",
-    "language": "es"
-  },
-  {
-    "input": "Hay un árbol caído bloqueando los dos carriles de la carretera",
-    "expectedId": "TRAF_021",
-    "language": "es"
-  },
-  {
-    "input": "Mi bebé se ha quedado encerrado dentro del coche y hace mucho sol",
-    "expectedId": "TRAF_019_VIC",
-    "language": "es"
-  },
-  {
-    "input": "Hay una inundación en el garaje, el agua ya me llega por la rodilla",
-    "expectedId": "ENV_003_VIC",
-    "language": "es"
-  },
-  {
-    "input": "He oído un estallido muy fuerte y ahora no hay luz en toda la calle",
-    "expectedId": "ENV_019",
-    "language": "es"
-  },
-  {
-    "input": "Hay un enjambre de abejas gigante en el parque de los niños",
-    "expectedId": "ENV_020_VIC",
-    "language": "es"
-  },
-  {
-    "input": "El ascensor se ha quedado pillado y estamos 4 personas dentro",
-    "expectedId": "ENV_021_VIC",
-    "language": "es"
-  },
-  {
-    "input": "Unos tíos están pintando grafitis en el portal",
-    "expectedId": "SEC_020",
-    "language": "es"
-  },
-  {
-    "input": "Me están siguiendo tres personas por un callejón oscuro",
-    "expectedId": "SEC_010",
-    "language": "es"
-  },
-  {
-    "input": "He visto un dron volando muy bajo y grabando cerca de mi ventana",
-    "expectedId": "SEC_019_VIC",
-    "language": "es"
-  },
-  {
-    "input": "Oigo gritos horribles arriba, parece una pelea doméstica fuerte",
-    "expectedId": "SEC_014_WIT",
-    "language": "es"
-  },
-  {
-    "input": "Me han dado un tirón y se han llevado el bolso con todo",
-    "expectedId": "SEC_013_VIC",
-    "language": "es"
-  },
-  {
-    "input": "Hay un tipo merodeando por mi jardín y mira por las ventanas",
-    "expectedId": "SEC_019_VIC",
-    "language": "es"
-  },
-  {
-    "input": "I have a crushing chest pain and I can't breathe, help me",
-    "expectedId": "MED_009_VIC",
+    "input": "There's a person choking on food at the restaurant, turning blue",
+    "expectedId": "VITAL_002_WIT",
     "language": "en"
   },
   {
-    "input": "There is a massive fire in the kitchen, the grease caught fire",
-    "expectedId": "FIRE_001_VIC",
-    "language": "en"
-  },
-  {
-    "input": "Mon épouse a perdu les eaux et les contractions sont très proches",
-    "expectedId": "MED_011_VIC",
+    "input": "Je suis seul et je m'étouffe avec un morceau de viande",
+    "expectedId": "VITAL_002_VIC",
     "language": "fr"
   },
   {
-    "input": "Il y a un accident grave sur l'autoroute avec several injured",
-    "expectedId": "TRAF_001_WIT",
-    "language": "fr"
-  },
-  {
-    "input": "Hier ist ein Mann zusammengecollapsed und er ist völlig bewusstlos",
-    "expectedId": "VITAL_001",
-    "language": "de"
-  },
-  {
-    "input": "Mein Keller ist komplett überflutet, das Wasser steigt schnell",
-    "expectedId": "ENV_003_VIC",
-    "language": "de"
-  },
-  {
-    "input": "Sto avendo un attacco di panico fortissimo, sento formicolio ovunque",
-    "expectedId": "MED_007_VIC",
-    "language": "it"
-  },
-  {
-    "input": "C'è un estraneo nel mio giardino che cerca di entrare in casa",
-    "expectedId": "SEC_019_VIC",
-    "language": "it"
-  },
-  {
-    "input": "Sunt blocat în lift la etajul 4 și nu mai este aer",
-    "expectedId": "ENV_021_VIC",
-    "language": "ro"
-  },
-  {
-    "input": "Cineva se îneacă cu mâncare și nu mai poate respira",
-    "expectedId": "VITAL_002_WIT",
-    "language": "ro"
-  },
-  {
-    "input": "Meu marido está me agredindo, por favor me ajude agora",
-    "expectedId": "SEC_014",
-    "language": "pt"
-  },
-  {
-    "input": "Houve um derramamento de óleo químico na estrada principal",
-    "expectedId": "ENV_004_WIT",
-    "language": "pt"
-  },
-  {
-    "input": "Help, my baby is locked inside the car and it's burning hot outside",
-    "expectedId": "TRAF_019_VIC",
-    "language": "en"
-  },
-  {
-    "input": "Пожар в жилом доме, на пятом этаже видны языки пламени",
-    "expectedId": "FIRE_001_VIC",
-    "language": "ru"
-  },
-  {
-    "input": "Человек лежит без сознания на тротуаре, пульс не прощупывается",
-    "expectedId": "VITAL_001",
-    "language": "ru"
-  },
-  {
-    "input": "这里有人晕倒了，完全没有意识，快来人救命",
-    "expectedId": "VITAL_001",
-    "language": "zh"
-  },
-  {
-    "input": "我的孩子被锁在车里了，现在的天气非常热，我很担心",
-    "expectedId": "TRAF_019_VIC",
-    "language": "zh"
-  },
-  {
-    "input": "急いでください、家が火事です。キッチンから火が出ています",
-    "expectedId": "FIRE_001_VIC",
-    "language": "ja"
-  },
-  {
-    "input": "隣の家から叫び声が聞こえます。激しい喧嘩のようです",
-    "expectedId": "SEC_014_WIT",
-    "language": "ja"
-  },
-  {
-    "input": "심장 통증이 너무 심해요. 숨을 쉬기가 힘듭니다",
-    "expectedId": "MED_009_VIC",
-    "language": "ko"
-  },
-  {
-    "input": "강도가 가방을 낚아채서 도망갔어요. 도와주세요",
-    "expectedId": "SEC_013_VIC",
-    "language": "ko"
-  },
-  {
-    "input": "هناك حريق كبير في المبنى، الدخان يملأ المكان",
-    "expectedId": "FIRE_001_VIC",
-    "language": "ar"
-  },
-  {
-    "input": "أنا عالق في المصعد ولا يوجد هواء، أرجوكم ساعدوني",
-    "expectedId": "ENV_021_VIC",
-    "language": "ar"
-  },
-  {
-    "input": "मुझे सीने में बहुत तेज़ दर्द हो रहा है, सांस लेना मुश्किल है",
-    "expectedId": "MED_009_VIC",
-    "language": "hi"
-  },
-  {
-    "input": "सड़क पर एक बहुत बुरा एक्सीडेंट हुआ है, कई लोग घायल हैं",
-    "expectedId": "TRAF_001_WIT",
-    "language": "hi"
-  },
-  {
-    "input": "আমার খুব বেশি বুকে ব্যথা হচ্ছে, মনে হচ্ছে হার্ট অ্যাটাক হয়েছে",
-    "expectedId": "MED_009_VIC",
-    "language": "bn"
-  },
-  {
-    "input": "Ada kebakaran besar di gudang belakang, api mulai merembet",
-    "expectedId": "FIRE_001_VIC",
-    "language": "id"
-  },
-  {
-    "input": "Seseorang sedang tenggelam di kolam renang, tolong segera",
-    "expectedId": "VITAL_002_WIT",
-    "language": "id"
-  },
-  {
-    "input": "Tolong, anak saya terkunci di dalam kereta dan cuaca sangat panas",
-    "expectedId": "TRAF_019_VIC",
-    "language": "ms"
-  },
-  {
-    "input": "Có một vụ hỏa hoạn lớn tại cửa hàng, khói đen bốc lên dữ dội",
-    "expectedId": "FIRE_001_VIC",
-    "language": "vi"
-  },
-  {
-    "input": "Tôi đang bị đau ngực dữ dội và không thể thở được",
-    "expectedId": "MED_009_VIC",
-    "language": "vi"
-  },
-  {
-    "input": "ช่วยด้วยค่ะ มีไฟไหม้ในห้องครัว เปลวไฟสูงมาก",
-    "expectedId": "FIRE_001_VIC",
-    "language": "th"
-  },
-  {
-    "input": "มีคนถูกรถชนที่สี่แยก นอนสลบอยู่กลางถนน",
-    "expectedId": "VITAL_001",
-    "language": "th"
-  },
-  {
-    "input": "Evde yangın çıktı, her yer duman altında, nefes alamıyoruz",
-    "expectedId": "FIRE_001_VIC",
-    "language": "tr"
-  },
-  {
-    "input": "Yolda zincirleme trafik kazası oldu, ambulans lazım",
-    "expectedId": "TRAF_001_WIT",
-    "language": "tr"
-  },
-  {
-    "input": "Er is een grote brand in de schuur, het vuur slaat over naar het huis",
-    "expectedId": "FIRE_001_VIC",
-    "language": "nl"
-  },
-  {
-    "input": "Mijn vrouw is aan het bevallen en de weeën komen heel snel",
-    "expectedId": "MED_011_VIC",
-    "language": "nl"
-  },
-  {
-    "input": "Pożar w bloku, ogień wydostaje się przez okna na trzecim piętrze",
-    "expectedId": "FIRE_001_VIC",
-    "language": "pl"
-  },
-  {
-    "input": "Ktoś został ugodzony nożem i bardzo krwawi, wezwijcie pomoc",
+    "input": "Mein Nachbar blutet sehr stark aus einer Wunde am Arm",
     "expectedId": "TRAUMA_001",
-    "language": "pl"
+    "language": "de"
   },
   {
-    "input": "Велика пожежа на складі, чути вибухи всередині",
-    "expectedId": "FIRE_001_VIC",
-    "language": "uk"
+    "input": "Mia nonna ha il viso storto da un lato e non riesce a parlare bene",
+    "expectedId": "VITAL_003",
+    "language": "it"
   },
   {
-    "input": "آتش‌سوزی بزرگی در ساختمان رخ داده است، دود همه جا را گرفته",
-    "expectedId": "FIRE_001_VIC",
-    "language": "fa"
+    "input": "Copilul meu are convulsii și spumă la gură",
+    "expectedId": "MED_001",
+    "language": "ro"
   },
   {
-    "input": "Kuna moto mkubwa katika soko, watu wanakimbia ovyo",
-    "expectedId": "FIRE_001_VIC",
-    "language": "sw"
+    "input": "Meu filho engoliu produto de limpeza, está vomitando",
+    "expectedId": "MED_002",
+    "language": "pt"
   },
   {
-    "input": "Tulungan niyo po kami, may sunog sa kapitbahay namin",
-    "expectedId": "FIRE_001_VIC",
-    "language": "tl"
+    "input": "Ребёнок упал в бассейн и не дышит, вытащили его только что",
+    "expectedId": "TRAUMA_003",
+    "language": "ru"
   },
   {
-    "input": "எனக்கு நெஞ்சு வலி அதிகமாக இருக்கிறது, என்னால் சுவாசிக்க முடியவில்லை",
-    "expectedId": "MED_009_VIC",
-    "language": "ta"
+    "input": "我对花生过敏，刚吃了一点，现在喉咙肿了",
+    "expectedId": "MED_002_ANAPH_VIC",
+    "language": "zh"
   },
   {
-    "input": "నాకు గుండె నొప్పిగా ఉంది, శ్వాస తీసుకోవడం కష్టమవుతోంది",
-    "expectedId": "MED_009_VIC",
-    "language": "te"
+    "input": "友達が蜂に刺されて顔が腫れ上がっています",
+    "expectedId": "MED_002_ANAPH_WIT",
+    "language": "ja"
   },
   {
-    "input": "माझ्या छातीत खूप दुखत आहे, श्वास घ्यायला त्रास होतोय",
-    "expectedId": "MED_009_VIC",
-    "language": "mr"
+    "input": "شخص ما يرتجف من البرد الشديد ولا يستطيع الكلام",
+    "expectedId": "MED_003",
+    "language": "ar"
   },
   {
-    "input": "મને છાતીમાં ખૂબ દુખાવો થાય છે, શ્વાસ લેવામાં તકલીફ છે",
-    "expectedId": "MED_009_VIC",
-    "language": "gu"
-  },
-  {
-    "input": "ನನಗೆ ಎದೆ ನೋವು ತುಂಬಾ ಹೆಚ್ಚಾಗಿದೆ, ಉಸಿರಾಡಲು ಆಗುತ್ತಿಲ್ಲ",
-    "expectedId": "MED_009_VIC",
-    "language": "kn"
-  },
-  {
-    "input": "എനിക്ക് നെഞ്ചുവേദന കഠിനമാണ്, ശ്വാസം എടുക്കാൻ ബുദ്ധിമുട്ടുന്നു",
-    "expectedId": "MED_009_VIC",
-    "language": "ml"
-  },
-  {
-    "input": "ਮੈਨੂੰ ਛਾਤੀ ਵਿੱਚ ਬਹੁਤ ਤੇਜ਼ ਦਰਦ ਹੋ ਰਿਹਾ ਹੈ, ਸਾਹ ਨਹੀਂ ਆ ਰਿਹਾ",
-    "expectedId": "MED_009_VIC",
-    "language": "pa"
-  },
-  {
-    "input": "Έχει ξεσπάσει μεγάλη φωτιά στο δάσος κοντά στα σπίτια",
-    "expectedId": "FIRE_001_VIC",
-    "language": "el"
-  },
-  {
-    "input": "יש שריפה גדולה בבניין, אנשים לכודים בפנים",
-    "expectedId": "FIRE_001_VIC",
-    "language": "he"
-  },
-  {
-    "input": "Det brenner kraftig i nabohuset, flammene står ut av taket",
-    "expectedId": "FIRE_001_VIC",
-    "language": "no"
-  },
-  {
-    "input": "Det brinner i skogen, rökpelaren syns på långt håll",
-    "expectedId": "FIRE_001_VIC",
-    "language": "sv"
-  },
-  {
-    "input": "Det brænder i køkkenet, emhætten har fanget ild",
-    "expectedId": "FIRE_001_VIC",
-    "language": "da"
-  },
-  {
-    "input": "Keittiössä on tulipalo, rasvakeitin syttyi palamaan",
-    "expectedId": "FIRE_001_VIC",
-    "language": "fi"
-  },
-  {
-    "input": "Nagy tűz van a gyárban, sűrű fekete füst száll fel",
-    "expectedId": "FIRE_001_VIC",
-    "language": "hu"
-  },
-  {
-    "input": "V domě hoří, z oken v prvním patře šlehají plameny",
-    "expectedId": "FIRE_001_VIC",
-    "language": "cs"
-  },
-  {
-    "input": "V budove horí, dym sa šíri po chodbách",
-    "expectedId": "FIRE_001_VIC",
-    "language": "sk"
-  },
-  {
-    "input": "Голям пожар в ресторанта, всички трябва да се евакуират",
-    "expectedId": "FIRE_001_VIC",
-    "language": "bg"
-  },
-  {
-    "input": "Избио је велики пожар у гаражи, ватра се шири",
-    "expectedId": "FIRE_001_VIC",
-    "language": "sr"
-  },
-  {
-    "input": "Izbio je veliki požar u skladištu, pozovite vatrogasce",
-    "expectedId": "FIRE_001_VIC",
-    "language": "hr"
-  },
-  {
-    "input": "Pastate kilo gaisras, matomos atviros liepsnos",
-    "expectedId": "FIRE_001_VIC",
-    "language": "lt"
-  },
-  {
-    "input": "Ēkā ir izcēlies ugunsgrēks, dūmi ir visur",
-    "expectedId": "FIRE_001_VIC",
-    "language": "lv"
-  },
-  {
-    "input": "Maja põleb, katusest tulevad leegid välja",
-    "expectedId": "FIRE_001_VIC",
-    "language": "et"
-  },
-  {
-    "input": "Hi ha un incendi forestal molt a prop de la urbanització",
-    "expectedId": "FIRE_001_VIC",
+    "input": "El meu avi s'ha trencat el braç, l'os es veu per fora",
+    "expectedId": "TRAUMA_004",
     "language": "ca"
   },
   {
-    "input": "Hai un incendio na cociña, o aceite comezou a arder",
-    "expectedId": "FIRE_001_VIC",
-    "language": "gl"
+    "input": "My diabetic friend is shaking and confused, very sweaty",
+    "expectedId": "MED_005",
+    "language": "en"
   },
   {
-    "input": "Sutea dago sukaldean, ke asko ateratzen ari da",
-    "expectedId": "FIRE_001_VIC",
-    "language": "eu"
+    "input": "Une femme s'est évanouie dans le métro, elle ne se réveille pas",
+    "expectedId": "MED_006",
+    "language": "fr"
   },
   {
-    "input": "ትልቅ እሳት በህንፃው ውስጥ አለ ፣ ጭሱ በየቦታው ነው",
-    "expectedId": "FIRE_001_VIC",
-    "language": "am"
+    "input": "Meine Freundin hyperventiliert und sagt sie stirbt gleich",
+    "expectedId": "MED_007_WIT",
+    "language": "de"
   },
   {
-    "input": "Dhismaha waxaa ka kacay dab weyn, qiiq ayaa meel walba qariyay",
-    "expectedId": "FIRE_001_VIC",
-    "language": "so"
+    "input": "Ho trovato mio fratello incosciente con una siringa accanto",
+    "expectedId": "MED_008",
+    "language": "it"
   },
   {
-    "input": "Iná ń jó ní ilé alápadà, ẹ jọ̀wọ́ ẹ ran wa lọ́wọ́",
-    "expectedId": "FIRE_001_VIC",
-    "language": "yo"
+    "input": "Văd pe cineva cu dureri în piept care ține mâna pe inimă",
+    "expectedId": "MED_009_WIT",
+    "language": "ro"
   },
   {
-    "input": "Kunomlilo omkhulu endlini, kudingeka usizo ngokushesha",
-    "expectedId": "FIRE_001_VIC",
-    "language": "zu"
+    "input": "Está muito calor e meu avô está confuso e com a pele seca",
+    "expectedId": "MED_010",
+    "language": "pt"
   },
   {
-    "input": "Nina rawray kashan wasiy ukhupi, yanapay wayku",
-    "expectedId": "FIRE_001_VIC",
-    "language": "qu"
+    "input": "Человек получил удар током от провода, лежит без движения",
+    "expectedId": "MED_011",
+    "language": "ru"
   },
   {
-    "input": "Wach'isiykikuwan wasiy ukhupi kashan, phaway amuy",
-    "expectedId": "MED_009_VIC",
-    "language": "qu"
+    "input": "有人被刀刺伤了，血流不止",
+    "expectedId": "TRAUMA_005",
+    "language": "zh"
+  },
+  {
+    "input": "銃で撃たれた人がいます、胸から血が出ています",
+    "expectedId": "TRAUMA_005",
+    "language": "ja"
+  },
+  {
+    "input": "هناك حريق في مطبخي، الزيت اشتعل في المقلاة",
+    "expectedId": "FIRE_006_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "Veig foc sortint de la casa del veí",
+    "expectedId": "FIRE_001_WIT",
+    "language": "ca"
+  },
+  {
+    "input": "There's smoke coming from an electrical outlet, smells like burning plastic",
+    "expectedId": "FIRE_002_VIC",
+    "language": "en"
+  },
+  {
+    "input": "Je vois des étincelles sur une ligne électrique dans la rue",
+    "expectedId": "FIRE_002_WIT",
+    "language": "fr"
+  },
+  {
+    "input": "Der Waldbrand kommt näher zu unserem Haus, überall Rauch",
+    "expectedId": "FIRE_003_VIC",
+    "language": "de"
+  },
+  {
+    "input": "Vedo fumo che esce dalla foresta, sembra un incendio grande",
+    "expectedId": "FIRE_003_WIT",
+    "language": "it"
+  },
+  {
+    "input": "Fumul iese din coș, cred că e foc în horn",
+    "expectedId": "FIRE_004",
+    "language": "ro"
+  },
+  {
+    "input": "Estou preso no carro cercado por fogo florestal",
+    "expectedId": "FIRE_005",
+    "language": "pt"
+  },
+  {
+    "input": "На мне загорелась одежда, помогите",
+    "expectedId": "FIRE_007",
+    "language": "ru"
+  },
+  {
+    "input": "办公室里有火灾警报响了，看到烟雾",
+    "expectedId": "FIRE_008",
+    "language": "zh"
+  },
+  {
+    "input": "ボートのエンジンルームから煙が出ています",
+    "expectedId": "FIRE_009",
+    "language": "ja"
+  },
+  {
+    "input": "سيارتي الكهربائية تدخن من الأسفل ورائحة كيميائية",
+    "expectedId": "FIRE_010_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "Hi ha un cotxe elèctric cremant-se al carrer",
+    "expectedId": "FIRE_010_WIT",
+    "language": "ca"
+  },
+  {
+    "input": "I'm trapped on the 15th floor, smoke is filling the hallway",
+    "expectedId": "FIRE_011",
+    "language": "en"
+  },
+  {
+    "input": "Il y a le feu à la station-service, j'étais en train de faire le plein",
+    "expectedId": "FIRE_012_VIC",
+    "language": "fr"
+  },
+  {
+    "input": "Ich sehe Feuer an einer Tankstelle von der Autobahn aus",
+    "expectedId": "FIRE_012_WIT",
+    "language": "de"
+  },
+  {
+    "input": "C'è un incendio chimico in fabbrica, nuvola tossica gialla",
+    "expectedId": "FIRE_013_VIC",
+    "language": "it"
+  },
+  {
+    "input": "Văd fum toxic ieșind dintr-o fabrică chimică",
+    "expectedId": "FIRE_013_WIT",
+    "language": "ro"
+  },
+  {
+    "input": "Meu carro está pegando fogo no motor",
+    "expectedId": "FIRE_014_VIC",
+    "language": "pt"
+  },
+  {
+    "input": "Вижу горящую машину на обочине шоссе",
+    "expectedId": "FIRE_014_WIT",
+    "language": "ru"
+  },
+  {
+    "input": "我被困在隧道里，到处都是烟",
+    "expectedId": "FIRE_015_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "トンネルから煙が出ています、入り口で見えます",
+    "expectedId": "FIRE_015_WIT",
+    "language": "ja"
+  },
+  {
+    "input": "حريق معدني، ضوء أبيض ساطع جداً",
+    "expectedId": "FIRE_016",
+    "language": "ar"
+  },
+  {
+    "input": "Estic atrapat en una habitació envoltada de foc",
+    "expectedId": "FIRE_017_EXTREME",
+    "language": "ca"
+  },
+  {
+    "input": "Someone inhaled a lot of smoke and passed out",
+    "expectedId": "FIRE_018_EXTREME",
+    "language": "en"
+  },
+  {
+    "input": "Je sens une forte odeur de gaz dans ma maison",
+    "expectedId": "ENV_001_VIC",
+    "language": "fr"
+  },
+  {
+    "input": "Ich rieche Gas auf der Straße, sehr stark",
+    "expectedId": "ENV_001_WIT",
+    "language": "de"
+  },
+  {
+    "input": "C'è un terremoto, tutto sta tremando",
+    "expectedId": "ENV_002",
+    "language": "it"
+  },
+  {
+    "input": "Apa crește rapid, mașina mea este blocată",
+    "expectedId": "ENV_003_VIC",
+    "language": "ro"
+  },
+  {
+    "input": "Vejo uma rua completamente inundada, carros submersos",
+    "expectedId": "ENV_003_WIT",
+    "language": "pt"
+  },
+  {
+    "input": "На меня попали химикаты, кожа горит",
+    "expectedId": "ENV_004_VIC",
+    "language": "ru"
+  },
+  {
+    "input": "看到化学品泄漏在高速公路上",
+    "expectedId": "ENV_004_WIT",
+    "language": "zh"
+  },
+  {
+    "input": "土砂崩れが起きて道路が塞がれています",
+    "expectedId": "ENV_005",
+    "language": "ja"
+  },
+  {
+    "input": "إعصار قادم، رياح قوية جداً",
+    "expectedId": "ENV_006",
+    "language": "ar"
+  },
+  {
+    "input": "Estic en la zona de radiació, què he de fer",
+    "expectedId": "ENV_007_VIC",
+    "language": "ca"
+  },
+  {
+    "input": "I see a radioactive warning sign and people evacuating",
+    "expectedId": "ENV_007_WIT",
+    "language": "en"
+  },
+  {
+    "input": "Il fait extrêmement chaud, plus de 45 degrés",
+    "expectedId": "ENV_008",
+    "language": "fr"
+  },
+  {
+    "input": "Es ist extrem kalt draußen, minus 30 Grad",
+    "expectedId": "ENV_009",
+    "language": "de"
+  },
+  {
+    "input": "Ci sono fulmini ovunque, temporale violento",
+    "expectedId": "ENV_010",
+    "language": "it"
+  },
+  {
+    "input": "Sunt prins într-o furtună de nisip, vizibilitate zero",
+    "expectedId": "ENV_011_VIC",
+    "language": "ro"
+  },
+  {
+    "input": "Vejo uma enorme parede de poeira se aproximando",
+    "expectedId": "ENV_011_WIT",
+    "language": "pt"
+  },
+  {
+    "input": "Вулкан извергается, пепел падает на нас",
+    "expectedId": "ENV_012_VIC",
+    "language": "ru"
+  },
+  {
+    "input": "看到火山喷发，远处有火山灰云",
+    "expectedId": "ENV_012_WIT",
+    "language": "zh"
+  },
+  {
+    "input": "津波が来ています、海が引いています",
+    "expectedId": "ENV_013_VIC",
+    "language": "ja"
+  },
+  {
+    "input": "أرى الماء ينحسر من الشاطئ بشكل غريب",
+    "expectedId": "ENV_013_WIT",
+    "language": "ar"
+  },
+  {
+    "input": "S'ha obert un forat enorme a la carretera",
+    "expectedId": "ENV_014",
+    "language": "ca"
+  },
+  {
+    "input": "The air quality is hazardous, can't breathe outside",
+    "expectedId": "ENV_015",
+    "language": "en"
+  },
+  {
+    "input": "Une avalanche nous a ensevelis, je suis coincé sous la neige",
+    "expectedId": "ENV_016",
+    "language": "fr"
+  },
+  {
+    "input": "Alle elektronischen Geräte sind ausgefallen, Sonnensturm",
+    "expectedId": "ENV_017",
+    "language": "de"
+  },
+  {
+    "input": "C'è un uragano in arrivo, venti fortissimi",
+    "expectedId": "ENV_018",
+    "language": "it"
+  },
+  {
+    "input": "Toate utilităţile au căzut, nu mai avem curent",
+    "expectedId": "ENV_019",
+    "language": "ro"
+  },
+  {
+    "input": "Um enxame de abelhas está atacando pessoas no parque",
+    "expectedId": "ENV_020_VIC",
+    "language": "pt"
+  },
+  {
+    "input": "Вижу медведя возле детской площадки",
+    "expectedId": "ENV_020_WIT",
+    "language": "ru"
+  },
+  {
+    "input": "我被困在电梯里了，按钮不工作",
+    "expectedId": "ENV_021_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "家に侵入者がいます、隠れています",
+    "expectedId": "SEC_001_VIC",
+    "language": "ja"
+  },
+  {
+    "input": "أرى شخصاً يقتحم منزل الجيران",
+    "expectedId": "SEC_001_WIT",
+    "language": "ar"
+  },
+  {
+    "input": "Hi ha un tirador actiu a l'edifici, estic amagat",
+    "expectedId": "SEC_002_VIC",
+    "language": "ca"
+  },
+  {
+    "input": "I hear gunshots in the mall, people are running",
+    "expectedId": "SEC_002_WIT",
+    "language": "en"
+  },
+  {
+    "input": "Il y a un colis suspect abandonné dans le métro",
+    "expectedId": "SEC_003",
+    "language": "fr"
+  },
+  {
+    "input": "Jemand versucht mich in ein Auto zu zerren",
+    "expectedId": "SEC_004",
+    "language": "de"
+  },
+  {
+    "input": "Un cane aggressivo mi sta attaccando",
+    "expectedId": "SEC_005",
+    "language": "it"
+  },
+  {
+    "input": "Cineva mi-a furat identitatea, tranzacții ciudate",
+    "expectedId": "SEC_006",
+    "language": "ro"
+  },
+  {
+    "input": "Há um tumulto violento na rua, multidão agressiva",
+    "expectedId": "SEC_007",
+    "language": "pt"
+  },
+  {
+    "input": "Грабители ворвались в дом, мы заперлись в комнате",
+    "expectedId": "SEC_008",
+    "language": "ru"
+  },
+  {
+    "input": "有人抢了我的车，用枪指着我",
+    "expectedId": "SEC_009_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "車の強盗を目撃しました、武器を持っています",
+    "expectedId": "SEC_009_WIT",
+    "language": "ja"
+  },
+  {
+    "input": "شخص ما يتبعني منذ ساعة، أشعر بالخطر",
+    "expectedId": "SEC_010",
+    "language": "ar"
+  },
+  {
+    "input": "M'estan seguint al caixer automàtic",
+    "expectedId": "SEC_011",
+    "language": "ca"
+  },
+  {
+    "input": "My coworker is making violent threats at the office",
+    "expectedId": "SEC_012",
+    "language": "en"
+  },
+  {
+    "input": "On vient de me voler mon sac à main dans la rue",
+    "expectedId": "SEC_013_VIC",
+    "language": "fr"
+  },
+  {
+    "input": "Ich habe gesehen wie jemand ausgeraubt wurde",
+    "expectedId": "SEC_013_WIT",
+    "language": "de"
+  },
+  {
+    "input": "Mio marito mi sta picchiando, aiuto",
+    "expectedId": "SEC_014",
+    "language": "it"
+  },
+  {
+    "input": "Sunt ostatec într-un autobuz, sechestratori înarmaţi",
+    "expectedId": "SEC_015",
+    "language": "ro"
+  },
+  {
+    "input": "Fui agredida sexualmente, preciso de ajuda",
+    "expectedId": "SEC_016",
+    "language": "pt"
+  },
+  {
+    "input": "На меня напали из-за моей религии",
+    "expectedId": "SEC_017",
+    "language": "ru"
+  },
+  {
+    "input": "有人在网上泄露了我的地址，威胁我",
+    "expectedId": "SEC_018",
+    "language": "zh"
+  },
+  {
+    "input": "庭に不審者がいて窓を覗いています",
+    "expectedId": "SEC_019_VIC",
+    "language": "ja"
+  },
+  {
+    "input": "أرى أشخاصاً يخربون الممتلكات",
+    "expectedId": "SEC_020",
+    "language": "ar"
+  },
+  {
+    "input": "He tingut un accident de cotxe, estic ferit",
+    "expectedId": "TRAF_001_VIC",
+    "language": "ca"
+  },
+  {
+    "input": "I just witnessed a multi-car pileup on the highway",
+    "expectedId": "TRAF_001_WIT",
+    "language": "en"
+  },
+  {
+    "input": "J'ai été renversé par une voiture sur le passage piéton",
+    "expectedId": "TRAF_002_VIC",
+    "language": "fr"
+  },
+  {
+    "input": "Ich habe gesehen wie ein Fußgänger angefahren wurde",
+    "expectedId": "TRAF_002_WIT",
+    "language": "de"
+  },
+  {
+    "input": "La mia auto sta prendendo fuoco, fumo dal motore",
+    "expectedId": "TRAF_003_VIC",
+    "language": "it"
+  },
+  {
+    "input": "Văd o mașină în flăcări pe autostradă",
+    "expectedId": "TRAF_003_WIT",
+    "language": "ro"
+  },
+  {
+    "input": "Acidente de bicicleta, ciclista caiu e está sangrando",
+    "expectedId": "TRAF_004",
+    "language": "pt"
+  },
+  {
+    "input": "Авария в метро, поезд сошёл с рельсов",
+    "expectedId": "TRAF_005",
+    "language": "ru"
+  },
+  {
+    "input": "我的车掉进湖里了，车在下沉",
+    "expectedId": "TRAF_006_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "車が川に落ちるのを見ました",
+    "expectedId": "TRAF_006_WIT",
+    "language": "ja"
+  },
+  {
+    "input": "الفرامل لا تعمل، لا أستطيع إيقاف السيارة",
+    "expectedId": "TRAF_007_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "Veig un cotxe fora de control a l'autopista",
+    "expectedId": "TRAF_007_WIT",
+    "language": "ca"
+  },
+  {
+    "input": "My tire just blew out at 70 mph on the freeway",
+    "expectedId": "TRAF_008",
+    "language": "en"
+  },
+  {
+    "input": "L'accélérateur est bloqué, la voiture accélère toute seule",
+    "expectedId": "TRAF_009",
+    "language": "fr"
+  },
+  {
+    "input": "Ein Geisterfahrer kommt direkt auf mich zu",
+    "expectedId": "TRAF_010_VIC",
+    "language": "de"
+  },
+  {
+    "input": "Vedo un'auto contromano in autostrada",
+    "expectedId": "TRAF_010_WIT",
+    "language": "it"
+  },
+  {
+    "input": "Sunt blocat în trafic de ore întregi, urgență medicală",
+    "expectedId": "TRAF_011",
+    "language": "ro"
+  },
+  {
+    "input": "Há um animal grande na estrada, bloqueando o trânsito",
+    "expectedId": "TRAF_012",
+    "language": "pt"
+  },
+  {
+    "input": "Система автопилота отказала, машина не реагирует",
+    "expectedId": "TRAF_013",
+    "language": "ru"
+  },
+  {
+    "input": "有个司机在追我的车，路怒症",
+    "expectedId": "TRAF_014_VIC",
+    "language": "zh"
+  },
+  {
+    "input": "二人のドライバーが道路で喧嘩しています",
+    "expectedId": "TRAF_014_WIT",
+    "language": "ja"
+  },
+  {
+    "input": "أشعر بألم في صدري أثناء القيادة، لا أستطيع التنفس",
+    "expectedId": "TRAF_015_VIC",
+    "language": "ar"
+  },
+  {
+    "input": "El conductor s'ha desmaiat al volant",
+    "expectedId": "TRAF_015_WIT",
+    "language": "ca"
+  },
+  {
+    "input": "My car is stuck on train tracks, train is coming",
+    "expectedId": "TRAF_016_VIC",
+    "language": "en"
+  },
+  {
+    "input": "Je vois une voiture coincée sur un passage à niveau",
+    "expectedId": "TRAF_016_WIT",
+    "language": "fr"
+  },
+  {
+    "input": "Stromleitung ist auf mein Auto gefallen, ich sitze fest",
+    "expectedId": "TRAF_017_VIC",
+    "language": "de"
+  },
+  {
+    "input": "Vedo cavi elettrici caduti su un'auto",
+    "expectedId": "TRAF_017_WIT",
+    "language": "it"
+  },
+  {
+    "input": "Sunt prins în tunel, fum peste tot",
+    "expectedId": "TRAF_018_VIC",
+    "language": "ro"
+  },
+  {
+    "input": "Vejo fumaça saindo de um túnel",
+    "expectedId": "TRAF_018_WIT",
+    "language": "pt"
+  },
+  {
+    "input": "Ребёнок заперт в раскалённой машине",
+    "expectedId": "TRAF_019_VIC",
+    "language": "ru"
+  },
+  {
+    "input": "撞到了一只鹿，车严重损坏",
+    "expectedId": "TRAF_020",
+    "language": "zh"
+  },
+  {
+    "input": "道路に大きな岩が落ちています",
+    "expectedId": "TRAF_021",
+    "language": "ja"
+  },
+  {
+    "input": "تعطلت سيارتي في منتصف الطريق السريع",
+    "expectedId": "TRAF_022",
+    "language": "ar"
+  },
+    {
+    "input": "Mi hijo no responde, está inconsciente y no respira",
+    "expectedId": "VITAL_001",
+    "language": "es"
+  },
+  {
+    "input": "Me estoy atragantando con comida, no puedo respirar ni hablar",
+    "expectedId": "VITAL_002_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Mi abuela tiene la cara torcida y no puede levantar el brazo derecho",
+    "expectedId": "VITAL_003",
+    "language": "es"
+  },
+  {
+    "input": "Hay un hombre sangrando muchísimo de una herida en la pierna",
+    "expectedId": "TRAUMA_001",
+    "language": "es"
+  },
+  {
+    "input": "Me caí en la hoguera y tengo quemaduras graves en las manos",
+    "expectedId": "TRAUMA_002",
+    "language": "es"
+  },
+  {
+    "input": "Un niño se cayó a la piscina y lo sacamos pero no respira",
+    "expectedId": "TRAUMA_003",
+    "language": "es"
+  },
+  {
+    "input": "Creo que tengo el brazo roto, se ve doblado de forma rara",
+    "expectedId": "TRAUMA_004",
+    "language": "es"
+  },
+  {
+    "input": "Me han apuñalado en el abdomen, sangro mucho",
+    "expectedId": "TRAUMA_005",
+    "language": "es"
+  },
+  {
+    "input": "Mi hermano está teniendo convulsiones y echa espuma por la boca",
+    "expectedId": "MED_001",
+    "language": "es"
+  },
+  {
+    "input": "Mi hija bebió lejía por accidente, está vomitando",
+    "expectedId": "MED_002",
+    "language": "es"
+  },
+  {
+    "input": "Me picó una avispa y se me está hinchando la garganta, no puedo tragar",
+    "expectedId": "MED_002_ANAPH_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Encontré a mi vecino tirado en la nieve, está helado y no reacciona",
+    "expectedId": "MED_003",
+    "language": "es"
+  },
+  {
+    "input": "Soy diabético y estoy temblando mucho, sudando frío y confundido",
+    "expectedId": "MED_005",
+    "language": "es"
+  },
+  {
+    "input": "Me he desmayado dos veces hoy, me siento muy mareado",
+    "expectedId": "MED_006",
+    "language": "es"
+  },
+  {
+    "input": "Hay fuego en mi cocina, la sartén con aceite está ardiendo",
+    "expectedId": "FIRE_006_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Veo humo saliendo de un enchufe, huele a plástico quemado",
+    "expectedId": "FIRE_002_VIC",
+    "language": "es"
+  },
+  {
+    "input": "El incendio forestal está llegando a mi urbanización",
+    "expectedId": "FIRE_003_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Huelo gas muy fuerte en toda la casa, me duele la cabeza",
+    "expectedId": "ENV_001_VIC",
+    "language": "es"
+  },
+  {
+    "input": "El agua de la inundación me llega ya por la cintura en el sótano",
+    "expectedId": "ENV_003_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Hay alguien dentro de mi casa, oigo pasos en el piso de arriba",
+    "expectedId": "SEC_001_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Me acaban de robar el móvil y la cartera en plena calle",
+    "expectedId": "SEC_013_VIC",
+    "language": "es"
+  },
+  {
+    "input": "He chocado con otro coche, hay heridos y no puedo salir",
+    "expectedId": "TRAF_001_VIC",
+    "language": "es"
+  },
+  {
+    "input": "Un coche me ha atropellado en el paso de cebra, me duele todo",
+    "expectedId": "TRAF_002_VIC",
+    "language": "es"
   }
 ]

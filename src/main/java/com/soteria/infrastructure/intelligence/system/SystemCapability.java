@@ -41,10 +41,10 @@ public class SystemCapability {
     }
 
     public enum AIModelProfile {
-        /** Smallest Unsloth bundle: {@code gemma-4-E2B-it-GGUF}. */
-        LITE("onboarding.model.profile.lite", 1.9),
-        /** E4B Q4. */
-        STABLE("onboarding.model.profile.stable", 3.2),
+        /** Fine-tuned Gemma 4 E2B for emergency protocols: {@code gemma4-soteria.gguf}. */
+        LITE("onboarding.model.profile.lite", 3.2),
+        /** Fine-tuned Gemma 4 E4B for emergency protocols: {@code gemma4-E4B-soteria.gguf}. */
+        STABLE("onboarding.model.profile.stable", 5.0),
         /** E4B Q8. */
         EXPERT("onboarding.model.profile.expert", 6.0);
 

@@ -83,7 +83,7 @@ public class EmergencyKnowledgeBase implements AutoCloseable, KnowledgeBase {
 
     public synchronized void setEmbedder(LlamaModel embedder) {
         semanticEngine.setEmbedder(embedder);
-        logger.info("Shared embedder (CT-XLMR-SE) injected into Knowledge Base.");
+        logger.info("Shared embedder (soteria-triage-v1) injected into Knowledge Base.");
 
         if (indexManager.hasSemanticVectors() && semanticEngine.loadCentroid()) {
             logger.info("Semantic vectors and centroid loaded from persistent index.");

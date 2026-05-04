@@ -32,11 +32,11 @@ class ModelManagerTest {
         ModelManager manager = new ModelManager(capability, tempDir);
         Path path = manager.getBrainModelPath(SystemCapability.AIModelProfile.STABLE);
         
-        assertTrue(path.toString().contains("gemma-4-E4B-it-Q4_K_M.gguf"));
+        assertTrue(path.toString().contains("gemma4-E4B-soteria.gguf"));
         assertEquals(tempDir, path.getParent());
 
         Path lite = manager.getBrainModelPath(SystemCapability.AIModelProfile.LITE);
-        assertTrue(lite.toString().contains("gemma-4-E2B-it-Q4_K_M.gguf"));
+        assertTrue(lite.toString().contains("gemma4-soteria.gguf"));
     }
 
     @Test
