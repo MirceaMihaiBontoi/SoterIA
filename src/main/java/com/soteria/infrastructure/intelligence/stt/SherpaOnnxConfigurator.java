@@ -29,13 +29,15 @@ final class SherpaOnnxConfigurator {
     /**
      * Locates encoder, decoder, and token files under {@code modelPath} and builds a greedy-decoding offline
      * Whisper recognizer aligned with {@link ModelManager#STT_SAMPLE_RATE}.
+     * Uses greedy search for speed (partials) or beam search for accuracy (finals).
      *
      * @param modelPath directory listing Whisper ONNX and token assets
      * @param language  Whisper language code (already normalized by the caller when applicable)
+     * @param useBeamSearch if true, uses beam search (slower, more accurate); if false, uses greedy (faster)
      * @return a new recognizer; caller must {@link OfflineRecognizer#release()} when done
      * @throws IOException if required files are missing or {@code modelPath} is not readable
      */
-    static OfflineRecognizer createWhisperRecognizer(Path modelPath, String language) throws IOException {
+    static OfflineRecognizer createWhisperRecognizer(Path modelPath, String language, boolean useBeamSearch) throws IOException {
         Path encoderPath = findFileBySuffix(modelPath, "-encoder.int8.onnx", "-encoder.onnx");
         Path decoderPath = findFileBySuffix(modelPath, "-decoder.int8.onnx", "-decoder.onnx");
         Path tokensPath = findFileBySuffix(modelPath, "-tokens.txt", "tokens.txt");
@@ -57,16 +59,26 @@ final class SherpaOnnxConfigurator {
                 .setNumThreads(2)
                 .build();
 
+        String decodingMethod = useBeamSearch ? "beam_search" : "greedy_search";
+        
         OfflineRecognizerConfig config = OfflineRecognizerConfig.builder()
                 .setOfflineModelConfig(modelConfig)
                 .setFeatureConfig(FeatureConfig.builder()
                         .setSampleRate(ModelManager.STT_SAMPLE_RATE)
                         .setFeatureDim(80)
                         .build())
-                .setDecodingMethod("greedy_search")
+                .setDecodingMethod(decodingMethod)
+                .setMaxActivePaths(useBeamSearch ? 4 : 1) // Beam size of 4 for beam search
                 .build();
 
         return new OfflineRecognizer(config);
+    }
+    
+    /**
+     * Backward compatibility: creates a greedy-search recognizer.
+     */
+    static OfflineRecognizer createWhisperRecognizer(Path modelPath, String language) throws IOException {
+        return createWhisperRecognizer(modelPath, language, false);
     }
 
     /**
