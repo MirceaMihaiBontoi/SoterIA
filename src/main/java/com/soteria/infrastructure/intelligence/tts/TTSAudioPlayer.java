@@ -8,12 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Handles audio playback and PCM processing for the TTS service.
  * Manages the audio line and a dedicated playback thread.
+ * Supports crossfading between audio chunks for smooth transitions.
  */
 public class TTSAudioPlayer implements AutoCloseable {
     private static final int SAMPLE_RATE = 24000;
     private static final int FADE_MS = 5;
     private static final int FADE_SAMPLES = (SAMPLE_RATE * FADE_MS) / 1000;
     private static final int PLAYBACK_CHUNK_BYTES = 8192;
+    private static final int CROSSFADE_MS = 30;  // 30ms crossfade between chunks
+    private static final int CROSSFADE_SAMPLES = (SAMPLE_RATE * CROSSFADE_MS) / 1000;
 
     private final TTSLogger ttsLogger;
     private final LinkedBlockingQueue<byte[]> playbackQueue = new LinkedBlockingQueue<>();
@@ -23,6 +26,7 @@ public class TTSAudioPlayer implements AutoCloseable {
     private Thread playbackThread;
     private volatile boolean running = false;
     private volatile float volume = 1.0f;
+    private byte[] previousChunkTail = null;  // For crossfading
 
     public TTSAudioPlayer(TTSLogger ttsLogger) {
         this.ttsLogger = ttsLogger;
@@ -51,6 +55,7 @@ public class TTSAudioPlayer implements AutoCloseable {
     public void stop() {
         interruptRequested.set(true);
         playbackQueue.clear();
+        previousChunkTail = null;  // Clear crossfade buffer
         if (persistentLine != null && persistentLine.isOpen()) {
             persistentLine.stop();
             persistentLine.flush();
@@ -70,7 +75,19 @@ public class TTSAudioPlayer implements AutoCloseable {
             try {
                 byte[] pcm = playbackQueue.poll(100, TimeUnit.MILLISECONDS);
                 if (pcm != null && !interruptRequested.get()) {
+                    // Apply crossfading if we have a previous chunk
+                    if (previousChunkTail != null && pcm.length > 0) {
+                        pcm = applyCrossfade(previousChunkTail, pcm);
+                    }
+                    
                     playPcm(pcm);
+                    
+                    // Save tail of this chunk for next crossfade
+                    int tailBytes = Math.min(CROSSFADE_SAMPLES * 2, pcm.length);
+                    if (tailBytes > 0) {
+                        previousChunkTail = new byte[tailBytes];
+                        System.arraycopy(pcm, pcm.length - tailBytes, previousChunkTail, 0, tailBytes);
+                    }
                 }
             } catch (InterruptedException _) {
                 Thread.currentThread().interrupt();
@@ -175,6 +192,60 @@ public class TTSAudioPlayer implements AutoCloseable {
 
     public boolean isQueueEmpty() {
         return playbackQueue.isEmpty();
+    }
+
+    /**
+     * Applies crossfading between two audio chunks for smooth transitions.
+     * 
+     * @param previousTail Tail of the previous chunk
+     * @param currentChunk Current chunk to play
+     * @return Crossfaded audio
+     */
+    private byte[] applyCrossfade(byte[] previousTail, byte[] currentChunk) {
+        int crossfadeBytes = Math.min(CROSSFADE_SAMPLES * 2, Math.min(previousTail.length, currentChunk.length));
+        if (crossfadeBytes < 4) {
+            return currentChunk;  // Not enough data to crossfade
+        }
+        
+        // Create result: previous (without tail) + crossfaded region + current (without head)
+        int previousKeep = previousTail.length - crossfadeBytes;
+        int currentKeep = currentChunk.length - crossfadeBytes;
+        byte[] result = new byte[previousKeep + crossfadeBytes + currentKeep];
+        
+        // Copy non-crossfaded part of previous
+        if (previousKeep > 0) {
+            System.arraycopy(previousTail, 0, result, 0, previousKeep);
+        }
+        
+        // Crossfade region
+        for (int i = 0; i < crossfadeBytes; i += 2) {
+            int prevIdx = previousKeep + i;
+            int currIdx = i;
+            
+            // Read samples
+            short prevSample = (short) (((previousTail[prevIdx + 1] & 0xFF) << 8) | (previousTail[prevIdx] & 0xFF));
+            short currSample = (short) (((currentChunk[currIdx + 1] & 0xFF) << 8) | (currentChunk[currIdx] & 0xFF));
+            
+            // Calculate crossfade weights
+            float progress = (float) i / crossfadeBytes;
+            float prevWeight = 1.0f - progress;
+            float currWeight = progress;
+            
+            // Mix samples
+            int mixed = Math.round(prevSample * prevWeight + currSample * currWeight);
+            mixed = Math.max(-32768, Math.min(32767, mixed));
+            
+            // Write mixed sample
+            result[previousKeep + i] = (byte) (mixed & 0xFF);
+            result[previousKeep + i + 1] = (byte) ((mixed >>> 8) & 0xFF);
+        }
+        
+        // Copy non-crossfaded part of current
+        if (currentKeep > 0) {
+            System.arraycopy(currentChunk, crossfadeBytes, result, previousKeep + crossfadeBytes, currentKeep);
+        }
+        
+        return result;
     }
 
     @Override

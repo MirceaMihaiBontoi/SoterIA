@@ -202,9 +202,9 @@ public class LocalBrainService implements AutoCloseable, Brain {
 
     private InferenceParameters createInferenceParameters(String prompt) {
         return new InferenceParameters(prompt)
-                .setTemperature(0.4f)
-                .setTopP(0.9f)
-                .setRepeatPenalty(1.2f)
+                .setTemperature(0.6f)  // Increased from 0.4 for faster sampling
+                .setTopP(0.95f)  // Increased from 0.9 for more token options
+                .setRepeatPenalty(1.1f)  // Reduced from 1.2 to allow faster repetition
                 .setNPredict(128)
                 .setStopStrings(GemmaPromptBuilder.GEMMA_ASSISTANT_STOP_SEQUENCES);
     }

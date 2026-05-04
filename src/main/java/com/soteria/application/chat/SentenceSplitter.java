@@ -39,6 +39,15 @@ public class SentenceSplitter {
 
         if (boundary != -1) {
             String candidate = text.substring(0, boundary + 1).trim();
+            
+            // CRITICAL: For ANY sentence with comma, ALWAYS send immediately
+            // This eliminates perceived latency for all comma-terminated phrases
+            boolean endsWithComma = candidate.endsWith(",") || candidate.endsWith("，") || candidate.endsWith("\u3001");
+            
+            if (endsWithComma) {
+                return boundary;  // Skip length check, send immediately
+            }
+            
             if (!isChunkLongEnoughForTts(candidate, isFinal)) {
                 boundary = -1;
             }
@@ -57,8 +66,9 @@ public class SentenceSplitter {
 
     /**
      * Avoid tiny prosodic fragments for Latin; CJK rarely uses spaces so use code-point span instead.
+     * For first sentence after comma, be more aggressive to reduce perceived latency.
      */
-    private static boolean isChunkLongEnoughForTts(String candidate, boolean isFinal) {
+    private boolean isChunkLongEnoughForTts(String candidate, boolean isFinal) {
         if (isFinal) {
             return true;
         }
@@ -66,14 +76,30 @@ public class SentenceSplitter {
         if (trimmed.isEmpty()) {
             return false;
         }
+        
+        // Check if this is first sentence ending with comma
+        boolean isFirstSentence = (sentenceCount == 0);
+        boolean endsWithComma = trimmed.endsWith(",") || trimmed.endsWith("，") || trimmed.endsWith("\u3001");
+        
         int cps = trimmed.codePointCount(0, trimmed.length());
+        int words = trimmed.split("\\s+").length;
+        
+        // For first sentence with comma, be more aggressive (lower thresholds)
+        if (isFirstSentence && endsWithComma) {
+            boolean result = (cps >= 8 || words >= 2);
+            if (result) {
+                return true;
+            }
+        }
+        
+        // Normal thresholds for other cases
         if (cps >= 6) {
             return true;
         }
-        int words = trimmed.split("\\s+").length;
         if (words >= 3) {
             return true;
         }
+        
         int lastCp = trimmed.codePointBefore(trimmed.length());
         return isStrongSentenceEnd(lastCp);
     }
@@ -102,7 +128,8 @@ public class SentenceSplitter {
         if (text.isEmpty()) return -1;
 
         boolean isFirstSentence = (sentenceCount == 0);
-        int commaThresholdCp = isFirstSentence ? 12 : 16;
+        // AGGRESSIVE: Send comma chunks immediately without waiting for more context
+        int commaThresholdCp = 0;  // No threshold - send immediately after comma
         int runOnCpLimit = isFirstSentence ? 46 : 72;
 
         int cpIdx = 0;
@@ -128,6 +155,7 @@ public class SentenceSplitter {
             cpIdx++;
             i += charLen;
         }
+        
         return -1;
     }
 

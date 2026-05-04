@@ -58,7 +58,28 @@ public interface TTS {
     boolean isSpeaking();
 
     /**
+     * Sets an error callback to be notified when synthesis or playback fails.
+     * @param callback The error callback, or null to remove
+     */
+    default void setErrorCallback(TTSErrorCallback callback) {
+        // Default implementation does nothing (for backward compatibility)
+    }
+
+    /**
      * Shuts down the TTS service and releases resources.
      */
     void shutdown();
+
+    /**
+     * Callback interface for TTS errors.
+     */
+    @FunctionalInterface
+    interface TTSErrorCallback {
+        /**
+         * Called when a TTS error occurs.
+         * @param text The text that failed to synthesize (may be null)
+         * @param error The error that occurred
+         */
+        void onError(String text, Throwable error);
+    }
 }

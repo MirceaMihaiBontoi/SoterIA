@@ -74,7 +74,7 @@ public class TTSModelManager implements AutoCloseable {
             OfflineTtsConfig config = OfflineTtsConfig.builder()
                     .setModel(modelConfig)
                     .setRuleFsts(fstPath)
-                    .setMaxNumSentences(1)
+                    .setMaxNumSentences(10)  // Increased from 3 to 10 for better prosody planning with lookahead
                     .build();
 
             this.offlineTts = new OfflineTts(config);
